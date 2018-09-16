@@ -37,6 +37,14 @@ Start the http server which serves the VTXClient on port 8080 using http-server:
 Then visit via your browser:
 https://bbs.localtest.com:8080
 
+## Docker
+You can also run everything with docker:
+
+```
+# docker build . -t bbsclient
+# docker run -it bbsclient
+```
+
 ## Built With
 
 * [VTX_ClientServer](https://github.com/codewar65/VTX_ClientServer) - All of the client side terminal magic.
