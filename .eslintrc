@@ -1,0 +1,13 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 6,
+      "sourceType": "module",
+  },
+  "rules": {
+    "no-unused-labels": "error",
+    "no-unused-vars": "error",
+    "no-var": "error",
+    "object-curly-spacing": ["error", "never"],
+    "space-before-function-paren": ["error", "never"]
+  }
+}

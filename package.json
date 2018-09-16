@@ -1,0 +1,22 @@
+{
+  "name": "vtx_client_server_node",
+  "version": "0.0.1",
+  "description": "A NodeJS port of the VTX BBS client and websocket proxy server.",
+  "main": "proxy/wsproxy.js",
+  "scripts": {
+    "install": "./scripts/mkkeycert.sh",
+    "start": "concurrently --kill-others \"./node_modules/http-server/bin/http-server -S -C ./cert/server.cert -K ./cert/server.key ./vtxclient/\" \"node ./proxy/wsproxy.js\"",
+    "prettier": "./node_modules/prettier/bin-prettier.js --print-width 80 --no-semi --single-quote --trailing-comma es5 --write **/*.js"
+  },
+  "author": "Jason Thomas",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "1.14.2",
+    "eslint": "5.6.0"
+  },
+  "dependencies": {
+    "ws": "^6.0.0",
+    "http-server": "0.11.1",
+    "concurrently": "4.0.1"
+  }
+}
