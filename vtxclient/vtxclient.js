@@ -1,3 +1,5 @@
+/* global vtxdata, Uint8Array, ArrayBuffer, Uint16Array, inflateRaw */
+/* eslint-env browser */
 /*
 
   Copyright (c) 2017, Daniel Mecklenburg Jr.
@@ -112,340 +114,340 @@
     ESC / CSI CODES - see vtx.txt
 
 */
-'use strict'
+"use strict";
 
 vtx: {
   // globals
-  const version = '0.93c beta',
+  const version = "0.93c beta",
     // ansi color lookup table (alteration. color 0=transparent, use 16 for true black`)
     ansiColors = [
       // VGA 0-15 - transparent will switch to #000000 when appropriate
-      'transparent',
-      '#AA0000',
-      '#00AA00',
-      '#AA5500',
-      '#0000AA',
-      '#AA00AA',
-      '#00AAAA',
-      '#AAAAAA',
-      '#555555',
-      '#FF5555',
-      '#55FF55',
-      '#FFFF55',
-      '#5555FF',
-      '#FF55FF',
-      '#55FFFF',
-      '#FFFFFF',
+      "transparent",
+      "#AA0000",
+      "#00AA00",
+      "#AA5500",
+      "#0000AA",
+      "#AA00AA",
+      "#00AAAA",
+      "#AAAAAA",
+      "#555555",
+      "#FF5555",
+      "#55FF55",
+      "#FFFF55",
+      "#5555FF",
+      "#FF55FF",
+      "#55FFFF",
+      "#FFFFFF",
       // EXTENDED 16-231
-      '#000000',
-      '#00005F',
-      '#000087',
-      '#0000AF',
-      '#0000D7',
-      '#0000FF',
-      '#005F00',
-      '#005F5F',
-      '#005F87',
-      '#005FAF',
-      '#005FD7',
-      '#005FFF',
-      '#008700',
-      '#00875F',
-      '#008787',
-      '#0087AF',
-      '#0087D7',
-      '#0087FF',
-      '#00AF00',
-      '#00AF5F',
-      '#00AF87',
-      '#00AFAF',
-      '#00AFD7',
-      '#00AFFF',
-      '#00D700',
-      '#00D75F',
-      '#00D787',
-      '#00D7AF',
-      '#00D7D7',
-      '#00D7FF',
-      '#00FF00',
-      '#00FF5F',
-      '#00FF87',
-      '#00FFAF',
-      '#00FFD7',
-      '#00FFFF',
-      '#5F0000',
-      '#5F005F',
-      '#5F0087',
-      '#5F00AF',
-      '#5F00D7',
-      '#5F00FF',
-      '#5F5F00',
-      '#5F5F5F',
-      '#5F5F87',
-      '#5F5FAF',
-      '#5F5FD7',
-      '#5F5FFF',
-      '#5F8700',
-      '#5F875F',
-      '#5F8787',
-      '#5F87AF',
-      '#5F87D7',
-      '#5F87FF',
-      '#5FAF00',
-      '#5FAF5F',
-      '#5FAF87',
-      '#5FAFAF',
-      '#5FAFD7',
-      '#5FAFFF',
-      '#5FD700',
-      '#5FD75F',
-      '#5FD787',
-      '#5FD7AF',
-      '#5FD7D7',
-      '#5FD7FF',
-      '#5FFF00',
-      '#5FFF5F',
-      '#5FFF87',
-      '#5FFFAF',
-      '#5FFFD7',
-      '#5FFFFF',
-      '#870000',
-      '#87005F',
-      '#870087',
-      '#8700AF',
-      '#8700D7',
-      '#8700FF',
-      '#875F00',
-      '#875F5F',
-      '#875F87',
-      '#875FAF',
-      '#875FD7',
-      '#875FFF',
-      '#878700',
-      '#87875F',
-      '#878787',
-      '#8787AF',
-      '#8787D7',
-      '#8787FF',
-      '#87AF00',
-      '#87AF5F',
-      '#87AF87',
-      '#87AFAF',
-      '#87AFD7',
-      '#87AFFF',
-      '#87D700',
-      '#87D75F',
-      '#87D787',
-      '#87D7AF',
-      '#87D7D7',
-      '#87D7FF',
-      '#87FF00',
-      '#87FF5F',
-      '#87FF87',
-      '#87FFAF',
-      '#87FFD7',
-      '#87FFFF',
-      '#AF0000',
-      '#AF005F',
-      '#AF0087',
-      '#AF00AF',
-      '#AF00D7',
-      '#AF00FF',
-      '#AF5F00',
-      '#AF5F5F',
-      '#AF5F87',
-      '#AF5FAF',
-      '#AF5FD7',
-      '#AF5FFF',
-      '#AF8700',
-      '#AF875F',
-      '#AF8787',
-      '#AF87AF',
-      '#AF87D7',
-      '#AF87FF',
-      '#AFAF00',
-      '#AFAF5F',
-      '#AFAF87',
-      '#AFAFAF',
-      '#AFAFD7',
-      '#AFAFFF',
-      '#AFD700',
-      '#AFD75F',
-      '#AFD787',
-      '#AFD7AF',
-      '#AFD7D7',
-      '#AFD7FF',
-      '#AFFF00',
-      '#AFFF5F',
-      '#AFFF87',
-      '#AFFFAF',
-      '#AFFFD7',
-      '#AFFFFF',
-      '#D70000',
-      '#D7005F',
-      '#D70087',
-      '#D700AF',
-      '#D700D7',
-      '#D700FF',
-      '#D75F00',
-      '#D75F5F',
-      '#D75F87',
-      '#D75FAF',
-      '#D75FD7',
-      '#D75FFF',
-      '#D78700',
-      '#D7875F',
-      '#D78787',
-      '#D787AF',
-      '#D787D7',
-      '#D787FF',
-      '#D7AF00',
-      '#D7AF5F',
-      '#D7AF87',
-      '#D7AFAF',
-      '#D7AFD7',
-      '#D7AFFF',
-      '#D7D700',
-      '#D7D75F',
-      '#D7D787',
-      '#D7D7AF',
-      '#D7D7D7',
-      '#D7D7FF',
-      '#D7FF00',
-      '#D7FF5F',
-      '#D7FF87',
-      '#D7FFAF',
-      '#D7FFD7',
-      '#D7FFFF',
-      '#FF0000',
-      '#FF005F',
-      '#FF0087',
-      '#FF00AF',
-      '#FF00D7',
-      '#FF00FF',
-      '#FF5F00',
-      '#FF5F5F',
-      '#FF5F87',
-      '#FF5FAF',
-      '#FF5FD7',
-      '#FF5FFF',
-      '#FF8700',
-      '#FF875F',
-      '#FF8787',
-      '#FF87AF',
-      '#FF87D7',
-      '#FF87FF',
-      '#FFAF00',
-      '#FFAF5F',
-      '#FFAF87',
-      '#FFAFAF',
-      '#FFAFD7',
-      '#FFAFFF',
-      '#FFD700',
-      '#FFD75F',
-      '#FFD787',
-      '#FFD7AF',
-      '#FFD7D7',
-      '#FFD7FF',
-      '#FFFF00',
-      '#FFFF5F',
-      '#FFFF87',
-      '#FFFFAF',
-      '#FFFFD7',
-      '#FFFFFF',
+      "#000000",
+      "#00005F",
+      "#000087",
+      "#0000AF",
+      "#0000D7",
+      "#0000FF",
+      "#005F00",
+      "#005F5F",
+      "#005F87",
+      "#005FAF",
+      "#005FD7",
+      "#005FFF",
+      "#008700",
+      "#00875F",
+      "#008787",
+      "#0087AF",
+      "#0087D7",
+      "#0087FF",
+      "#00AF00",
+      "#00AF5F",
+      "#00AF87",
+      "#00AFAF",
+      "#00AFD7",
+      "#00AFFF",
+      "#00D700",
+      "#00D75F",
+      "#00D787",
+      "#00D7AF",
+      "#00D7D7",
+      "#00D7FF",
+      "#00FF00",
+      "#00FF5F",
+      "#00FF87",
+      "#00FFAF",
+      "#00FFD7",
+      "#00FFFF",
+      "#5F0000",
+      "#5F005F",
+      "#5F0087",
+      "#5F00AF",
+      "#5F00D7",
+      "#5F00FF",
+      "#5F5F00",
+      "#5F5F5F",
+      "#5F5F87",
+      "#5F5FAF",
+      "#5F5FD7",
+      "#5F5FFF",
+      "#5F8700",
+      "#5F875F",
+      "#5F8787",
+      "#5F87AF",
+      "#5F87D7",
+      "#5F87FF",
+      "#5FAF00",
+      "#5FAF5F",
+      "#5FAF87",
+      "#5FAFAF",
+      "#5FAFD7",
+      "#5FAFFF",
+      "#5FD700",
+      "#5FD75F",
+      "#5FD787",
+      "#5FD7AF",
+      "#5FD7D7",
+      "#5FD7FF",
+      "#5FFF00",
+      "#5FFF5F",
+      "#5FFF87",
+      "#5FFFAF",
+      "#5FFFD7",
+      "#5FFFFF",
+      "#870000",
+      "#87005F",
+      "#870087",
+      "#8700AF",
+      "#8700D7",
+      "#8700FF",
+      "#875F00",
+      "#875F5F",
+      "#875F87",
+      "#875FAF",
+      "#875FD7",
+      "#875FFF",
+      "#878700",
+      "#87875F",
+      "#878787",
+      "#8787AF",
+      "#8787D7",
+      "#8787FF",
+      "#87AF00",
+      "#87AF5F",
+      "#87AF87",
+      "#87AFAF",
+      "#87AFD7",
+      "#87AFFF",
+      "#87D700",
+      "#87D75F",
+      "#87D787",
+      "#87D7AF",
+      "#87D7D7",
+      "#87D7FF",
+      "#87FF00",
+      "#87FF5F",
+      "#87FF87",
+      "#87FFAF",
+      "#87FFD7",
+      "#87FFFF",
+      "#AF0000",
+      "#AF005F",
+      "#AF0087",
+      "#AF00AF",
+      "#AF00D7",
+      "#AF00FF",
+      "#AF5F00",
+      "#AF5F5F",
+      "#AF5F87",
+      "#AF5FAF",
+      "#AF5FD7",
+      "#AF5FFF",
+      "#AF8700",
+      "#AF875F",
+      "#AF8787",
+      "#AF87AF",
+      "#AF87D7",
+      "#AF87FF",
+      "#AFAF00",
+      "#AFAF5F",
+      "#AFAF87",
+      "#AFAFAF",
+      "#AFAFD7",
+      "#AFAFFF",
+      "#AFD700",
+      "#AFD75F",
+      "#AFD787",
+      "#AFD7AF",
+      "#AFD7D7",
+      "#AFD7FF",
+      "#AFFF00",
+      "#AFFF5F",
+      "#AFFF87",
+      "#AFFFAF",
+      "#AFFFD7",
+      "#AFFFFF",
+      "#D70000",
+      "#D7005F",
+      "#D70087",
+      "#D700AF",
+      "#D700D7",
+      "#D700FF",
+      "#D75F00",
+      "#D75F5F",
+      "#D75F87",
+      "#D75FAF",
+      "#D75FD7",
+      "#D75FFF",
+      "#D78700",
+      "#D7875F",
+      "#D78787",
+      "#D787AF",
+      "#D787D7",
+      "#D787FF",
+      "#D7AF00",
+      "#D7AF5F",
+      "#D7AF87",
+      "#D7AFAF",
+      "#D7AFD7",
+      "#D7AFFF",
+      "#D7D700",
+      "#D7D75F",
+      "#D7D787",
+      "#D7D7AF",
+      "#D7D7D7",
+      "#D7D7FF",
+      "#D7FF00",
+      "#D7FF5F",
+      "#D7FF87",
+      "#D7FFAF",
+      "#D7FFD7",
+      "#D7FFFF",
+      "#FF0000",
+      "#FF005F",
+      "#FF0087",
+      "#FF00AF",
+      "#FF00D7",
+      "#FF00FF",
+      "#FF5F00",
+      "#FF5F5F",
+      "#FF5F87",
+      "#FF5FAF",
+      "#FF5FD7",
+      "#FF5FFF",
+      "#FF8700",
+      "#FF875F",
+      "#FF8787",
+      "#FF87AF",
+      "#FF87D7",
+      "#FF87FF",
+      "#FFAF00",
+      "#FFAF5F",
+      "#FFAF87",
+      "#FFAFAF",
+      "#FFAFD7",
+      "#FFAFFF",
+      "#FFD700",
+      "#FFD75F",
+      "#FFD787",
+      "#FFD7AF",
+      "#FFD7D7",
+      "#FFD7FF",
+      "#FFFF00",
+      "#FFFF5F",
+      "#FFFF87",
+      "#FFFFAF",
+      "#FFFFD7",
+      "#FFFFFF",
       // GRAYS 232-255
-      '#080808',
-      '#121212',
-      '#1C1C1C',
-      '#262626',
-      '#303030',
-      '#3A3A3A',
-      '#444444',
-      '#4E4E4E',
-      '#585858',
-      '#626262',
-      '#6C6C6C',
-      '#767676',
-      '#808080',
-      '#8A8A8A',
-      '#949494',
-      '#9E9E9E',
-      '#A8A8A8',
-      '#B2B2B2',
-      '#BCBCBC',
-      '#C6C6C6',
-      '#D0D0D0',
-      '#DADADA',
-      '#E4E4E4',
-      '#EEEEEE',
+      "#080808",
+      "#121212",
+      "#1C1C1C",
+      "#262626",
+      "#303030",
+      "#3A3A3A",
+      "#444444",
+      "#4E4E4E",
+      "#585858",
+      "#626262",
+      "#6C6C6C",
+      "#767676",
+      "#808080",
+      "#8A8A8A",
+      "#949494",
+      "#9E9E9E",
+      "#A8A8A8",
+      "#B2B2B2",
+      "#BCBCBC",
+      "#C6C6C6",
+      "#D0D0D0",
+      "#DADADA",
+      "#E4E4E4",
+      "#EEEEEE"
     ],
     // commodore colors.
     vic20Colors = [
       // vic-20 in 22 column mode
-      '#000000',
-      '#FFFFFF',
-      '#782922',
-      '#87D6DD',
-      '#AA5FB6',
-      '#55A049',
-      '#40318D',
-      '#BFCE72',
-      '#AA7449',
-      '#EAB489',
-      '#B86962',
-      '#C7FFFF',
-      '#EA9FF6',
-      '#94E089',
-      '#8071CC',
-      '#FFFFB2',
-      '#000000', // fake black
+      "#000000",
+      "#FFFFFF",
+      "#782922",
+      "#87D6DD",
+      "#AA5FB6",
+      "#55A049",
+      "#40318D",
+      "#BFCE72",
+      "#AA7449",
+      "#EAB489",
+      "#B86962",
+      "#C7FFFF",
+      "#EA9FF6",
+      "#94E089",
+      "#8071CC",
+      "#FFFFB2",
+      "#000000" // fake black
     ],
     c64Colors = [
       // C64/C128 in 40 column mode
-      '#000000',
-      '#FFFFFF',
-      '#68372B',
-      '#70A4B2',
-      '#6F3D86',
-      '#588D43',
-      '#352879',
-      '#B8C76F',
-      '#6F4F25',
-      '#433900',
-      '#9A6759',
-      '#444444',
-      '#6C6C6C',
-      '#9AD284',
-      '#6C5EB5',
-      '#959595',
-      '#000000', // fake black
+      "#000000",
+      "#FFFFFF",
+      "#68372B",
+      "#70A4B2",
+      "#6F3D86",
+      "#588D43",
+      "#352879",
+      "#B8C76F",
+      "#6F4F25",
+      "#433900",
+      "#9A6759",
+      "#444444",
+      "#6C6C6C",
+      "#9AD284",
+      "#6C5EB5",
+      "#959595",
+      "#000000" // fake black
     ],
     c128Colors = [
       // C128 colors in 80 column mode
-      '#000000',
-      '#303030',
-      '#EA311B',
-      '#FC601C',
-      '#36C137',
-      '#77EC7C',
-      '#1C49D9',
-      '#4487EF',
-      '#BBC238',
-      '#E9F491',
-      '#D974DA',
-      '#EECFED',
-      '#68C8C2',
-      '#B2F0EC',
-      '#BECEBC',
-      '#FFFFFF',
-      '#000000', // fake black
+      "#000000",
+      "#303030",
+      "#EA311B",
+      "#FC601C",
+      "#36C137",
+      "#77EC7C",
+      "#1C49D9",
+      "#4487EF",
+      "#BBC238",
+      "#E9F491",
+      "#D974DA",
+      "#EECFED",
+      "#68C8C2",
+      "#B2F0EC",
+      "#BECEBC",
+      "#FFFFFF",
+      "#000000" // fake black
     ],
     // atari tty colors.
-    atariColors = ['#0141A3', '#64ACFF'],
+    atariColors = ["#0141A3", "#64ACFF"],
     // convert teletext colors to ansi
     ttxToAnsiColor = [16, 196, 46, 226, 21, 201, 51, 15],
-    hex = '0123456789ABCDEF',
-    b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',
+    hex = "0123456789ABCDEF",
+    b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
     // attributes
     A_CELL_FGCOLOR_MASK = 0x000000ff,
     A_CELL_BGCOLOR_MASK = 0x0000ff00,
@@ -548,28 +550,28 @@ vtx: {
     _BLANK = 0x0020, // characters without a glyph (null etc).
     _SHY = 0x2010, // similar character to replace soft-hyphen
     // special char codes and sequences
-    NUL = '\x00',
-    ESC = '\x1B',
-    CSI = '\x1B[',
-    CR = '\x0D',
-    LF = '\x0A',
-    CRLF = '\x0D\x0A',
+    NUL = "\x00",
+    ESC = "\x1B",
+    CSI = "\x1B[",
+    CR = "\x0D",
+    LF = "\x0A",
+    CRLF = "\x0D\x0A",
     // tables for converting byte to UTF16 (unicode)
     codePageAKAs = {
-      CP790: 'CP667',
-      CP991: 'CP667',
-      CP916: 'CP862',
-      CP1119: 'CP772',
-      CP1118: 'CP774',
-      CP900: 'CP866',
-      CP895: 'CP866',
-      CP65001: 'UTF8',
-      CP819: 'ISO8859_1',
-      CP28593: 'ISO8859_3',
-      VIC20: 'RAW',
-      C64: 'RAW',
-      C128: 'RAW',
-      ATASCII: 'RAW',
+      CP790: "CP667",
+      CP991: "CP667",
+      CP916: "CP862",
+      CP1119: "CP772",
+      CP1118: "CP774",
+      CP900: "CP866",
+      CP895: "CP866",
+      CP65001: "UTF8",
+      CP819: "ISO8859_1",
+      CP28593: "ISO8859_3",
+      VIC20: "RAW",
+      C64: "RAW",
+      C128: "RAW",
+      ATASCII: "RAW"
     },
     // codepage tables.
     // size     desc
@@ -705,7 +707,7 @@ vtx: {
         0x007c,
         0x007d,
         0x007e,
-        0x2302,
+        0x2302
       ]),
       CP437: new Uint16Array([
         // CP437
@@ -836,7 +838,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        _BLANK,
+        _BLANK
       ]),
       CP667: new Uint16Array([
         // CP667, CP790, CP991
@@ -967,7 +969,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP668: new Uint16Array([
         // CP668
@@ -1098,7 +1100,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP737: new Uint16Array([
         // CP737
@@ -1229,7 +1231,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP770: new Uint16Array([
         // CP770
@@ -1360,7 +1362,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP771: new Uint16Array([
         // CP771
@@ -1491,7 +1493,7 @@ vtx: {
         0x017d,
         0x017e,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP772: new Uint16Array([
         // CP772, CP1119
@@ -1622,7 +1624,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP773: new Uint16Array([
         // CP773
@@ -1753,7 +1755,7 @@ vtx: {
         0x017d,
         0x017e,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP774: new Uint16Array([
         // CP774, CP1118
@@ -1884,7 +1886,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP775: new Uint16Array([
         // CP775
@@ -2015,7 +2017,7 @@ vtx: {
         0x00b3,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP808: new Uint16Array([
         // CP808
@@ -2146,7 +2148,7 @@ vtx: {
         0x2116,
         0x20ac,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP813: new Uint16Array([
         // CP813
@@ -2245,7 +2247,7 @@ vtx: {
         0x03cc,
         0x03cd,
         0x03ce,
-        _BLANK,
+        _BLANK
       ]),
       CP850: new Uint16Array([
         // CP850
@@ -2376,7 +2378,7 @@ vtx: {
         0x00b3,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP851: new Uint16Array([
         // CP851
@@ -2507,7 +2509,7 @@ vtx: {
         0x03b0,
         0x03ce,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP852: new Uint16Array([
         // CP852
@@ -2638,7 +2640,7 @@ vtx: {
         0x0158,
         0x0159,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP853: new Uint16Array([
         // CP853
@@ -2769,7 +2771,7 @@ vtx: {
         0x00b3,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP855: new Uint16Array([
         // CP855
@@ -2900,7 +2902,7 @@ vtx: {
         0x0427,
         0x00a7,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP857: new Uint16Array([
         // CP857
@@ -3031,7 +3033,7 @@ vtx: {
         0x00b3,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP858: new Uint16Array([
         // CP858
@@ -3162,7 +3164,7 @@ vtx: {
         0x00b3,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP859: new Uint16Array([
         // CP859
@@ -3293,7 +3295,7 @@ vtx: {
         0x00b3,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP860: new Uint16Array([
         // CP860
@@ -3424,7 +3426,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP861: new Uint16Array([
         // CP861
@@ -3555,7 +3557,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP863: new Uint16Array([
         // CP863
@@ -3686,7 +3688,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP865: new Uint16Array([
         // CP865
@@ -3817,7 +3819,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP866: new Uint16Array([
         // CP866, CP900
@@ -3948,7 +3950,7 @@ vtx: {
         0x2116,
         0x00a4,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP867: new Uint16Array([
         // CP867, CP895
@@ -4079,7 +4081,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP869: new Uint16Array([
         // CP869
@@ -4210,7 +4212,7 @@ vtx: {
         0x03b0,
         0x03ce,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP872: new Uint16Array([
         // CP872
@@ -4341,7 +4343,7 @@ vtx: {
         0x0427,
         0x00a7,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       CP878: new Uint16Array([
         // CP878
@@ -4472,7 +4474,7 @@ vtx: {
         0x042d,
         0x0429,
         0x0427,
-        0x042a,
+        0x042a
       ]),
       CP912: new Uint16Array([
         // CP912
@@ -4603,7 +4605,7 @@ vtx: {
         0x00fc,
         0x00fd,
         0x0163,
-        0x02d9,
+        0x02d9
       ]),
       CP915: new Uint16Array([
         // CP915
@@ -4734,7 +4736,7 @@ vtx: {
         0x045c,
         0x00a7,
         0x045e,
-        0x045f,
+        0x045f
       ]),
       CP920: new Uint16Array([
         // CP920
@@ -4833,7 +4835,7 @@ vtx: {
         0x00fc,
         0x0131,
         0x015f,
-        0x00ff,
+        0x00ff
       ]),
       CP1117: new Uint16Array([
         // CP1117
@@ -4964,7 +4966,7 @@ vtx: {
         0x0156,
         0x201e,
         0x201c,
-        0x00a0,
+        0x00a0
       ]),
       CPMIK: new Uint16Array([
         // CPMIK
@@ -5095,7 +5097,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       WIN1250: new Uint16Array([
         // WIN1250
@@ -5226,7 +5228,7 @@ vtx: {
         0x00fc,
         0x00fd,
         0x0163,
-        0x02d9,
+        0x02d9
       ]),
       WIN1251: new Uint16Array([
         // WIN1251 [1]
@@ -5357,7 +5359,7 @@ vtx: {
         0x044c,
         0x044d,
         0x044e,
-        0x044f,
+        0x044f
       ]),
       WIN1253: new Uint16Array([
         // WIN1253
@@ -5488,7 +5490,7 @@ vtx: {
         0x03cc,
         0x03cd,
         0x03ce,
-        _BLANK,
+        _BLANK
       ]),
       WIN1254: new Uint16Array([
         // WIN1254
@@ -5619,7 +5621,7 @@ vtx: {
         0x00fc,
         0x0131,
         0x015f,
-        0x00ff,
+        0x00ff
       ]),
       WIN1257: new Uint16Array([
         // WIN1257
@@ -5750,7 +5752,7 @@ vtx: {
         0x00fc,
         0x017c,
         0x017e,
-        0x02d9,
+        0x02d9
       ]),
       KOI8_R: new Uint16Array([
         // KOI8-R [2]
@@ -5881,7 +5883,7 @@ vtx: {
         0x042d,
         0x0429,
         0x0427,
-        0x042a,
+        0x042a
       ]),
       KOI8_U: new Uint16Array([
         // KOI8-U
@@ -6012,7 +6014,7 @@ vtx: {
         0x042d,
         0x0429,
         0x0427,
-        0x042a,
+        0x042a
       ]),
       ISO8859_1: new Uint16Array([
         // ISO8859_1, CP819
@@ -6143,7 +6145,7 @@ vtx: {
         0x00fc,
         0x00fd,
         0x00fe,
-        0x00ff,
+        0x00ff
       ]),
       ISO8859_2: new Uint16Array([
         // ISO8859_2 [3]
@@ -6274,7 +6276,7 @@ vtx: {
         0x00fc,
         0x00fd,
         0x0163,
-        0x02d9,
+        0x02d9
       ]),
       ISO8859_3: new Uint16Array([
         // ISO8859_3, CP28593
@@ -6405,7 +6407,7 @@ vtx: {
         0x00fc,
         0x016d,
         0x015d,
-        0x02d9,
+        0x02d9
       ]),
       ISO8859_4: new Uint16Array([
         // ISO8859_4, CP28594 [4,13]
@@ -6536,7 +6538,7 @@ vtx: {
         0x00fc,
         0x0169,
         0x016b,
-        0x02d9,
+        0x02d9
       ]),
       ISO8859_5: new Uint16Array([
         // ISO 8859_5 - cyrillic
@@ -6667,7 +6669,7 @@ vtx: {
         0x045c,
         0x00a7,
         0x045e,
-        0x045f,
+        0x045f
       ]),
       ISO8859_7: new Uint16Array([
         // ISO 8859_7 - greek
@@ -6798,7 +6800,7 @@ vtx: {
         0x03cc,
         0x03cd,
         0x03ce,
-        _BLANK,
+        _BLANK
       ]),
       ISO8859_9: new Uint16Array([
         // ISO 8859_9 - turkish
@@ -6929,7 +6931,7 @@ vtx: {
         0x00fc,
         0x0131,
         0x015f,
-        0x00ff,
+        0x00ff
       ]),
       ISO8859_10: new Uint16Array([
         // ISO 8859_10 - nordic
@@ -7060,7 +7062,7 @@ vtx: {
         0x00fc,
         0x00fd,
         0x00fe,
-        0x0138,
+        0x0138
       ]),
       ISO8859_13: new Uint16Array([
         // ISO 8859_13 - baltic
@@ -7191,7 +7193,7 @@ vtx: {
         0x00fc,
         0x017c,
         0x017e,
-        0x2019,
+        0x2019
       ]),
       ISO8859_14: new Uint16Array([
         // ISO 8859_14 - celtic
@@ -7322,7 +7324,7 @@ vtx: {
         0x00fc,
         0x00fd,
         0x0177,
-        0x00ff,
+        0x00ff
       ]),
       ISO8859_15: new Uint16Array([
         // ISO 8859_15 - western european
@@ -7453,7 +7455,7 @@ vtx: {
         0x00fc,
         0x00fd,
         0x00fe,
-        0x00ff,
+        0x00ff
       ]),
       ISO8859_16: new Uint16Array([
         // ISO 8859_16 - southeaster european
@@ -7584,7 +7586,7 @@ vtx: {
         0x00fc,
         0x0119,
         0x021b,
-        0x00ff,
+        0x00ff
       ]),
       ARMSCII_8: new Uint16Array([
         // ArmSCI-8
@@ -7683,7 +7685,7 @@ vtx: {
         0x0556,
         0x0586,
         0x055a,
-        _BLANK,
+        _BLANK
       ]),
       HAIK8: new Uint16Array([
         // HAIK8
@@ -7814,7 +7816,7 @@ vtx: {
         0x0556,
         0x0586,
         0x055a,
-        _BLANK,
+        _BLANK
       ]),
       CP1131: new Uint16Array([
         // CP1131 - Belarus
@@ -7945,7 +7947,7 @@ vtx: {
         0x0490,
         0x0491,
         0x2219,
-        0x00a0,
+        0x00a0
       ]),
 
       CP862: new Uint16Array([
@@ -8077,7 +8079,7 @@ vtx: {
         0x207f,
         0x00b2,
         0x25a0,
-        0x00a0,
+        0x00a0
       ]),
       ISO8859_8: new Uint16Array([
         // ISO 8859-8 : hebrew
@@ -8208,7 +8210,7 @@ vtx: {
         _BLANK,
         0x200e,
         0x200f,
-        _BLANK,
+        _BLANK
       ]),
       WIN1255: new Uint16Array([
         // win 1255 - hebrew
@@ -8339,7 +8341,7 @@ vtx: {
         _BLANK,
         0x200e,
         0x200f,
-        _BLANK,
+        _BLANK
       ]),
       WIN1256: new Uint16Array([
         // win 1256 - arabic
@@ -8470,7 +8472,7 @@ vtx: {
         0x00fc,
         0x200e,
         0x200f,
-        0x06d2,
+        0x06d2
       ]),
       ISO8859_6: new Uint16Array([
         // ISO 8859-6 arabic
@@ -8601,7 +8603,7 @@ vtx: {
         _BLANK,
         _BLANK,
         _BLANK,
-        _BLANK,
+        _BLANK
       ]),
 
       CP864: new Uint16Array([
@@ -8733,7 +8735,7 @@ vtx: {
         0xfed9,
         0xfef1,
         0x25a0,
-        _BLANK,
+        _BLANK
       ]),
 
       TELETEXT: new Uint16Array([
@@ -8993,7 +8995,7 @@ vtx: {
         _BLANK,
         _BLANK,
         _BLANK,
-        _BLANK,
+        _BLANK
       ]),
 
       RAW: new Uint16Array([
@@ -9253,7 +9255,7 @@ vtx: {
         0xe0fc,
         0xe0fd,
         0xe0fe,
-        0xe0ff,
+        0xe0ff
       ]),
       RAWHI: new Uint16Array([
         // for RAW converted fonts - mapped to ASCII
@@ -9384,8 +9386,8 @@ vtx: {
         0x00fc,
         0x00fd,
         0x00fe,
-        0x00ff,
-      ]),
+        0x00ff
+      ])
     },
     // http://invisible-island.net/xterm/xterm-function-keys.html
     // http://ansi-bbs.org/ansi-bbs2/index.ssjs
@@ -9395,25 +9397,25 @@ vtx: {
       0: 0, // windows - ie
       8: function() {
         // backspace
-        if (cbm) return 0x14
-        else if (atari) return 0x7e
-        else return _BS
+        if (cbm) return 0x14;
+        else if (atari) return 0x7e;
+        else return _BS;
       },
       9: function() {
         // tab
         if (cbm) {
           // toggle text / gfx modes
-          conFontNum ^= 0x1
-          renderAll()
-          return 0
-        } else if (atari) return 0x7f
-        else return 0x09
+          conFontNum ^= 0x1;
+          renderAll();
+          return 0;
+        } else if (atari) return 0x7f;
+        else return 0x09;
       },
       12: 0, // clear (numpad5 numlk off)
       13: function() {
         // enter
-        if (atari) return 0x9b
-        else return _CR
+        if (atari) return 0x9b;
+        else return _CR;
       },
       16: 0, // shift
       17: null, // ctrl
@@ -9422,191 +9424,191 @@ vtx: {
       20: DO_CAPLK, // caps lock
       27: function() {
         // esc
-        if (cbm) return 0x03
+        if (cbm) return 0x03;
         // run/stop
-        else return _ESC
+        else return _ESC;
       },
-      32: ' ', // spacebar
+      32: " ", // spacebar
       33: function() {
         // pgup
-        if (modeDOORWAY) return '\x00\x49'
-        else return CSI + 'V'
+        if (modeDOORWAY) return "\x00\x49";
+        else return CSI + "V";
       },
       34: function() {
         // pgdn
-        if (modeDOORWAY) return '\x00\x51'
-        else return CSI + 'U'
+        if (modeDOORWAY) return "\x00\x51";
+        else return CSI + "U";
       },
       35: function() {
         // end
         // text mode in cbm
-        if (cbm) return 0x0e
-        else if (modeDOORWAY) return '\x00\x4F'
-        else return CSI + 'K'
+        if (cbm) return 0x0e;
+        else if (modeDOORWAY) return "\x00\x4F";
+        else return CSI + "K";
       },
       36: function() {
         // home
-        if (cbm) return 0x13
-        else if (modeDOORWAY) return '\x00\x47'
-        else return CSI + 'H'
+        if (cbm) return 0x13;
+        else if (modeDOORWAY) return "\x00\x47";
+        else return CSI + "H";
       },
       37: function() {
         // left arrow
-        if (cbm) return 0x9d
-        else if (atari) return 0x1e
-        else if (modeDOORWAY) return '\x00\x4B'
-        else return CSI + 'D'
+        if (cbm) return 0x9d;
+        else if (atari) return 0x1e;
+        else if (modeDOORWAY) return "\x00\x4B";
+        else return CSI + "D";
       },
       38: function() {
         // up arrow
-        if (cbm) return 0x91
-        else if (atari) return 0x1c
-        else if (modeDOORWAY) return '\x00\x48'
-        else return CSI + 'A'
+        if (cbm) return 0x91;
+        else if (atari) return 0x1c;
+        else if (modeDOORWAY) return "\x00\x48";
+        else return CSI + "A";
       },
       39: function() {
         // right arrow
-        if (cbm) return 0x1d
-        else if (atari) return 0x1f
-        else if (modeDOORWAY) return '\x00\x4D'
-        else return CSI + 'C'
+        if (cbm) return 0x1d;
+        else if (atari) return 0x1f;
+        else if (modeDOORWAY) return "\x00\x4D";
+        else return CSI + "C";
       },
       40: function() {
         // down arrow
-        if (cbm) return 0x11
-        else if (atari) return 0x1d
-        else if (modeDOORWAY) return '\x00\x50'
-        else return CSI + 'B'
+        if (cbm) return 0x11;
+        else if (atari) return 0x1d;
+        else if (modeDOORWAY) return "\x00\x50";
+        else return CSI + "B";
       },
       45: function() {
         // insert
-        if (cbm) return 0x94
-        else if (atari) return 0xff
-        else if (modeDOORWAY) return '\x00\x52'
-        else return CSI + '@'
+        if (cbm) return 0x94;
+        else if (atari) return 0xff;
+        else if (modeDOORWAY) return "\x00\x52";
+        else return CSI + "@";
       },
       46: function() {
         // delete
-        if (cbm) return 0x14
-        else if (atari) return 0xfe
-        else return 0x7f
+        if (cbm) return 0x14;
+        else if (atari) return 0xfe;
+        else return 0x7f;
       },
-      48: '0', // 0
-      49: '1', // 1
-      50: '2', // 2
-      51: '3', // 3
-      52: '4', // 4
-      53: '5', // 5
-      54: '6', // 6
-      55: '7', // 7
-      56: '8', // 8
-      57: '9', // 9
-      59: ';', // ;: - firefox
-      61: '=', // =+ - firefox
-      65: 'a', // a
-      66: 'b', // b
-      67: 'c', // c - browser copy
-      68: 'd', // d
-      69: 'e', // e
-      70: 'f', // f
-      71: 'g', // g
-      72: 'h', // h
-      73: 'i', // i
-      74: 'j', // j
-      75: 'k', // k
-      76: 'l', // l
-      77: 'm', // m
-      78: 'n', // n - browser new window
-      79: 'o', // o
-      80: 'p', // p
-      81: 'q', // q
-      82: 'r', // r
-      83: 's', // s
-      84: 't', // t - browser new tab
-      85: 'u', // u
-      86: 'v', // v - browser paste
-      87: 'w', // w - browser close window
-      88: 'x', // x
-      89: 'y', // y
-      90: 'z', // z
+      48: "0", // 0
+      49: "1", // 1
+      50: "2", // 2
+      51: "3", // 3
+      52: "4", // 4
+      53: "5", // 5
+      54: "6", // 6
+      55: "7", // 7
+      56: "8", // 8
+      57: "9", // 9
+      59: ";", // ;: - firefox
+      61: "=", // =+ - firefox
+      65: "a", // a
+      66: "b", // b
+      67: "c", // c - browser copy
+      68: "d", // d
+      69: "e", // e
+      70: "f", // f
+      71: "g", // g
+      72: "h", // h
+      73: "i", // i
+      74: "j", // j
+      75: "k", // k
+      76: "l", // l
+      77: "m", // m
+      78: "n", // n - browser new window
+      79: "o", // o
+      80: "p", // p
+      81: "q", // q
+      82: "r", // r
+      83: "s", // s
+      84: "t", // t - browser new tab
+      85: "u", // u
+      86: "v", // v - browser paste
+      87: "w", // w - browser close window
+      88: "x", // x
+      89: "y", // y
+      90: "z", // z
       91: 0, // left win
       92: 0, // right win
       93: 0, // select
-      96: '0', // numpad0
-      97: '1', // numpad1
-      98: '2', // numpad2
-      99: '3', // numpad3
-      100: '4', // numpad4
-      101: '5', // numpad5
-      102: '6', // numpad6
-      103: '7', // numpad7
-      104: '8', // numpad8
-      105: '9', // numpad9
-      106: '*', // multiply
-      107: '+', // add (use for enter on VT modes)
-      109: '-', // subtract
-      110: '.', // decimal
-      111: '/', // divide
+      96: "0", // numpad0
+      97: "1", // numpad1
+      98: "2", // numpad2
+      99: "3", // numpad3
+      100: "4", // numpad4
+      101: "5", // numpad5
+      102: "6", // numpad6
+      103: "7", // numpad7
+      104: "8", // numpad8
+      105: "9", // numpad9
+      106: "*", // multiply
+      107: "+", // add (use for enter on VT modes)
+      109: "-", // subtract
+      110: ".", // decimal
+      111: "/", // divide
       112: function() {
         // f1
-        if (cbm) return 0x85
-        else if (modeDOORWAY) return '\x00\x3B'
-        else return ESC + 'OP'
+        if (cbm) return 0x85;
+        else if (modeDOORWAY) return "\x00\x3B";
+        else return ESC + "OP";
       },
       113: function() {
         // f2
-        if (cbm) return 0x89
-        else if (modeDOORWAY) return '\x00\x3C'
-        else return ESC + 'OQ'
+        if (cbm) return 0x89;
+        else if (modeDOORWAY) return "\x00\x3C";
+        else return ESC + "OQ";
       },
       114: function() {
         // f3
-        if (cbm) return 0x86
-        else if (modeDOORWAY) return '\x00\x3D'
-        else return ESC + 'OR'
+        if (cbm) return 0x86;
+        else if (modeDOORWAY) return "\x00\x3D";
+        else return ESC + "OR";
       },
       115: function() {
         // f4
-        if (cbm) return 0x8a
-        else if (modeDOORWAY) return '\x00\x3E'
-        else return ESC + 'OS'
+        if (cbm) return 0x8a;
+        else if (modeDOORWAY) return "\x00\x3E";
+        else return ESC + "OS";
       },
       116: function() {
         // f5 - browser refresh
-        if (cbm) return 0x87
-        else if (modeDOORWAY) return '\x00\x3F'
-        else return ESC + 'Ot'
+        if (cbm) return 0x87;
+        else if (modeDOORWAY) return "\x00\x3F";
+        else return ESC + "Ot";
       },
       117: function() {
         // f6
-        if (cbm) return 0x8b
-        else if (modeDOORWAY) return '\x00\x40'
-        else return CSI + '17~'
+        if (cbm) return 0x8b;
+        else if (modeDOORWAY) return "\x00\x40";
+        else return CSI + "17~";
       },
       118: function() {
         // f7
-        if (cbm) return 0x88
-        else if (modeDOORWAY) return '\x00\x41'
-        else return CSI + '18~'
+        if (cbm) return 0x88;
+        else if (modeDOORWAY) return "\x00\x41";
+        else return CSI + "18~";
       },
       119: function() {
         // f8
-        if (cbm) return 0x8c
-        else if (modeDOORWAY) return '\x00\x42'
-        else return CSI + '19~'
+        if (cbm) return 0x8c;
+        else if (modeDOORWAY) return "\x00\x42";
+        else return CSI + "19~";
       },
       120: function() {
         // f9
-        if (modeDOORWAY) return '\x00\x43'
-        else return CSI + '20~'
+        if (modeDOORWAY) return "\x00\x43";
+        else return CSI + "20~";
       },
       121: function() {
         // f10
-        if (modeDOORWAY) return '\x00\x44'
-        else return CSI + '21~'
+        if (modeDOORWAY) return "\x00\x44";
+        else return CSI + "21~";
       },
-      122: CSI + '23~', // f11 - browser full screen
-      123: CSI + '24~', // f12
+      122: CSI + "23~", // f11 - browser full screen
+      123: CSI + "24~", // f12
 
       124: 0, // gui F13
       125: 0, // gui F14
@@ -9622,233 +9624,233 @@ vtx: {
       135: 0, // gui F24
       144: DO_NUMLK, // numlock
       145: DO_SCRLK, // scrolllock
-      173: '-', // -_ (firefox)
-      186: ';', // ;:
-      187: '=', // =+
-      188: ',', // ,<
-      189: '-', // -
-      190: '.', // .
-      191: '/', // /
-      192: '`', // `
-      219: '[', // [
-      220: '\\', // '\'
-      221: ']', // ]
+      173: "-", // -_ (firefox)
+      186: ";", // ;:
+      187: "=", // =+
+      188: ",", // ,<
+      189: "-", // -
+      190: ".", // .
+      191: "/", // /
+      192: "`", // `
+      219: "[", // [
+      220: "\\", // '\'
+      221: "]", // ]
       222: "'", // '
-      255: 0, // windows - chrome/opera
+      255: 0 // windows - chrome/opera
     },
     keysS1C0A0 = {
       // SHIFTed keys.
 
       9: function() {
         // tab
-        if (atari) return 0x9f
+        if (atari) return 0x9f;
         // set tabstop
-        else if (modeDOORWAY) return '\x00\x0F'
-        else return 0
+        else if (modeDOORWAY) return "\x00\x0F";
+        else return 0;
       },
       13: function() {
         // enter
-        return cbm ? 0x8d : 0
+        return cbm ? 0x8d : 0;
       },
-      32: '\xa0', // spacebar
+      32: "\xa0", // spacebar
 
       35: function() {
         // end
         // graphics cbm
-        return cbm ? 0x8e : 0
+        return cbm ? 0x8e : 0;
       },
       36: function() {
         // home
         // clr cbm
-        if (cbm) return 0x93
-        else if (atari) return 0x7d
-        else return 0
+        if (cbm) return 0x93;
+        else if (atari) return 0x7d;
+        else return 0;
       },
 
       45: function() {
         // insert
-        if (atari) return 0x9d
+        if (atari) return 0x9d;
         // insert row
-        else return 0
+        else return 0;
       },
       46: function() {
         // delete
-        if (atari) return 0x9c
+        if (atari) return 0x9c;
         // delete row
-        else return 0
+        else return 0;
       },
-      48: ')', // 0
-      49: '!', // 1
-      50: '@', // 2
-      51: '#', // 3
-      52: '$', // 4
-      53: '%', // 5
-      54: '^', // 6
-      55: '&', // 7
-      56: '*', // 8
-      57: '(', // 9
-      59: ':', // ;: - firefox
-      61: '+', // =+ - firefox
-      65: 'A', // a
-      66: 'B', // b
-      67: 'C', // c - browser copy
-      68: 'D', // d
-      69: 'E', // e
-      70: 'F', // f
-      71: 'G', // g
-      72: 'H', // h
-      73: 'I', // i
-      74: 'J', // j
-      75: 'K', // k
-      76: 'L', // l
-      77: 'M', // m
-      78: 'N', // n - browser new window
-      79: 'O', // o
-      80: 'P', // p
-      81: 'Q', // q
-      82: 'R', // r
-      83: 'S', // s
-      84: 'T', // t - browser new tab
-      85: 'U', // u
-      86: 'V', // v - browser paste
-      87: 'W', // w - browser close window
-      88: 'X', // x
-      89: 'Y', // y
-      90: 'Z', // z
+      48: ")", // 0
+      49: "!", // 1
+      50: "@", // 2
+      51: "#", // 3
+      52: "$", // 4
+      53: "%", // 5
+      54: "^", // 6
+      55: "&", // 7
+      56: "*", // 8
+      57: "(", // 9
+      59: ":", // ;: - firefox
+      61: "+", // =+ - firefox
+      65: "A", // a
+      66: "B", // b
+      67: "C", // c - browser copy
+      68: "D", // d
+      69: "E", // e
+      70: "F", // f
+      71: "G", // g
+      72: "H", // h
+      73: "I", // i
+      74: "J", // j
+      75: "K", // k
+      76: "L", // l
+      77: "M", // m
+      78: "N", // n - browser new window
+      79: "O", // o
+      80: "P", // p
+      81: "Q", // q
+      82: "R", // r
+      83: "S", // s
+      84: "T", // t - browser new tab
+      85: "U", // u
+      86: "V", // v - browser paste
+      87: "W", // w - browser close window
+      88: "X", // x
+      89: "Y", // y
+      90: "Z", // z
       112: function() {
         // f1
-        return modeDOORWAY ? '\x00\x54' : 0
+        return modeDOORWAY ? "\x00\x54" : 0;
       },
       113: function() {
         // f2
-        return modeDOORWAY ? '\x00\x55' : 0
+        return modeDOORWAY ? "\x00\x55" : 0;
       },
       114: function() {
         // f3
-        return modeDOORWAY ? '\x00\x56' : 0
+        return modeDOORWAY ? "\x00\x56" : 0;
       },
       115: function() {
         // f4
-        return modeDOORWAY ? '\x00\x57' : 0
+        return modeDOORWAY ? "\x00\x57" : 0;
       },
       116: null, // f5 - browser refresh
       117: function() {
         // f6
-        return modeDOORWAY ? '\x00\x59' : 0
+        return modeDOORWAY ? "\x00\x59" : 0;
       },
       118: function() {
         // f7
-        return modeDOORWAY ? '\x00\x5A' : 0
+        return modeDOORWAY ? "\x00\x5A" : 0;
       },
       119: function() {
         // f8
-        return modeDOORWAY ? '\x00\x5B' : 0
+        return modeDOORWAY ? "\x00\x5B" : 0;
       },
       120: function() {
         // f9
-        return modeDOORWAY ? '\x00\x5C' : 0
+        return modeDOORWAY ? "\x00\x5C" : 0;
       },
       121: function() {
         // f10
-        return modeDOORWAY ? '\x00\x5D' : 0
+        return modeDOORWAY ? "\x00\x5D" : 0;
       },
-      173: '_', // -_ (firefox)
-      186: ':', // ;:
-      187: '+', // =+
-      188: '<', // ,<
-      189: '_', // -
-      190: '>', // .
-      191: '?', // /
-      192: '~', // `
-      219: '{', // [
-      220: '|', // '\'
-      221: '}', // ]
-      222: '"', // '
+      173: "_", // -_ (firefox)
+      186: ":", // ;:
+      187: "+", // =+
+      188: "<", // ,<
+      189: "_", // -
+      190: ">", // .
+      191: "?", // /
+      192: "~", // `
+      219: "{", // [
+      220: "|", // '\'
+      221: "}", // ]
+      222: '"' // '
     },
     keysS0C1A0 = {
       // CTRLed keys.
       9: function() {
         // tab
-        if (atari) return 0x9e
+        if (atari) return 0x9e;
         // clear tabstop
-        else return 0
+        else return 0;
       },
       33: function() {
         // pgup
-        return modeDOORWAY ? '\x00\x84' : 0
+        return modeDOORWAY ? "\x00\x84" : 0;
       },
       34: function() {
         // pgdn
-        return modeDOORWAY ? '\x00\x76' : 0
+        return modeDOORWAY ? "\x00\x76" : 0;
       },
       35: function() {
         // end
-        return modeDOORWAY ? '\x00\x75' : 0
+        return modeDOORWAY ? "\x00\x75" : 0;
       },
       36: function() {
         // home
-        return modeDOORWAY ? '/x00/x77' : 0
+        return modeDOORWAY ? "/x00/x77" : 0;
       },
       37: function() {
         // left
-        return modeDOORWAY ? '\x00\x73' : 0
+        return modeDOORWAY ? "\x00\x73" : 0;
       },
       39: function() {
         // right
-        return modeDOORWAY ? '\x00\x74' : 0
+        return modeDOORWAY ? "\x00\x74" : 0;
       },
       48: function() {
         // 0
         // rev off
-        return cbm ? 0x92 : 0
+        return cbm ? 0x92 : 0;
       },
       49: function() {
         // 1
         // black
-        return cbm ? 0x90 : 0
+        return cbm ? 0x90 : 0;
       },
       50: function() {
         // 2
-        if (cbm) return 0x05
+        if (cbm) return 0x05;
         // white
-        else if (atari) return 0xfd
+        else if (atari) return 0xfd;
         // bell
-        else return 0
+        else return 0;
       },
       51: function() {
         // 3
         // red
-        return cbm ? 0x1c : 0
+        return cbm ? 0x1c : 0;
       },
       52: function() {
         // 4
         // cyan
-        return cbm ? 0x9f : 0
+        return cbm ? 0x9f : 0;
       },
       53: function() {
         // 5
         // purple
-        return cbm ? 0x9c : 0
+        return cbm ? 0x9c : 0;
       },
       54: function() {
         // 6
         // green
-        return cbm ? 0x1e : 0
+        return cbm ? 0x1e : 0;
       },
       55: function() {
         // 7
         // blue
-        return cbm ? 0x1f : 0
+        return cbm ? 0x1f : 0;
       },
       56: function() {
         // 8
         // yellow
-        return cbm ? 0x9e : 0
+        return cbm ? 0x9e : 0;
       },
       57: function() {
         // 9
         // rev on
-        return cbm ? 0x12 : 0
+        return cbm ? 0x12 : 0;
       },
       65: DO_SELECTALL, // a
       66: 0x02, // b
@@ -9878,44 +9880,44 @@ vtx: {
       90: 0x1a, // z
       112: function() {
         // f1
-        return modeDOORWAY ? '\x00\x5E' : 0
+        return modeDOORWAY ? "\x00\x5E" : 0;
       },
       113: function() {
         // f2
-        return modeDOORWAY ? '\x00\x5F' : 0
+        return modeDOORWAY ? "\x00\x5F" : 0;
       },
       114: function() {
         // f3
-        return modeDOORWAY ? '\x00\x60' : 0
+        return modeDOORWAY ? "\x00\x60" : 0;
       },
       115: function() {
         // f4
-        return modeDOORWAY ? '\x00\x61' : 0
+        return modeDOORWAY ? "\x00\x61" : 0;
       },
       116: null, // f5 - browser refresh
       117: function() {
         // f6
-        return modeDOORWAY ? '\x00\x63' : 0
+        return modeDOORWAY ? "\x00\x63" : 0;
       },
       118: function() {
         // f7
-        return modeDOORWAY ? '\x00\x64' : 0
+        return modeDOORWAY ? "\x00\x64" : 0;
       },
       119: function() {
         // f8
-        return modeDOORWAY ? '\x00\x65' : 0
+        return modeDOORWAY ? "\x00\x65" : 0;
       },
       120: function() {
         // f9
-        return modeDOORWAY ? '\x00\x66' : 0
+        return modeDOORWAY ? "\x00\x66" : 0;
       },
       121: function() {
         // f10
-        return modeDOORWAY ? '\x00\x67' : 0
+        return modeDOORWAY ? "\x00\x67" : 0;
       },
       219: 0x1b, // [
       220: 0x1c, // '\'
-      221: 0x1d, // ]
+      221: 0x1d // ]
     },
     keysS1C1A0 = {
       // SHIFT+CTRL keys. (currently empty)
@@ -9925,90 +9927,90 @@ vtx: {
       49: function() {
         // 1
         // orange
-        return cbm ? 0x81 : 0
+        return cbm ? 0x81 : 0;
       },
       50: function() {
         // 2
         // brown
-        return cbm ? 0x95 : 0
+        return cbm ? 0x95 : 0;
       },
       51: function() {
         // 3
         // lt red
-        return cbm ? 0x96 : 0
+        return cbm ? 0x96 : 0;
       },
       52: function() {
         // 4
         // dk gray
-        return cbm ? 0x97 : 0
+        return cbm ? 0x97 : 0;
       },
       53: function() {
         // 5
         // gray
-        return cbm ? 0x98 : 0
+        return cbm ? 0x98 : 0;
       },
       54: function() {
         // 6
         // lt green
-        return cbm ? 0x99 : 0
+        return cbm ? 0x99 : 0;
       },
       55: function() {
         // 7
         // lt blue
-        return cbm ? 0x9a : 0
+        return cbm ? 0x9a : 0;
       },
       56: function() {
         // 8
         // lt gray
-        return cbm ? 0x9b : 0
+        return cbm ? 0x9b : 0;
       },
       112: function() {
         // F1
-        return modeDOORWAY ? '\x00\x68' : 0
+        return modeDOORWAY ? "\x00\x68" : 0;
       },
       113: function() {
         // F2
-        return modeDOORWAY ? '\x00\x69' : 0
+        return modeDOORWAY ? "\x00\x69" : 0;
       },
       114: function() {
         // F3
-        return modeDOORWAY ? '\x00\x6A' : 0
+        return modeDOORWAY ? "\x00\x6A" : 0;
       },
       115: function() {
         // F4
-        return modeDOORWAY ? '\x00\x6B' : 0
+        return modeDOORWAY ? "\x00\x6B" : 0;
       },
       116: function() {
         // F5
-        return modeDOORWAY ? '\x00\x6C' : 0
+        return modeDOORWAY ? "\x00\x6C" : 0;
       },
       117: function() {
         // f6
-        return modeDOORWAY ? '\x00\x6D' : 0
+        return modeDOORWAY ? "\x00\x6D" : 0;
       },
       118: function() {
         // f7
-        return modeDOORWAY ? '\x00\x6E' : 0
+        return modeDOORWAY ? "\x00\x6E" : 0;
       },
       119: function() {
         // f8
-        return modeDOORWAY ? '\x00\x6F' : 0
+        return modeDOORWAY ? "\x00\x6F" : 0;
       },
       120: function() {
         // f9
-        return modeDOORWAY ? '\x00\x70' : 0
+        return modeDOORWAY ? "\x00\x70" : 0;
       },
       121: function() {
         // f10
-        return modeDOORWAY ? '\x00\x71' : 0
-      },
+        return modeDOORWAY ? "\x00\x71" : 0;
+      }
     },
     keysS1C0A1 = {
       // SHIFT+ALTed keus. (currently empty)
     },
     keysS0C1A1 = {
       // CTRL+ALTed keys.
-      46: null, // delete
+      46: null // delete
     },
     keysS1C1A1 = {
       // SHIFT+CTRL+ALTed keys.  (currently empty)
@@ -10021,25 +10023,25 @@ vtx: {
       keysS0C0A1,
       keysS1C0A1,
       keysS0C1A1,
-      keysS1C1A1,
+      keysS1C1A1
     ],
     // all available to vtx client
     vtxFonts = [
-      'UVGA16',
-      'MICROKNIGHT',
-      'MICROKNIGHTPLUS',
-      'MOSOUL',
-      'P0TNOODLE',
-      'TOPAZ',
-      'TOPAZPLUS',
-      'VIC200',
-      'VIC201',
-      'C640',
-      'C641',
-      'C1280',
-      'C1281',
-      'ATARI',
-      'TI994',
+      "UVGA16",
+      "MICROKNIGHT",
+      "MICROKNIGHTPLUS",
+      "MOSOUL",
+      "P0TNOODLE",
+      "TOPAZ",
+      "TOPAZPLUS",
+      "VIC200",
+      "VIC201",
+      "C640",
+      "C641",
+      "C1280",
+      "C1281",
+      "ATARI",
+      "TI994"
     ],
     // telnet commands
     TN_IS = 0x00,
@@ -10085,10 +10087,10 @@ vtx: {
     TNQ_WANTNO_OP = 4,
     TNQ_WANTYES_OP = 5,
     // for ymodem crc16
-    CRC_POLY = 0x1021
+    CRC_POLY = 0x1021;
 
   let // script path
-    vtxPath = '',
+    vtxPath = "",
     // strings that get transmogrified by the HTTP server.
     // only change these if you are not using the VTX HTTP server.
     codePage = vtxdata.codePage,
@@ -10097,8 +10099,8 @@ vtx: {
     crtRows = vtxdata.crtRows,
     xScale = vtxdata.xScale,
     term = vtxdata.term,
-    cbm = vtxdata.term == 'PETSCII',
-    atari = vtxdata.term == 'ATASCII',
+    cbm = vtxdata.term == "PETSCII",
+    atari = vtxdata.term == "ATASCII",
     initStr = vtxdata.initStr,
     cbmColors, // the correct color palette for a PETSCII
     ws = null, // websocket connection.
@@ -10117,7 +10119,7 @@ vtx: {
     pagePos,
     pageLeft, // left position of page div.
     pageTop, // top position of page div.
-    elPage = document.getElementsByTagName('html')[0],
+    elPage = document.getElementsByTagName("html")[0],
     crsr, // cursor element
     crsrRow, // cursor position
     crsrCol, // ''
@@ -10153,8 +10155,8 @@ vtx: {
     soundKeyDn = [], // release sound
     textPos = null, // ul x,y of textdiv
     // ansi parsing vars
-    parms = '', // parameters for CSI
-    interm = '', // intermediate for CSI
+    parms = "", // parameters for CSI
+    interm = "", // intermediate for CSI
     ansiState = 0,
     // mode switches
     modeVTXANSI = false, // CSI ?50 h/l to switch out of old ANSI.SYS mode.
@@ -10180,7 +10182,7 @@ vtx: {
     regionTopRow, // top row of scroll region.
     regionBottomRow, // bottom row of scroll region.
     // display buffer.
-    conBuffer = '', // console output buffer.
+    conBuffer = "", // console output buffer.
     // Attrs are integer arrays, base 0 (i.e.: row 1 = index 0)
     conCanvas = [], // row canvas array
     conRowAttr = [], // row attributes array of number
@@ -10216,115 +10218,115 @@ vtx: {
     ymFileSize, // file size. -1 if unknown.
     ymModifiedDate, // secs since 1/1/1970 in octal
     ymFilePos, // current position in file.
-    ymFileData = new Blob([], { type: 'application/octet-stream' }),
+    ymFileData = new Blob([], { type: "application/octet-stream" }),
     ymEOTCount,
     ymNakCount,
     ymNextBlock,
-    ymSendStartTime // timer for when to abort
+    ymSendStartTime; // timer for when to abort
 
   // add event listener
   function addListener(obj, eventName, listener) {
-    if (obj.addEventListener) obj.addEventListener(eventName, listener, false)
-    else obj.attachEvent('on' + eventName, listener)
+    if (obj.addEventListener) obj.addEventListener(eventName, listener, false);
+    else obj.attachEvent("on" + eventName, listener);
   }
 
   // create an element
   function domElement(type, options, styles, txt) {
     var e = document.createElement(type),
-      i
+      i;
 
-    if (options) for (i in options) e[i] = options[i]
-    if (styles) for (i in styles) e.style[i] = styles[i]
-    if (txt) e.appendChild(document.createTextNode(txt))
-    return e
+    if (options) for (i in options) e[i] = options[i];
+    if (styles) for (i in styles) e.style[i] = styles[i];
+    if (txt) e.appendChild(document.createTextNode(txt));
+    return e;
   }
 
   // keeps google closure compiler from bitching.
   function int(val) {
-    return parseInt(val, 10)
+    return parseInt(val, 10);
   }
 
   // clamp value to range. with optional fallback if out of bounds.
   function minMax(v, min, max, fallback) {
     if (fallback == null) {
-      if (v < min) v = min
-      if (v > max) v = max
+      if (v < min) v = min;
+      if (v > max) v = max;
     } else {
-      if (v < min) v = fallback
-      if (v > max) v = fallback
+      if (v < min) v = fallback;
+      if (v > max) v = fallback;
     }
-    return v
+    return v;
   }
 
   function between(mid, low, hi) {
-    return (mid >= low && mid <= hi) || (mid >= hi && mid <= low)
+    return (mid >= low && mid <= hi) || (mid >= hi && mid <= low);
   }
 
   // load fonts and boot
   function bootVTX() {
     var el,
-      hd = document.getElementsByTagName('head')[0],
+      hd = document.getElementsByTagName("head")[0],
       testTimer,
       testDiv,
       i,
       path,
-      scripts
+      scripts;
 
     // get path of script for access to images, etc
-    vtxPath = ''
-    scripts = document.getElementsByTagName('script')
+    vtxPath = "";
+    scripts = document.getElementsByTagName("script");
     for (i = scripts.length - 1; i >= 0; i--) {
-      if (scripts[i].src.toLowerCase().indexOf('vtxclient') >= 0) {
-        path = scripts[i].src.split('?')[0]
+      if (scripts[i].src.toLowerCase().indexOf("vtxclient") >= 0) {
+        path = scripts[i].src.split("?")[0];
         vtxPath =
           path
-            .split('/')
+            .split("/")
             .slice(0, -1)
-            .join('/') + '/'
-        break
+            .join("/") + "/";
+        break;
       }
     }
 
     // force load adobeblank
     el = domElement(
-      'style',
+      "style",
       {
-        type: 'text/css',
-        id: 'vtxfonts',
+        type: "text/css",
+        id: "vtxfonts"
       },
       {},
-      '@font-face { \n' +
+      "@font-face { \n" +
         '  font-family: "AdobeBlank"; ' +
         '  src: url("' +
         vtxPath +
         'AdobeBlank.woff") format("woff"); }\n'
-    )
-    hd.appendChild(el)
+    );
+    hd.appendChild(el);
 
     testDiv = domElement(
-      'div',
+      "div",
       {},
       {
         fontFamily: '"AdobeBlank", sans-serif',
-        fontSize: '24px',
-        fontWeight: 'normal',
-        color: 'transparent',
-        display: 'inline-block',
-        border: '0px',
-        padding: '0px',
-        margin: '0px',
+        fontSize: "24px",
+        fontWeight: "normal",
+        color: "transparent",
+        display: "inline-block",
+        border: "0px",
+        padding: "0px",
+        margin: "0px"
       },
-      'Test 1..2..3..'
-    )
-    document.body.appendChild(testDiv)
+      "Test 1..2..3.."
+    );
+    document.body.appendChild(testDiv);
     testTimer = setInterval(function() {
-      var w = testDiv.offsetWidth
+      var w = testDiv.offsetWidth;
       if (w < 32) {
-        document.body.removeChild(testDiv)
-        clearInterval(testTimer)
-        bootVTX1()
+        document.body.removeChild(testDiv);
+        clearInterval(testTimer);
+        bootVTX1();
       }
-    }, 50)
+    }, 50);
   }
 
   function bootVTX1() {
@@ -10333,196 +10335,196 @@ vtx: {
       l,
       str,
       el,
-      t = document.getElementsByTagName('title')[0],
-      hd = document.getElementsByTagName('head')[0],
+      t = document.getElementsByTagName("title")[0],
+      hd = document.getElementsByTagName("head")[0],
       bootFonts,
       bootTimer,
-      bootDiv = []
+      bootDiv = [];
 
     // load fonts
     // set fonts to be loaded based on term
-    l = vtxFonts.length
-    vtxFontsLoaded = new Array(l)
-    for (i = 0; i < l; i++) vtxFontsLoaded[i] = false
+    l = vtxFonts.length;
+    vtxFontsLoaded = new Array(l);
+    for (i = 0; i < l; i++) vtxFontsLoaded[i] = false;
 
-    bootFonts = []
+    bootFonts = [];
     switch (vtxdata.term) {
-      case 'PETSCII':
+      case "PETSCII":
         switch (vtxdata.codePage) {
-          case 'VIC20':
-            bootFonts.push('VIC200')
-            bootFonts.push('VIC201')
-            break
+          case "VIC20":
+            bootFonts.push("VIC200");
+            bootFonts.push("VIC201");
+            break;
 
-          case 'C128':
-            bootFonts.push('C1280')
-            bootFonts.push('C1281')
-            break
+          case "C128":
+            bootFonts.push("C1280");
+            bootFonts.push("C1281");
+            break;
 
-          case 'C64':
+          case "C64":
           default:
-            bootFonts.push('C640')
-            bootFonts.push('C641')
-            break
+            bootFonts.push("C640");
+            bootFonts.push("C641");
+            break;
         }
-        break
+        break;
 
-      case 'ATASCII':
-        bootFonts.push('ATARI')
-        break
+      case "ATASCII":
+        bootFonts.push("ATARI");
+        break;
 
       default:
-        bootFonts.push('UVGA16')
-        break
+        bootFonts.push("UVGA16");
+        break;
     }
 
     // inject @font-faces
-    el = document.getElementById('vtxfonts')
-    str = ''
+    el = document.getElementById("vtxfonts");
+    str = "";
     for (i = 0, l = bootFonts.length; i < l; i++)
       str +=
-        '@font-face {\r\n ' +
+        "@font-face {\r\n " +
         '  font-family: "' +
         bootFonts[i] +
         '"; ' +
         '  src: url("' +
         vtxPath +
         bootFonts[i] +
-        '.woff") format("woff"); }\r\n'
-    el.innerHTML += str
+        '.woff") format("woff"); }\r\n';
+    el.innerHTML += str;
 
     // loop through until all fonts needed at boot.
     for (i = 0, l = bootFonts.length; i < l; i++) {
       bootDiv[i] = domElement(
-        'div',
+        "div",
         {},
         {
           fontFamily: bootFonts[i] + ', "AdobeBlank"',
-          fontSize: '24px',
-          fontWeight: 'normal',
-          color: 'transparent',
-          display: 'inline-block',
-          border: '0px',
-          padding: '0px',
-          margin: '0px',
+          fontSize: "24px",
+          fontWeight: "normal",
+          color: "transparent",
+          display: "inline-block",
+          border: "0px",
+          padding: "0px",
+          margin: "0px"
         },
-        'Test 1..2..3..'
-      )
-      document.body.appendChild(bootDiv[i])
+        "Test 1..2..3.."
+      );
+      document.body.appendChild(bootDiv[i]);
     }
     bootTimer = setInterval(function() {
       var i,
-        count = bootFonts.length
+        count = bootFonts.length;
 
       for (i = bootFonts.length - 1; i >= 0; i--)
         if (bootDiv[i].offsetWidth > 12) {
           // mark as font loaded.
           for (j = 0; j < vtxFonts.length; j++)
             if (vtxFonts[j] == bootFonts[i]) {
-              vtxFontsLoaded[j] = true
-              break
+              vtxFontsLoaded[j] = true;
+              break;
             }
-          count--
+          count--;
         }
 
       if (count == 0) {
         for (i = bootFonts.length - 1; i >= 0; i--)
-          document.body.removeChild(bootDiv[i])
-        clearInterval(bootTimer)
-        bootVTX2()
+          document.body.removeChild(bootDiv[i]);
+        clearInterval(bootTimer);
+        bootVTX2();
       }
-    }, 50)
+    }, 50);
   }
 
   function bootVTX2() {
-    var t = document.getElementsByTagName('title')[0],
-      hd = document.getElementsByTagName('head')[0]
+    var t = document.getElementsByTagName("title")[0],
+      hd = document.getElementsByTagName("head")[0];
 
     // wait for the required data.
     while (!vtxdata) {}
 
     // format the TITLE tag - only if empty or missing.
-    if (!t) hd.appendChild(domElement('title', {}, {}, vtxdata.sysName))
+    if (!t) hd.appendChild(domElement("title", {}, {}, vtxdata.sysName));
     else {
-      if (!t.innerText || t.innerText == '') t.innerText = vtxdata.sysName
+      if (!t.innerText || t.innerText == "") t.innerText = vtxdata.sysName;
     }
 
     // when all fonts loaded call initDisplay
-    window.setTimeout(initDisplay, 100)
+    window.setTimeout(initDisplay, 100);
   }
 
   function loadSingleFont(fname) {
     var fn,
       el,
       str,
-      hd = document.getElementsByTagName('head')[0],
+      hd = document.getElementsByTagName("head")[0],
       fontTimer,
-      testDiv
+      testDiv;
 
     // return if it's already loaded.
-    fn = vtxFonts.indexOf(fname)
+    fn = vtxFonts.indexOf(fname);
     if (fn >= 0 && !vtxFontsLoaded[fn]) {
       // inject new @font-faces
       str =
-        '@font-face {\r\n ' +
+        "@font-face {\r\n " +
         '  font-family: "' +
         fname +
         '"; ' +
         '  src: url("' +
         vtxPath +
         fname +
-        '.woff") format("woff"); }\r\n'
+        '.woff") format("woff"); }\r\n';
 
-      el = document.getElementById('vtxfonts')
-      if (el) el.innerHTML += str
-      else el = domElement('style', { type: 'text/css' }, {}, str)
-      hd.appendChild(el)
+      el = document.getElementById("vtxfonts");
+      if (el) el.innerHTML += str;
+      else el = domElement("style", { type: "text/css" }, {}, str);
+      hd.appendChild(el);
 
       testDiv = domElement(
-        'div',
+        "div",
         {},
         {
           fontFamily: fname + ', "AdobeBlank"',
-          fontSize: '24px',
-          fontWeight: 'normal',
-          color: 'transparent',
-          display: 'inline-block',
-          border: '0px',
-          padding: '0px',
-          margin: '0px',
+          fontSize: "24px",
+          fontWeight: "normal",
+          color: "transparent",
+          display: "inline-block",
+          border: "0px",
+          padding: "0px",
+          margin: "0px"
         },
-        'Test 1..2..3..'
-      )
-      document.body.appendChild(testDiv)
+        "Test 1..2..3.."
+      );
+      document.body.appendChild(testDiv);
 
       fontTimer = setInterval(function() {
-        var w = testDiv.offsetWidth
+        var w = testDiv.offsetWidth;
         if (w > 32) {
           // mark as font loaded.
-          vtxFontsLoaded[fn] = true
-          document.body.removeChild(testDiv)
-          clearInterval(fontTimer)
+          vtxFontsLoaded[fn] = true;
+          document.body.removeChild(testDiv);
+          clearInterval(fontTimer);
 
           // redraw everything using this fomt.
           setTimeout(function() {
-            redrawFont(fname)
-          }, 250)
+            redrawFont(fname);
+          }, 250);
         }
-      }, 250)
+      }, 250);
     }
   }
 
   // global redraw a font change based on font name (i.e. VIC200, etc)
   function redrawFont(fname) {
-    var fn, tfn, r, c
+    var fn, tfn, r, c;
 
     // convert fname to font number
-    fn = conFont.indexOf(fname)
+    fn = conFont.indexOf(fname);
     if (fn >= 0) {
       for (r = conRowAttr.length - 1; r >= 0; r--)
         for (c = conCellAttr[r].length - 1; c >= 0; c--) {
-          tfn = (conCellAttr[r][c] & A_CELL_FONT_MASK) >>> 28
-          if (tfn == fn) renderCell(r, c, 0, false)
+          tfn = (conCellAttr[r][c] & A_CELL_FONT_MASK) >>> 28;
+          if (tfn == fn) renderCell(r, c, 0, false);
         }
     }
   }
@@ -10532,59 +10534,59 @@ vtx: {
   if (!String.prototype.splice) {
     String.prototype.splice = function(start, deleteCount, item) {
       if (start < 0) {
-        start = this.length + start
-        if (start < 0) start = 0
+        start = this.length + start;
+        if (start < 0) start = 0;
       }
       return (
-        this.slice(0, start) + (item || '') + this.slice(start + deleteCount)
-      )
-    }
+        this.slice(0, start) + (item || "") + this.slice(start + deleteCount)
+      );
+    };
   }
 
   // which row is the mouse on?
   function getMouseCell(e) {
-    var x, y, width, c, rh, ty, dt, i
+    var x, y, width, c, rh, ty, dt, i;
 
-    if (modeFullScreen) ty = clientDiv.scrollTop || clientDiv.scrollTop
-    else ty = document.documentElement.scrollTop || document.body.scrollTop
+    if (modeFullScreen) ty = clientDiv.scrollTop || clientDiv.scrollTop;
+    else ty = document.documentElement.scrollTop || document.body.scrollTop;
 
-    x = e.clientX
-    y = e.clientY + ty
-    dt = textPos.top
+    x = e.clientX;
+    y = e.clientY + ty;
+    dt = textPos.top;
     if (y >= dt && between(x, textPos.left, textPos.left + crtWidth - 1)) {
       // on the page. find row
       for (i = 0; i < conRowAttr.length; i++) {
-        width = getRowAttrWidth(conRowAttr[i]) / 100
-        rh = fontSize
+        width = getRowAttrWidth(conRowAttr[i]) / 100;
+        rh = fontSize;
         if (between(y, dt, dt + rh - 1)) {
           // on this row. get col
-          c = (x - textPos.left) / (xScale * colSize * width)
-          return { row: i, col: Math.floor(c) }
+          c = (x - textPos.left) / (xScale * colSize * width);
+          return { row: i, col: Math.floor(c) };
         }
-        dt += rh
+        dt += rh;
       }
     }
     // off the console
-    return null
+    return null;
   }
 
   // get the hotspot under x, y
   function getHotSpot(e) {
-    var i, mpos, hs
+    var i, mpos, hs;
 
-    mpos = getMouseCell(e)
+    mpos = getMouseCell(e);
     if (mpos) {
       // adjust to base-1 ansi coords
       for (i = 0; i < conHotSpots.length; i++) {
-        hs = conHotSpots[i]
+        hs = conHotSpots[i];
         if (
           between(mpos.row, hs.row, hs.row + hs.height - 1) &&
           between(mpos.col, hs.col, hs.col + hs.width - 1)
         )
-          return conHotSpots[i]
+          return conHotSpots[i];
       }
     }
-    return null
+    return null;
   }
 
   var selectStart = {},
@@ -10593,317 +10595,318 @@ vtx: {
     dragEnd = {},
     dragPrev = {},
     isSelect = false,
-    isDrag = false // in drag mode?
+    isDrag = false; // in drag mode?
 
   function loc2Linear(loc) {
-    if (loc) return (loc.row << 11) + loc.col
-    return null
+    if (loc) return (loc.row << 11) + loc.col;
+    return null;
   }
 
   function linear2Loc(lin) {
-    return { row: lin >>> 11, col: lin & 0x7ff }
+    return { row: lin >>> 11, col: lin & 0x7ff };
   }
 
   function betweenRCs(loc, loc1, loc2) {
     // is loc.row,loc.col between loc1 and loc2 inclusively?
-    return between(loc2Linear(loc), loc2Linear(loc1), loc2Linear(loc2))
+    return between(loc2Linear(loc), loc2Linear(loc1), loc2Linear(loc2));
   }
 
   function refreshBetweenRCs(loc1, loc2) {
-    var r1, r2, c1, c2
+    var r1, r2, c1, c2;
 
     if (loc2Linear(loc2) < loc2Linear(loc1)) {
-      r1 = loc2.row
-      c1 = loc2.col
-      r2 = loc1.row
-      c2 = loc1.col
+      r1 = loc2.row;
+      c1 = loc2.col;
+      r2 = loc1.row;
+      c2 = loc1.col;
     } else {
-      r1 = loc1.row
-      c1 = loc1.col
-      r2 = loc2.row
-      c2 = loc2.col
+      r1 = loc1.row;
+      c1 = loc1.col;
+      r2 = loc2.row;
+      c2 = loc2.col;
     }
     while (true) {
-      renderCell(r1, c1)
-      if (r1 == r2 && c1 == c2) break
-      c1++
+      renderCell(r1, c1);
+      if (r1 == r2 && c1 == c2) break;
+      c1++;
       if (c1 >= crtCols) {
-        c1 = 0
-        r1++
+        c1 = 0;
+        r1++;
       }
     }
   }
 
   function mouseUp(e) {
     // for now, just fix meta key states
-    e = e || window.event
-    shiftState = e.shiftKey
-    ctrlState = e.ctrlKey
-    altState = e.altKey
+    e = e || window.event;
+    shiftState = e.shiftKey;
+    ctrlState = e.ctrlKey;
+    altState = e.altKey;
 
     if (e.button == 0) {
       // end drag
-      isSelect = false
+      isSelect = false;
       if (isDrag) {
         if (loc2Linear(dragEnd) > loc2Linear(dragStart)) {
-          selectStart = dragStart
-          selectEnd = dragEnd
+          selectStart = dragStart;
+          selectEnd = dragEnd;
         } else {
-          selectStart = dragEnd
-          selectEnd = dragStart
+          selectStart = dragEnd;
+          selectEnd = dragStart;
         }
-        isSelect = true
-        isDrag = false
+        isSelect = true;
+        isDrag = false;
       }
     }
   }
 
   function mouseDown(e) {
-    var fromr, tor, p, dir, mloc
+    var fromr, tor, p, dir, mloc;
 
     // for now, just fix meta key states
-    e = e || window.event
-    shiftState = e.shiftKey
-    ctrlState = e.ctrlKey
-    altState = e.altKey
+    e = e || window.event;
+    shiftState = e.shiftKey;
+    ctrlState = e.ctrlKey;
+    altState = e.altKey;
 
     // get mouse pos
     if (e.button == 0) {
       // start drag
-      isDrag = false
+      isDrag = false;
       if (isSelect) {
         // erase old selection.
-        isSelect = false
-        refreshBetweenRCs(selectStart, selectEnd)
+        isSelect = false;
+        refreshBetweenRCs(selectStart, selectEnd);
       }
-      mloc = getMouseCell(e)
+      mloc = getMouseCell(e);
       if (mloc && mloc != {}) {
-        dragStart = mloc
-        dragEnd = mloc
-        dragPrev = mloc
-        isDrag = true
+        dragStart = mloc;
+        dragEnd = mloc;
+        dragPrev = mloc;
+        isDrag = true;
       }
     }
   }
 
   function mouseMove(e) {
-    var x, y, mloc, dir, p, hs
+    var x, y, mloc, dir, p, hs;
 
     // for now, just fix meta key states
-    e = e || window.event
-    shiftState = e.shiftKey
-    ctrlState = e.ctrlKey
-    altState = e.altKey
+    e = e || window.event;
+    shiftState = e.shiftKey;
+    ctrlState = e.ctrlKey;
+    altState = e.altKey;
 
-    if (termState > TS_NORMAL) return
+    if (termState > TS_NORMAL) return;
 
     if (isDrag) {
       // dragging
-      mloc = getMouseCell(e)
+      mloc = getMouseCell(e);
       if (mloc != null) {
         // new location
-        dragEnd = mloc
-        refreshBetweenRCs(dragEnd, dragPrev)
-        dragPrev = dragEnd
+        dragEnd = mloc;
+        refreshBetweenRCs(dragEnd, dragPrev);
+        dragPrev = dragEnd;
       }
     } else {
       // moving around
       // check if over a hotspot
-      hs = getHotSpot(e)
+      hs = getHotSpot(e);
       if (hs) {
         if (lastHotSpot != hs) {
           if (lastHotSpot) {
             // erase old
             for (y = 0; y < lastHotSpot.height; y++)
               for (x = 0; x < lastHotSpot.width; x++)
-                renderCell(lastHotSpot.row + y, lastHotSpot.col + x)
+                renderCell(lastHotSpot.row + y, lastHotSpot.col + x);
           }
           // draw this one
           for (y = 0; y < hs.height; y++)
             for (x = 0; x < hs.width; x++)
-              renderCell(hs.row + y, hs.col + x, hs.hilite ? 1 : 0)
+              renderCell(hs.row + y, hs.col + x, hs.hilite ? 1 : 0);
         }
-        document.body.style['cursor'] = 'pointer'
+        document.body.style["cursor"] = "pointer";
       } else {
         if (lastHotSpot) {
           // erase old
           for (y = 0; y < lastHotSpot.height; y++)
             for (x = 0; x < lastHotSpot.width; x++)
-              renderCell(lastHotSpot.row + y, lastHotSpot.col + x)
+              renderCell(lastHotSpot.row + y, lastHotSpot.col + x);
         }
-        document.body.style['cursor'] = 'default'
+        document.body.style["cursor"] = "default";
       }
-      lastHotSpot = hs
+      lastHotSpot = hs;
     }
   }
 
   function click(e) {
-    var x, y, win, hs
+    var x, y, win, hs;
 
     // for now, just fix meta key states
-    e = e || window.event
-    shiftState = e.shiftKey
-    ctrlState = e.ctrlKey
-    altState = e.altKey
+    e = e || window.event;
+    shiftState = e.shiftKey;
+    ctrlState = e.ctrlKey;
+    altState = e.altKey;
 
-    if (termState > TS_NORMAL) return
+    if (termState > TS_NORMAL) return;
 
-    hs = getHotSpot(e)
+    hs = getHotSpot(e);
     if (hs) {
       // draw this one
       for (y = 0; y < hs.height; y++)
         for (x = 0; x < hs.width; x++)
-          renderCell(hs.row + y, hs.col + x, hs.hilite ? 2 : 0)
+          renderCell(hs.row + y, hs.col + x, hs.hilite ? 2 : 0);
 
       // clicked on hotspot.
       switch (hs.type) {
         case 0:
-          sendData(hs.val)
-          break
+          sendData(hs.val);
+          break;
 
         case 1:
           // url
-          win = window.open(hs.val, '_blank')
-          win.focus()
-          break
+          win = window.open(hs.val, "_blank");
+          win.focus();
+          break;
       }
     }
   }
 
   // process keyups (function, arrows, etc)
   function keyUp(e) {
-    var kc
+    var kc;
 
-    e = e || window.event
-    kc = e.keyCode || e.which
+    e = e || window.event;
+    kc = e.keyCode || e.which;
 
-    shiftState = e.shiftKey
-    ctrlState = e.ctrlKey
-    altState = e.altKey
+    shiftState = e.shiftKey;
+    ctrlState = e.ctrlKey;
+    altState = e.altKey;
 
     if (kc == 17) {
       if (isSelect) {
-        isSelect = false
-        refreshBetweenRCs(selectStart, selectEnd)
+        isSelect = false;
+        refreshBetweenRCs(selectStart, selectEnd);
       }
-      copyEl.style['visibility'] = 'hidden'
+      copyEl.style["visibility"] = "hidden";
     }
 
     // play key up sound
-    if (soundClicks) soundKeyUp[kc % 11].play()
-    keysDn[kc] = false
+    if (soundClicks) soundKeyUp[kc % 11].play();
+    keysDn[kc] = false;
   }
 
   // process keydowns (function, arrows, etc)
   function keyDown(e) {
-    var stateIdx, kc, ka, r, c, p, endl, str
+    var stateIdx, kc, ka, r, c, p, endl, str;
 
-    e = e || window.event
-    kc = e.keyCode || e.which
+    e = e || window.event;
+    kc = e.keyCode || e.which;
 
-    shiftState = e.shiftKey
-    ctrlState = e.ctrlKey
-    altState = e.altKey
+    shiftState = e.shiftKey;
+    ctrlState = e.ctrlKey;
+    altState = e.altKey;
 
-    if (termState > TS_NORMAL) return
+    if (termState > TS_NORMAL) return;
 
     if (kc == 17 && !keysDn[kc] && isSelect) {
       // copy selected text to clipboard.
-      str = ''
-      endl = loc2Linear(selectEnd)
-      r = selectStart.row
-      c = selectStart.col
+      str = "";
+      endl = loc2Linear(selectEnd);
+      r = selectStart.row;
+      c = selectStart.col;
       while (true) {
         if (c < conText[r].length) {
-          str += conText[r].charAt(c)
+          str += conText[r].charAt(c);
         }
-        if (loc2Linear({ row: r, col: c }) >= endl) break
-        c++
+        if (loc2Linear({ row: r, col: c }) >= endl) break;
+        c++;
         if (c >= conText[r].length) {
-          str += '\r\n'
-          c = 0
-          r++
+          str += "\r\n";
+          c = 0;
+          r++;
         }
       }
-      copyEl.style['visibility'] = 'visible'
-      copyEl.value = str
-      copyEl.focus()
-      copyEl.select()
+      copyEl.style["visibility"] = "visible";
+      copyEl.value = str;
+      copyEl.focus();
+      copyEl.select();
     }
 
     // play key down sound
-    if (soundClicks && !keysDn[kc]) soundKeyDn[kc % 11].play()
-    keysDn[kc] = true
+    if (soundClicks && !keysDn[kc]) soundKeyDn[kc % 11].play();
+    keysDn[kc] = true;
 
-    stateIdx = (shiftState ? 1 : 0) + (ctrlState ? 2 : 0) + (altState ? 4 : 0)
+    stateIdx = (shiftState ? 1 : 0) + (ctrlState ? 2 : 0) + (altState ? 4 : 0);
 
     // translate for capslock
-    if (between(kc, 65, 90) && stateIdx < 2 && capState) stateIdx ^= 1
+    if (between(kc, 65, 90) && stateIdx < 2 && capState) stateIdx ^= 1;
 
     // reverse upper/lowers for PETSCII
     if (cbm) {
-      if (between(kc, 65, 90)) stateIdx ^= 1
+      if (between(kc, 65, 90)) stateIdx ^= 1;
     }
 
-    ka = keyVals[stateIdx][kc]
+    ka = keyVals[stateIdx][kc];
     if (ka == null) {
       // let browser handle it.
-      return (e.returnValue = true)
-    } else if (typeof ka == 'function') {
-      ka = ka()
-      if (ka == null) return (e.returnValue = true)
+      return (e.returnValue = true);
+    } else if (typeof ka == "function") {
+      ka = ka();
+      if (ka == null) return (e.returnValue = true);
     }
 
-    if (typeof ka == 'string') {
+    if (typeof ka == "string") {
       // send string to console.
-      sendData(ka)
-      e.preventDefault()
-      return (e.returnValue = false) // true
-    } else if (typeof ka == 'number') {
+      sendData(ka);
+      e.preventDefault();
+      return (e.returnValue = false); // true
+    } else if (typeof ka == "number") {
       if (ka == 0) {
         // never do anything.
-        e.preventDefault()
-        return (e.returnValue = true)
+        e.preventDefault();
+        return (e.returnValue = true);
       } else if (ka < 0) {
         // perform special action.
         switch (ka) {
           case DO_CAPLK:
-            capState = !capState
-            setBulbs()
-            break
+            capState = !capState;
+            setBulbs();
+            break;
 
           case DO_NUMLK:
-            numState = !numState
-            setBulbs()
-            break
+            numState = !numState;
+            setBulbs();
+            break;
 
           case DO_SCRLK:
-            scrState = !scrState
-            setBulbs()
-            break
+            scrState = !scrState;
+            setBulbs();
+            break;
 
-          case DO_COPY:
-            // create string of selected text.
-            if (isSelect) {
-              isSelect = false
-              refreshBetweenRCs(selectStart, selectEnd)
-            }
-            break
+          // Seems unreachable since DO_COPY is undefined
+          // case DO_COPY:
+          //   // create string of selected text.
+          //   if (isSelect) {
+          //     isSelect = false;
+          //     refreshBetweenRCs(selectStart, selectEnd);
+          //   }
+          //   break;
 
           case DO_SELECTALL:
-            break
+            break;
 
           default:
             // unknown action - pass to keyPress
-            return
+            return;
         }
-        e.preventDefault()
-        return (e.returnValue = false)
+        e.preventDefault();
+        return (e.returnValue = false);
       } else if (ka > 0) {
         // send ascii if online, send to server. if offline, localecho
-        sendData(ka)
-        e.preventDefault()
-        return (e.returnValue = false)
+        sendData(ka);
+        e.preventDefault();
+        return (e.returnValue = false);
       }
     }
   }
@@ -10911,181 +10914,181 @@ vtx: {
   // process keypresses (alphas, numerics, etc)
   function keyPress(e) {
     // normally, send to websocket server. only echo what is returned.
-    var cc
+    var cc;
 
-    e = e || window.event
-    cc = e.charCode
+    e = e || window.event;
+    cc = e.charCode;
 
-    shiftState = e.shiftKey
-    ctrlState = e.ctrlKey
-    altState = e.altKey
+    shiftState = e.shiftKey;
+    ctrlState = e.ctrlKey;
+    altState = e.altKey;
 
     capState =
       (between(cc, 65, 90) && !shiftState) ||
-      (between(cc, 97, 112) && shiftState)
+      (between(cc, 97, 112) && shiftState);
   }
 
   // delete row from storage and element from html
   // TODO - check scroll region
   function delRow(rownum) {
-    var els, p
+    var els, p;
 
-    expandToRow(rownum)
-    els = document.getElementsByClassName('vtx')
-    p = els[rownum - 1].parentNode
-    p.removeChild(els[rownum])
-    conRowAttr.splice(rownum, 1)
-    conText.splice(rownum, 1)
-    conCellAttr.splice(rownum, 1)
-    conCanvas.splice(rownum, 1)
+    expandToRow(rownum);
+    els = document.getElementsByClassName("vtx");
+    p = els[rownum - 1].parentNode;
+    p.removeChild(els[rownum]);
+    conRowAttr.splice(rownum, 1);
+    conText.splice(rownum, 1);
+    conCellAttr.splice(rownum, 1);
+    conCanvas.splice(rownum, 1);
 
     // move all hotspots below up one. remove hotspots on this row.
-    clearHotSpotsRow(rownum, 0, 999)
-    moveHotSpotsRows(rownum + 1, conRowAttr.length, -1)
+    clearHotSpotsRow(rownum, 0, 999);
+    moveHotSpotsRows(rownum + 1, conRowAttr.length, -1);
   }
 
   // insert row into storage and element into html
   // TODO - check scroll region
   function insRow(rownum) {
-    var els, p
+    var els, p;
 
-    els = document.getElementsByClassName('vtx')
-    p = els[rownum].parentNode
-    p.insertBefore(createNewRow(), els[rownum])
-    conRowAttr.splice(rownum, 0, defRowAttr)
-    conText.splice(rownum, 0, '')
-    conCellAttr.splice(rownum, 0, [])
-    conCanvas.splice(rownum, 0, null)
+    els = document.getElementsByClassName("vtx");
+    p = els[rownum].parentNode;
+    p.insertBefore(createNewRow(), els[rownum]);
+    conRowAttr.splice(rownum, 0, defRowAttr);
+    conText.splice(rownum, 0, "");
+    conCellAttr.splice(rownum, 0, []);
+    conCanvas.splice(rownum, 0, null);
 
     // move all hotspots on this row and below down one.
-    moveHotSpotsRows(rownum, conRowAttr.length, +1)
-    trimHistory()
+    moveHotSpotsRows(rownum, conRowAttr.length, +1);
+    trimHistory();
   }
 
   // remove excess rows from top.
   function trimHistory() {
-    var els, p, i, hs
+    var els, p, i, hs;
 
     while (conRowAttr.length > vtxdata.crtHistory) {
-      clearHotSpotsRow(0, 0, 999)
-      els = document.getElementsByClassName('vtx')
-      p = els[0].parentNode
-      p.removeChild(els[0])
-      conRowAttr.splice(0, 1)
-      conText.splice(0, 1)
-      conCellAttr.splice(0, 1)
-      conCanvas.splice(0, 1)
-      crsrRow--
+      clearHotSpotsRow(0, 0, 999);
+      els = document.getElementsByClassName("vtx");
+      p = els[0].parentNode;
+      p.removeChild(els[0]);
+      conRowAttr.splice(0, 1);
+      conText.splice(0, 1);
+      conCellAttr.splice(0, 1);
+      conCanvas.splice(0, 1);
+      crsrRow--;
     }
   }
 
   // delete a character at position
   function delChar(rownum, colnum) {
-    expandToRow(rownum)
-    expandToCol(rownum, colnum)
-    conText[rownum] = conText[rownum].splice(colnum, 1)
-    conCellAttr[rownum].splice(colnum, 1)
-    moveHotSpotsRow(rownum, colnum, 999, -1)
-    redrawRow(rownum)
+    expandToRow(rownum);
+    expandToCol(rownum, colnum);
+    conText[rownum] = conText[rownum].splice(colnum, 1);
+    conCellAttr[rownum].splice(colnum, 1);
+    moveHotSpotsRow(rownum, colnum, 999, -1);
+    redrawRow(rownum);
   }
 
   // insert a character at position. also sets attr to def
   function insChar(rownum, colnum, chr) {
-    expandToRow(rownum)
-    expandToCol(rownum, colnum)
+    expandToRow(rownum);
+    expandToCol(rownum, colnum);
     conText[rownum] = conText[rownum].splice(
       colnum,
       0,
       String.fromCharCode(chr)
-    )
-    conCellAttr[rownum].splice(colnum, 0, defCellAttr)
-    moveHotSpotsRow(rownum, colnum, 999, +1)
-    redrawRow(rownum)
+    );
+    conCellAttr[rownum].splice(colnum, 0, defCellAttr);
+    moveHotSpotsRow(rownum, colnum, 999, +1);
+    redrawRow(rownum);
   }
 
   // create blank row
   function createNewRow() {
     var cmv,
-      el = domElement('div', { className: 'vtx' })
+      el = domElement("div", { className: "vtx" });
     //cnv = domElement('canvas');
     //el.appendChild(cnv);
-    return el
+    return el;
   }
 
   // compute number of visible cells on this row.
   function colsOnRow(rownum) {
     var cols = crtCols,
-      width = getRowAttrWidth(conRowAttr[rownum]) / 100
+      width = getRowAttrWidth(conRowAttr[rownum]) / 100;
 
-    cols *= 1 / width
-    return cols
+    cols *= 1 / width;
+    return cols;
   }
 
   // flush out parameter array with defaults.
   // truncate to match defs length
   function fixParams(parm, defs) {
-    var i
-    for (i = parm.length; i < defs.length; i++) parm[i] = defs[i]
-    return parm.slice(0, defs.length)
+    var i;
+    for (i = parm.length; i < defs.length; i++) parm[i] = defs[i];
+    return parm.slice(0, defs.length);
   }
 
   // get actual document position of element
   function getElementPosition(obj) {
     var lpos = obj.offsetLeft,
-      tpos = obj.offsetTop
+      tpos = obj.offsetTop;
 
     while (obj.offsetParent) {
-      obj = obj.offsetParent
-      lpos += obj.offsetLeft
-      tpos += obj.offsetTop
+      obj = obj.offsetParent;
+      lpos += obj.offsetLeft;
+      tpos += obj.offsetTop;
     }
-    return { left: lpos, top: tpos }
+    return { left: lpos, top: tpos };
   }
 
   // redraw the cursor. - attempt to scroll
   function crsrDraw() {
-    var row, rpos, csize, dt, wh
+    var row, rpos, csize, dt, wh;
 
-    expandToRow(crsrRow)
-    row = getRowElement(crsrRow)
-    if (row == null) return
+    expandToRow(crsrRow);
+    row = getRowElement(crsrRow);
+    if (row == null) return;
 
     // position of row in relation to parent.
-    rpos = getElementPosition(row)
+    rpos = getElementPosition(row);
 
     // position of doc
     if (modeFullScreen) {
-      dt = clientDiv.scrollTop
-      wh = clientDiv.clientHeight
+      dt = clientDiv.scrollTop;
+      wh = clientDiv.clientHeight;
     } else {
-      dt = document.documentElement.scrollTop || document.body.scrollTop
-      wh = window.innerHeight
+      dt = document.documentElement.scrollTop || document.body.scrollTop;
+      wh = window.innerHeight;
     }
 
     // character size for this row.
-    csize = getRowFontSize(crsrRow)
+    csize = getRowFontSize(crsrRow);
 
     // set cursor siz / pos
-    crsr.style['top'] = rpos.top - textPos.top + 'px'
-    crsr.style['left'] = xScale * crsrCol * csize.width + 'px'
-    crsr.style['width'] = xScale * csize.width + 'px'
-    crsr.style['height'] = csize.height + 'px'
+    crsr.style["top"] = rpos.top - textPos.top + "px";
+    crsr.style["left"] = xScale * crsrCol * csize.width + "px";
+    crsr.style["width"] = xScale * csize.width + "px";
+    crsr.style["height"] = csize.height + "px";
 
     if (modeFullScreen) {
       if (rpos.top < dt) {
         // cursor is above page - scroll up
-        clientDiv.scrollTo = rpos.top - 8
+        clientDiv.scrollTo = rpos.top - 8;
       } else if (rpos.top + csize.height > dt + wh) {
         // cursor is below page - scroll down
-        clientDiv.scrollTop = rpos.top + csize.height + 8
+        clientDiv.scrollTop = rpos.top + csize.height + 8;
       }
     } else {
       if (rpos.top < dt) {
         // cursor is above page - scroll up
-        window.scrollTo(0, rpos.top - 8)
+        window.scrollTo(0, rpos.top - 8);
       } else if (rpos.top + csize.height > dt + wh) {
         // cursor is below page - scroll down
-        window.scrollTo(0, rpos.top + csize.height + 8)
+        window.scrollTo(0, rpos.top + csize.height + 8);
       }
     }
   }
@@ -11106,109 +11109,109 @@ vtx: {
       txtBottom,
       txtLeft,
       txtRight,
-      testString = '',
+      testString = "",
       data,
       ctx,
       canvas,
       bmpw = 2000,
-      bmph = 64
+      bmph = 64;
 
-    testString += '\u2588\u2588'
-    for (i = 32; i < 128; i++) testString += String.fromCharCode(i)
-    testString += '\u2588\u2588'
+    testString += "\u2588\u2588";
+    for (i = 32; i < 128; i++) testString += String.fromCharCode(i);
+    testString += "\u2588\u2588";
 
-    cs = document.defaultView.getComputedStyle(pageDiv, null)
-    fontName = vtxdata.fontName || cs['font-family']
-    fontSize = int(vtxdata.fontSize) || int(cs['font-size'])
-    font = fontSize + 'px ' + fontName
+    cs = document.defaultView.getComputedStyle(pageDiv, null);
+    fontName = vtxdata.fontName || cs["font-family"];
+    fontSize = int(vtxdata.fontSize) || int(cs["font-size"]);
+    font = fontSize + "px " + fontName;
 
     // interrogate font
-    canvas = domElement('canvas', {
+    canvas = domElement("canvas", {
       width: bmpw,
-      height: bmph,
-    })
-    ctx = canvas.getContext('2d')
-    ctx.font = font
-    ctx.textBaseline = 'top'
-    ctx.textAlign = 'left'
-    ctx.fillStyle = '#FFF'
-    ctx.fillText(testString, 15, 15)
+      height: bmph
+    });
+    ctx = canvas.getContext("2d");
+    ctx.font = font;
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#FFF";
+    ctx.fillText(testString, 15, 15);
 
-    data = ctx.getImageData(0, 0, bmpw, bmph).data
-    txtTop = txtLeft = bmpw
-    txtRight = txtBottom = 0
+    data = ctx.getImageData(0, 0, bmpw, bmph).data;
+    txtTop = txtLeft = bmpw;
+    txtRight = txtBottom = 0;
     for (y = 0; y < bmph; y++)
       for (x = 0; x < bmpw; x++) {
-        d = data[(y * bmpw + x) * 4]
+        d = data[(y * bmpw + x) * 4];
         if (d != 0) {
-          if (y < txtTop) txtTop = y
-          if (y > txtBottom) txtBottom = y
-          if (x < txtLeft) txtLeft = x
-          if (x > txtRight) txtRight = x
+          if (y < txtTop) txtTop = y;
+          if (y > txtBottom) txtBottom = y;
+          if (x < txtLeft) txtLeft = x;
+          if (x > txtRight) txtRight = x;
         }
       }
     //rowSize = Math.floor(txtBottom - txtTop) + 1; // this is normally same as fontSize
-    rowSize = fontSize
-    colSize = Math.floor((txtRight - txtLeft) / testString.length)
+    rowSize = fontSize;
+    colSize = Math.floor((txtRight - txtLeft) / testString.length);
   }
 
   // get maximum row on document.
   function getMaxRow() {
-    return conRowAttr.length - 1
+    return conRowAttr.length - 1;
   }
 
   // get row length for a row
   function getMaxCol(rownum) {
-    return conText[rownum].length - 1
+    return conText[rownum].length - 1;
   }
 
   // home cursor
   function XcrsrHome() {
-    crsrRow = crsrCol = 0 // base 0
-    crsrDraw()
+    crsrRow = crsrCol = 0; // base 0
+    crsrDraw();
   }
 
   // move cursor
   function XcrsrMove(rownum, colnum) {
-    crsrRow = rownum
-    crsrCol = colnum
-    crsrDraw()
+    crsrRow = rownum;
+    crsrCol = colnum;
+    crsrDraw();
   }
 
   // cursor up
   function XcrsrUp() {
-    if (crsrRow > 0) crsrRow--
-    crsrDraw()
+    if (crsrRow > 0) crsrRow--;
+    crsrDraw();
   }
 
   // cursor left
   function XcrsrLeft() {
-    if (crsrCol > 0) crsrCol--
-    crsrDraw()
+    if (crsrCol > 0) crsrCol--;
+    crsrDraw();
   }
 
   // cursor right
   function XcrsrRight() {
-    crsrCol++
-    crsrDraw()
+    crsrCol++;
+    crsrDraw();
   }
 
   // return element for row
   function getRowElement(row) {
-    var els = document.getElementsByClassName('vtx')
+    var els = document.getElementsByClassName("vtx");
 
-    if (row > els.length) return null
-    return els[row]
+    if (row > els.length) return null;
+    return els[row];
   }
 
   // called often to fix cursor on zoom / page resize
   function doCheckResize() {
     // page resize?
     //textPos = textDiv.getBoundingClientRect();
-    textPos = getElementPosition(textDiv)
+    textPos = getElementPosition(textDiv);
     if (elPage.clientWidth != pageWidth) {
-      pageWidth = elPage.clientWidth
-      crsrDraw(true)
+      pageWidth = elPage.clientWidth;
+      crsrDraw(true);
     }
     //    ctrlDiv.style['top'] = textPos.top + 'px';
     //    ctrlDiv.style['left'] = (6 + textPos.left + (crtWidth*xScale)) + 'px';
@@ -11217,29 +11220,29 @@ vtx: {
   // blink cursor (533ms is cursor blink speed based on DOS VGA).
   function doCursor() {
     if (cbm)
-      crsr.firstChild.style['background-color'] =
+      crsr.firstChild.style["background-color"] =
         (crsrBlink = !crsrBlink) || !modeCursor
-          ? 'transparent'
-          : cbmColors[cellAttr & 0xf]
+          ? "transparent"
+          : cbmColors[cellAttr & 0xf];
     else if (atari)
-      crsr.firstChild.style['background-color'] =
+      crsr.firstChild.style["background-color"] =
         (crsrBlink = !crsrBlink) || !modeCursor
-          ? 'transparent'
-          : atariColors[cellAttr & 0x1]
+          ? "transparent"
+          : atariColors[cellAttr & 0x1];
     else
-      crsr.firstChild.style['background-color'] =
+      crsr.firstChild.style["background-color"] =
         (crsrBlink = !crsrBlink) || !modeCursor
-          ? 'transparent'
-          : ansiColors[getCrsrAttrColor(crsrAttr)]
+          ? "transparent"
+          : ansiColors[getCrsrAttrColor(crsrAttr)];
   }
 
   // animate blink (533ms)
   function doBlink() {
-    var r, c, y
+    var r, c, y;
 
     if (!modeNoBlink && !modeBlinkBright) {
       // y of first row.
-      y = textDiv.getBoundingClientRect().top
+      y = textDiv.getBoundingClientRect().top;
       for (r = 0; r < conRowAttr.length; r++) {
         // check if row is visible
         if (y + rowSize > 0 && y < window.innerHeight) {
@@ -11247,109 +11250,117 @@ vtx: {
           // refresh blinkable text.
           for (c = 0; c < conCellAttr[r].length; c++) {
             if (conCellAttr[r][c] & (A_CELL_BLINKSLOW | A_CELL_BLINKFAST))
-              renderCell(r, c)
+              renderCell(r, c);
           }
         }
-        y += rowSize
+        y += rowSize;
       }
     }
-    cellBlinkFast = !cellBlinkFast
-    if (cellBlinkFast) cellBlinkSlow = !cellBlinkSlow
+    cellBlinkFast = !cellBlinkFast;
+    if (cellBlinkFast) cellBlinkSlow = !cellBlinkSlow;
   }
 
   // compute font size (width) for row - figure in scale (row is dom element)
   function getRowFontSize(rownum) {
-    var w, rattr
+    var w, rattr;
 
-    rattr = conRowAttr[rownum]
-    w = colSize * (getRowAttrWidth(rattr) / 100)
-    return { width: w, height: rowSize }
+    rattr = conRowAttr[rownum];
+    w = colSize * (getRowAttrWidth(rattr) / 100);
+    return { width: w, height: rowSize };
   }
 
   // concert integer to hex string.
   function itoh(i, d) {
-    var str = ''
+    var str = "";
 
-    d = d || 0
+    d = d || 0;
     for (; i; str = hex.charAt(i & 0x0f) + str, i >>= 4) {}
-    if (d > 0) while (str.length < d) str = '0' + str
-    return str
+    if (d > 0) while (str.length < d) str = "0" + str;
+    return str;
   }
 
   // convert hex string to integer
   function htoi(h) {
-    var i, l, v
+    var i, l, v;
 
-    h = h || '0'
+    h = h || "0";
     for (h = h.toUpperCase(), v = 0, i = 0, l = h.length; i < l; i++) {
-      v <<= 4
-      v += hex.indexOf(h.charAt(i))
+      v <<= 4;
+      v += hex.indexOf(h.charAt(i));
     }
-    return v
+    return v;
   }
 
-  // create row attribute
-  function makeRowAttr(c1, c2, bp, width, marquee) {
-    bp = bp || 0
-    width = width || 100
-    marquee = marquee || false
+  // Unused and 'size' is undefined.
+  // // create row attribute
+  // function makeRowAttr(c1, c2, bp, width, marquee) {
+  //   bp = bp || 0;
+  //   width = width || 100;
+  //   marquee = marquee || false;
 
-    width = minMax(Math.round(width / 50) - 1, 0, 3) << 21
-    return (
-      (c1 & 0xff) |
-      ((c2 & 0xff) << 8) |
-      bp |
-      size |
-      width |
-      (marquee ? A_ROW_MARQUEE : 0)
-    )
+  //   width = minMax(Math.round(width / 50) - 1, 0, 3) << 21;
+  //   return (
+  //     (c1 & 0xff) |
+  //     ((c2 & 0xff) << 8) |
+  //     bp |
+  //     size |
+  //     width |
+  //     (marquee ? A_ROW_MARQUEE : 0)
+  //   );
+  // }
+
+  function getPageAttrBorder(attr) {
+    return attr & 0x00ff;
+  }
+  function getPageAttrBackground(attr) {
+    return attr & 0xff00;
   }
 
   function setPageAttrBorder(attr, color) {
-    return (attr & 0x00ff) | ((color & 0xff) << 8)
+    return (attr & 0x00ff) | ((color & 0xff) << 8);
   }
   function setPageAttrBackground(attr, color) {
-    return (attr & 0xff00) | (color & 0xff)
+    return (attr & 0xff00) | (color & 0xff);
   }
 
   // set row attribute parts
   function setRowAttrColor1(attr, color1) {
-    return (attr & ~A_ROW_COLOR1_MASK) | (color1 & 0xff)
+    return (attr & ~A_ROW_COLOR1_MASK) | (color1 & 0xff);
   }
   function setRowAttrColor2(attr, color2) {
-    return (attr & ~A_ROW_COLOR2_MASK) | ((color2 & 0xff) << 8)
+    return (attr & ~A_ROW_COLOR2_MASK) | ((color2 & 0xff) << 8);
   }
   function setRowAttrPattern(attr, pattern) {
-    return (attr & ~A_ROW_PATTERN_MASK) | pattern
+    return (attr & ~A_ROW_PATTERN_MASK) | pattern;
   }
   function setRowAttrWidth(attr, width) {
     // round width to nearest valid 50%
-    width = Math.round(width / 50) - 1
-    if (width < 0) width = 0
-    if (width > 3) width = 3
-    width <<= 21
+    width = Math.round(width / 50) - 1;
+    if (width < 0) width = 0;
+    if (width > 3) width = 3;
+    width <<= 21;
 
-    return (attr & ~A_ROW_WIDTH_MASK) | width
+    return (attr & ~A_ROW_WIDTH_MASK) | width;
   }
   function setRowAttrMarquee(attr, marquee) {
-    return (attr & ~A_ROW_MARQUEE) | (marquee ? A_ROW_MARQUEE : 0)
+    return (attr & ~A_ROW_MARQUEE) | (marquee ? A_ROW_MARQUEE : 0);
   }
 
   // get row attribute parts
   function getRowAttrColor1(attr) {
-    return attr & 0xff
+    return attr & 0xff;
   }
   function getRowAttrColor2(attr) {
-    return (attr >>> 8) & 0xff
+    return (attr >>> 8) & 0xff;
   }
   function getRowAttrPattern(attr) {
-    return attr & A_ROW_PATTERN_MASK
+    return attr & A_ROW_PATTERN_MASK;
   }
   function getRowAttrWidth(attr) {
-    return (((attr & A_ROW_WIDTH_MASK) >>> 21) + 1) * 50.0
+    return (((attr & A_ROW_WIDTH_MASK) >>> 21) + 1) * 50.0;
   }
   function getRowAttrMarquee(attr) {
-    return (attr & A_ROW_MARQUEE) != 0
+    return (attr & A_ROW_MARQUEE) != 0;
   }
 
   // create cell attribute
@@ -11367,18 +11378,18 @@ vtx: {
     faint,
     font
   ) {
-    fg = fg || 7
-    bg = bg || 0
-    bold = bold || false
-    italics = italics || false
-    underline = underline || false
-    blinkslow = blinkslow || false
-    shadow = shadow || false
-    strikethrough = strikethrough || false
-    doublestrike = online || false
-    blinkfast = blinkfast || false
-    faint = faint || false
-    font = font || 0
+    fg = fg || 7;
+    bg = bg || 0;
+    bold = bold || false;
+    italics = italics || false;
+    underline = underline || false;
+    blinkslow = blinkslow || false;
+    shadow = shadow || false;
+    strikethrough = strikethrough || false;
+    doublestrike = false; // Online is undefined: (online || false;)
+    blinkfast = blinkfast || false;
+    faint = faint || false;
+    font = font || 0;
 
     return (
       (fg & 0xff) |
@@ -11393,207 +11404,209 @@ vtx: {
       (blinkfast ? A_CELL_BLINKFAST : 0) |
       (faint ? A_CELL_FAINT : 0) |
       ((font & 0xf) << 28)
-    )
+    );
   }
 
   // set cell attribute parts
   function setCellAttrFG(attr, color) {
-    return (attr & ~A_CELL_FGCOLOR_MASK) | (color & 0xff)
+    return (attr & ~A_CELL_FGCOLOR_MASK) | (color & 0xff);
   }
   function setCellAttrBG(attr, color) {
-    return (attr & ~A_CELL_BGCOLOR_MASK) | ((color & 0xff) << 8)
+    return (attr & ~A_CELL_BGCOLOR_MASK) | ((color & 0xff) << 8);
   }
   function setCellAttrBold(attr, bold) {
-    return (attr & ~A_CELL_BOLD) | (bold ? A_CELL_BOLD : 0)
+    return (attr & ~A_CELL_BOLD) | (bold ? A_CELL_BOLD : 0);
   }
   function setCellAttrItalics(attr, italics) {
-    return (attr & ~A_CELL_ITALICS) | (italics ? A_CELL_ITALICS : 0)
+    return (attr & ~A_CELL_ITALICS) | (italics ? A_CELL_ITALICS : 0);
   }
   function setCellAttrUnderline(attr, underline) {
-    return (attr & ~A_CELL_UNDERLINE) | (underline ? A_CELL_UNDERLINE : 0)
+    return (attr & ~A_CELL_UNDERLINE) | (underline ? A_CELL_UNDERLINE : 0);
   }
   function setCellAttrBlinkSlow(attr, blink) {
-    return (attr & ~A_CELL_BLINKSLOW) | (blink ? A_CELL_BLINKSLOW : 0)
+    return (attr & ~A_CELL_BLINKSLOW) | (blink ? A_CELL_BLINKSLOW : 0);
   }
   function setCellAttrBlinkFast(attr, blink) {
-    return (attr & ~A_CELL_BLINKFAST) | (blink ? A_CELL_BLINKFAST : 0)
+    return (attr & ~A_CELL_BLINKFAST) | (blink ? A_CELL_BLINKFAST : 0);
   }
   function setCellAttrShadow(attr, shadow) {
-    return (attr & ~A_CELL_SHADOW) | (shadow ? A_CELL_SHADOW : 0)
+    return (attr & ~A_CELL_SHADOW) | (shadow ? A_CELL_SHADOW : 0);
   }
   function setCellAttrStrikethrough(attr, strikethrough) {
     return (
       (attr & ~A_CELL_STRIKETHROUGH) |
       (strikethrough ? A_CELL_STRIKETHROUGH : 0)
-    )
+    );
   }
   function setCellAttrDoublestrike(attr, doublestrike) {
     return (
       (attr & ~A_CELL_DOUBLESTRIKE) | (doublestrike ? A_CELL_DOUBLESTRIKE : 0)
-    )
+    );
   }
   function setCellAttrReverse(attr, reverse) {
-    return (attr & ~A_CELL_REVERSE) | (reverse ? A_CELL_REVERSE : 0)
+    return (attr & ~A_CELL_REVERSE) | (reverse ? A_CELL_REVERSE : 0);
   }
   function setCellAttrDisplay(attr, display) {
-    return (attr & ~A_CELL_DISPLAY_MASK) | (display & A_CELL_DISPLAY_MASK)
+    return (attr & ~A_CELL_DISPLAY_MASK) | (display & A_CELL_DISPLAY_MASK);
   }
   function setCellAttrFaint(attr, faint) {
-    return (attr & ~A_CELL_FAINT) | (faint ? A_CELL_FAINT : 0)
+    return (attr & ~A_CELL_FAINT) | (faint ? A_CELL_FAINT : 0);
   }
   function setCellAttrFont(attr, font) {
-    return (attr & ~A_CELL_FONT_MASK) | ((font & 0xf) << 28)
+    return (attr & ~A_CELL_FONT_MASK) | ((font & 0xf) << 28);
   }
 
   // get cell attribute parts
   function getCellAttrFG(attr) {
-    return attr & 0xff
+    return attr & 0xff;
   }
   function getCellAttrBG(attr) {
-    return (attr >>> 8) & 0xff
+    return (attr >>> 8) & 0xff;
   }
   function getCellAttrBold(attr) {
-    return (attr & A_CELL_BOLD) != 0
+    return (attr & A_CELL_BOLD) != 0;
   }
   function getCellAttrItalics(attr) {
-    return (attr & A_CELL_ITALICS) != 0
+    return (attr & A_CELL_ITALICS) != 0;
   }
   function getCellAttrUnderline(attr) {
-    return (attr & A_CELL_UNDERLINE) != 0
+    return (attr & A_CELL_UNDERLINE) != 0;
   }
   function getCellAttrBlinkSlow(attr) {
-    return (attr & A_CELL_BLINKSLOW) != 0
+    return (attr & A_CELL_BLINKSLOW) != 0;
   }
   function getCellAttrBlinkFast(attr) {
-    return (attr & A_CELL_BLINKFAST) != 0
+    return (attr & A_CELL_BLINKFAST) != 0;
   }
   function getCellAttrShadow(attr) {
-    return (attr & A_CELL_SHADOW) != 0
+    return (attr & A_CELL_SHADOW) != 0;
   }
   function getCellAttrStrikethrough(attr) {
-    return (attr & A_CELL_STRIKETHROUGH) != 0
+    return (attr & A_CELL_STRIKETHROUGH) != 0;
   }
   function getCellAttrDoublestrike(attr) {
-    return (attr & A_CELL_DOUBLESTRIKE) != 0
+    return (attr & A_CELL_DOUBLESTRIKE) != 0;
   }
   function getCellAttrReverse(attr) {
-    return (attr & A_CELL_REVERSE) != 0
+    return (attr & A_CELL_REVERSE) != 0;
   }
   function getCellAttrDisplay(attr) {
-    return attr & A_CELL_DISPLAY_MASK
+    return attr & A_CELL_DISPLAY_MASK;
   }
   function getCellAttrFaint(attr) {
-    return (attr & A_CELL_FAINT) != 0
+    return (attr & A_CELL_FAINT) != 0;
   }
   function getCellAttrFont(attr) {
-    return (attr & A_CELL_FONT_MASK) >>> 28
+    return (attr & A_CELL_FONT_MASK) >>> 28;
   }
 
   // create cursor attributes
   function makeCrsrAttr(color, size, orientation) {
-    color = color || 7
-    size = size || 2
-    orientation = orientation || 0
-    color &= 0xff
-    size &= 0x03
-    orientation = orientation ? 1 : 0
-    return (color & 0xff) | (size << 8) | (orientation << 10)
+    color = color || 7;
+    size = size || 2;
+    orientation = orientation || 0;
+    color &= 0xff;
+    size &= 0x03;
+    orientation = orientation ? 1 : 0;
+    return (color & 0xff) | (size << 8) | (orientation << 10);
   }
 
   // set cursor attributes
   function setCrsrAttrColor(attr, color) {
-    return (attr & ~A_CRSR_COLOR_MASK) | (color & 0xff)
+    return (attr & ~A_CRSR_COLOR_MASK) | (color & 0xff);
   }
   function setCrsrAttrSize(attr, size) {
-    return (attr & ~A_CRSR_STYLE_MASK) | ((size << 8) & 0x0300)
+    return (attr & ~A_CRSR_STYLE_MASK) | ((size << 8) & 0x0300);
   }
   function setCrsrAttrOrientation(attr, orient) {
-    return (attr & ~A_CRSR_ORIENTATION) | (orient ? A_CRSR_ORIENTATION : 0x0000)
+    return (
+      (attr & ~A_CRSR_ORIENTATION) | (orient ? A_CRSR_ORIENTATION : 0x0000)
+    );
   }
 
   // get cursor attributes
   function getCrsrAttrColor(attr) {
-    return attr & 0xff
+    return attr & 0xff;
   }
   function getCrsrAttrSize(attr) {
-    return (attr & A_CRSR_STYLE_MASK) >>> 8
+    return (attr & A_CRSR_STYLE_MASK) >>> 8;
   }
   function getCrsrAttrOrientation(attr) {
-    return (attr & A_CRSR_ORIENTATION) >>> 10
+    return (attr & A_CRSR_ORIENTATION) >>> 10;
   }
 
   // if row size has changed, resize canvas, redraw row.
   function adjustRow(rownum) {
-    var row, width, w, x, cnv, i, nw
+    var row, width, w, x, cnv, i, nw;
 
-    row = getRowElement(rownum)
-    width = getRowAttrWidth(conRowAttr[rownum]) / 100 // .5 - 2
-    w = colSize * width // width of char
+    row = getRowElement(rownum);
+    width = getRowAttrWidth(conRowAttr[rownum]) / 100; // .5 - 2
+    w = colSize * width; // width of char
 
     // get current size
-    cnv = row.firstChild
+    cnv = row.firstChild;
     if (!cnv) {
       // create it.
-      cnv = document.createElement('canvas')
-      row.appendChild(cnv)
-      conCanvas[rownum] = cnv
+      cnv = document.createElement("canvas");
+      row.appendChild(cnv);
+      conCanvas[rownum] = cnv;
     }
 
     if (conRowAttr[rownum] & A_ROW_MARQUEE) {
       // marquee are normal width min or text length max
-      nw = Math.max(conText[rownum].length * w, crtCols * colSize)
+      nw = Math.max(conText[rownum].length * w, crtCols * colSize);
     } else {
-      nw = crtCols * colSize
+      nw = crtCols * colSize;
     }
 
     if (cnv.height != rowSize + 16 || cnv.width != nw) {
       // adjust for new height.
-      row.style['height'] = rowSize + 'px'
-      cnv.width = nw * xScale
-      cnv.height = rowSize + 16
+      row.style["height"] = rowSize + "px";
+      cnv.width = nw * xScale;
+      cnv.height = rowSize + 16;
     }
     // redraw this entire row
-    redrawRow(rownum)
+    redrawRow(rownum);
   }
 
   function redrawRow(rownum) {
-    var cnv, ctx, row, size, width, w, h, x, y, i, l
+    var cnv, ctx, row, size, width, w, h, x, y, i, l;
 
-    expandToRow(rownum) // in case..
+    expandToRow(rownum); // in case..
 
     // redraw this entire row
-    l = conText[rownum].length
-    for (i = 0; i < l; i++) renderCell(rownum, i)
+    l = conText[rownum].length;
+    for (i = 0; i < l; i++) renderCell(rownum, i);
 
     // clear end of row
     //row = getRowElement(rownum);
-    width = getRowAttrWidth(conRowAttr[rownum]) / 100 // .5 - 2
-    w = xScale * colSize * width // width of char
-    x = w * l // left pos of char on canv
+    width = getRowAttrWidth(conRowAttr[rownum]) / 100; // .5 - 2
+    w = xScale * colSize * width; // width of char
+    x = w * l; // left pos of char on canv
 
-    cnv = conCanvas[rownum]
+    cnv = conCanvas[rownum];
     if (!cnv) {
-      row = getRowElement(rownum)
+      row = getRowElement(rownum);
       cnv = domElement(
-        'canvas',
+        "canvas",
         {
           width: crtCols * w,
-          height: fontSize + 16,
+          height: fontSize + 16
         },
-        { zIndex: '50' }
-      )
-      row.appendChild(cnv)
-      conCanvas[rownum] = cnv
+        { zIndex: "50" }
+      );
+      row.appendChild(cnv);
+      conCanvas[rownum] = cnv;
     }
-    ctx = cnv.getContext('2d')
-    ctx.clearRect(x, 0, cnv.width - x, cnv.height)
+    ctx = cnv.getContext("2d");
+    ctx.clearRect(x, 0, cnv.width - x, cnv.height);
   }
 
   // redraw all characters
   function renderAll() {
-    var r, c
+    var r, c;
     for (r = 0; r < conRowAttr.length; r++)
-      for (c = 0; c < conCellAttr[r].length; c++) renderCell(r, c)
+      for (c = 0; c < conCellAttr[r].length; c++) renderCell(r, c);
   }
 
   // render an individual row, col. if forcerev, invert (twice if need be)
@@ -11604,8 +11617,8 @@ vtx: {
   // force draw cells below on draw of top on tall cells. set bottom true.
   // bottom = true if this is the bottom half of the row above.
   function renderCell(rownum, colnum, hilight, bottom) {
-    hilight = hilight || 0
-    bottom = bottom || false
+    hilight = hilight || 0;
+    bottom = bottom || false;
     var row, // row element drawing to
       size, // size factor (25%-200%)
       width, // width factor (50%-200%)
@@ -11634,57 +11647,57 @@ vtx: {
       xskew, // skew amount for italics
       xadj, // x adjustment to render character
       yadj, // y adjustment to render character
-      yScale // y scale for tall characters
+      yScale; // y scale for tall characters
 
-    hilight = hilight || 0 // flag for mouse over drawing. 0=normal,
+    hilight = hilight || 0; // flag for mouse over drawing. 0=normal,
     // 1=mouseover,2=click
-    bottom = bottom || false // force draw bottoms of double. if this is set
+    bottom = bottom || false; // force draw bottoms of double. if this is set
     // draw the bottom haft of character in row
     // above this row.
-    rowadj = bottom ? -1 : 0 // adjustment for retreiving character info.
+    rowadj = bottom ? -1 : 0; // adjustment for retreiving character info.
 
     // quick range check
-    if (rownum + rowadj > conRowAttr.length) return
-    if (colnum >= conText[rownum + rowadj].length) return
+    if (rownum + rowadj > conRowAttr.length) return;
+    if (colnum >= conText[rownum + rowadj].length) return;
 
     // get size of this row
-    width = getRowAttrWidth(conRowAttr[rownum + rowadj]) / 100 // .5 - 2
+    width = getRowAttrWidth(conRowAttr[rownum + rowadj]) / 100; // .5 - 2
 
-    w = xScale * colSize * width // width of char
-    x = w * colnum // left pos of char on canv
+    w = xScale * colSize * width; // width of char
+    x = w * colnum; // left pos of char on canv
 
     // don't render off page unless marquee
-    if (x > w * crtCols && !(conRowAttr[rownum] & A_ROW_MARQUEE)) return
+    if (x > w * crtCols && !(conRowAttr[rownum] & A_ROW_MARQUEE)) return;
 
     // compute height
     //    row = getRowElement(rownum);    // <- speed this up.
-    h = fontSize // height of char
-    stroke = h * 0.1 // underline/strikethrough size
+    h = fontSize; // height of char
+    stroke = h * 0.1; // underline/strikethrough size
 
-    cnv = conCanvas[rownum]
+    cnv = conCanvas[rownum];
     if (!cnv) {
       // create new canvas if nonexistant
-      row = getRowElement(rownum)
+      row = getRowElement(rownum);
       cnv = domElement(
-        'canvas',
+        "canvas",
         {
           width: crtCols * w,
-          height: h + 16,
+          height: h + 16
         },
-        { zIndex: '50' }
-      )
-      row.appendChild(cnv)
-      conCanvas[rownum] = cnv
+        { zIndex: "50" }
+      );
+      row.appendChild(cnv);
+      conCanvas[rownum] = cnv;
     }
-    ctx = cnv.getContext('2d')
+    ctx = cnv.getContext("2d");
 
     // get char and attributes
-    ch = conText[rownum + rowadj].charAt(colnum)
-    attr = conCellAttr[rownum + rowadj][colnum]
+    ch = conText[rownum + rowadj].charAt(colnum);
+    attr = conCellAttr[rownum + rowadj][colnum];
 
     // force highlight (for mouse selections)
-    if (hilight == 1) attr = hotspotHoverAttr
-    else if (hilight == 2) attr = hotspotClickAttr
+    if (hilight == 1) attr = hotspotHoverAttr;
+    else if (hilight == 2) attr = hotspotClickAttr;
 
     // force highlight (for clipboard selection)
     if (
@@ -11692,200 +11705,200 @@ vtx: {
         betweenRCs({ row: rownum, col: colnum }, selectStart, selectEnd)) ||
       (isDrag && betweenRCs({ row: rownum, col: colnum }, dragStart, dragEnd))
     ) {
-      attr &= ~0xffff
-      attr |= 0x0f04
+      attr &= ~0xffff;
+      attr |= 0x0f04;
     }
 
     // extract colors and font to use
-    tfg = attr & 0xff
-    tbg = (attr >>> 8) & 0xff
-    tfnt = ((attr & A_CELL_FONT_MASK) >>> 28) & 0xf
+    tfg = attr & 0xff;
+    tbg = (attr >>> 8) & 0xff;
+    tfnt = ((attr & A_CELL_FONT_MASK) >>> 28) & 0xf;
 
     // get bold and adust if not used
-    tbold = attr & A_CELL_BOLD
+    tbold = attr & A_CELL_BOLD;
     if (modeNoBold)
       // CSI ?32 h / l
-      tbold = 0
+      tbold = 0;
 
     // get blink attributes
-    tblinks = attr & (A_CELL_BLINKSLOW | A_CELL_BLINKFAST)
+    tblinks = attr & (A_CELL_BLINKSLOW | A_CELL_BLINKFAST);
 
     // move bold / blink to proper font if mode is on
-    if (modeBoldFont && tbold) tfnt = 1
-    if (modeBlinkFont && tblinks) tfnt = 2
-    if (modeBoldFont && tbold && modeBlinkFont && tblinks) tfnt = 3
+    if (modeBoldFont && tbold) tfnt = 1;
+    if (modeBlinkFont && tblinks) tfnt = 2;
+    if (modeBoldFont && tbold && modeBlinkFont && tblinks) tfnt = 3;
 
     // reverse fg / bg for reverse on
     if (attr & A_CELL_REVERSE) {
-      tmp = tfg
-      tfg = tbg
-      tbg = tmp
+      tmp = tfg;
+      tfg = tbg;
+      tbg = tmp;
     }
 
     // adjust fg color if in BBS ANSI and turn off bold.
     if (!cbm && !atari && !modeVTXANSI) {
       if (tbold && tfg < 8) {
-        tfg += 8
+        tfg += 8;
       }
-      tbold = false
+      tbold = false;
     }
 
     // fix iCE colors
     if (modeBlinkBright && tbg < 8 && tblinks) {
       // high intensity background / force blink off
-      tbg += 8
-      attr &= ~(A_CELL_BLINKSLOW | A_CELL_BLINKFAST)
-      tblinks = 0
+      tbg += 8;
+      attr &= ~(A_CELL_BLINKSLOW | A_CELL_BLINKFAST);
+      tblinks = 0;
     }
 
     // fix transparents
     if (!cbm && !atari) {
-      if (tfg == 0) tfg = 16
-      if (tbg == 0 && !modeVTXANSI) tbg = 16
+      if (tfg == 0) tfg = 16;
+      if (tbg == 0 && !modeVTXANSI) tbg = 16;
     }
 
     // fix stupid ansi
     if (ch.charCodeAt(0) == 0x2588) {
-      ch = ' '
-      tbg = tfg
+      ch = " ";
+      tbg = tfg;
     }
 
     // set clipping region for this cell.
-    ctx.save()
-    ctx.beginPath()
-    ctx.rect(x, 0, w, h)
-    ctx.clip()
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, 0, w, h);
+    ctx.clip();
 
     // clear cell with background color
     if (cbm) {
       // PETSCII colors
-      ctx.fillStyle = cbmColors[tbg]
-      ctx.fillRect(x, 0, w, h)
+      ctx.fillStyle = cbmColors[tbg];
+      ctx.fillRect(x, 0, w, h);
     } else if (atari) {
-      ctx.fillStyle = atariColors[tbg] // this should be 0 or 1
-      ctx.fillRect(x, 0, w, h)
+      ctx.fillStyle = atariColors[tbg]; // this should be 0 or 1
+      ctx.fillRect(x, 0, w, h);
     } else {
       // ANSI colors
       if (tbg > 0) {
-        ctx.fillStyle = ansiColors[tbg]
-        ctx.fillRect(x, 0, w, h)
-      } else ctx.clearRect(x, 0, w, h)
+        ctx.fillStyle = ansiColors[tbg];
+        ctx.fillRect(x, 0, w, h);
+      } else ctx.clearRect(x, 0, w, h);
     }
 
-    drawtxt = true
+    drawtxt = true;
 
     // don't draw if in blink state
     if (
       (attr & A_CELL_BLINKSLOW && cellBlinkSlow) ||
       (attr & A_CELL_BLINKFAST && cellBlinkFast)
     ) {
-      if (!modeNoBlink) drawtxt = false
+      if (!modeNoBlink) drawtxt = false;
     }
 
     // row display takes precidence over cell
     // adjust scaling for row display type (normal,conceal,top,bottom)
-    i = conRowAttr[rownum] & A_ROW_DISPLAY_MASK
+    i = conRowAttr[rownum] & A_ROW_DISPLAY_MASK;
     switch (i) {
       case A_ROW_DISPLAY_NORMAL:
         // adjust scaling for cell display type (normal,conceal,top,bottom)
-        j = attr & A_CELL_DISPLAY_MASK
+        j = attr & A_CELL_DISPLAY_MASK;
         switch (j) {
           case A_CELL_DISPLAY_NORMAL:
-            yadj = 0
-            yScale = 1.0
-            break
+            yadj = 0;
+            yScale = 1.0;
+            break;
 
           case A_CELL_DISPLAY_CONCEAL:
             // don't draw if row is concealed.
-            drawtxt = false
-            break
+            drawtxt = false;
+            break;
 
           case A_CELL_DISPLAY_TOP:
-            yadj = 0
-            yScale = 2.0
-            break
+            yadj = 0;
+            yScale = 2.0;
+            break;
 
           case A_CELL_DISPLAY_BOTTOM:
-            yadj = -h
-            yScale = 2.0
-            break
+            yadj = -h;
+            yScale = 2.0;
+            break;
         }
-        break
+        break;
 
       case A_ROW_DISPLAY_CONCEAL:
         // don't draw if row is concealed.
-        drawtxt = false
-        break
+        drawtxt = false;
+        break;
 
       case A_ROW_DISPLAY_TOP:
-        yadj = 0
-        yScale = 2.0
-        break
+        yadj = 0;
+        yScale = 2.0;
+        break;
 
       case A_ROW_DISPLAY_BOTTOM:
-        yadj = -h
-        yScale = 2.0
-        break
+        yadj = -h;
+        yScale = 2.0;
+        break;
     }
 
     if (drawtxt) {
       // select text color
       if (attr & A_CELL_FAINT)
         // darken faint color
-        ctx.fillStyle = brightenRGB(ansiColors[tfg], -0.33)
+        ctx.fillStyle = brightenRGB(ansiColors[tfg], -0.33);
       else if (cbm)
         // PETSCII color
-        ctx.fillStyle = cbmColors[tfg]
+        ctx.fillStyle = cbmColors[tfg];
       else if (atari)
         // ATASCII monochrome color
-        ctx.fillStyle = atariColors[tfg]
+        ctx.fillStyle = atariColors[tfg];
       // ANSI color
-      else ctx.fillStyle = ansiColors[tfg]
+      else ctx.fillStyle = ansiColors[tfg];
 
       // swap for special fonts.
-      teletext = -1
+      teletext = -1;
       if (tfnt == 11 || tfnt == 12) {
         // special teletext block font
-        if ((ch >= ' ' && ch <= '?') || (ch >= '`' && ch <= '\x7f'))
-          teletext = tfnt - 11
-        ctx.font = (tbold ? 'bold ' : '') + fontSize + 'px ' + conFont[tfnt]
+        if ((ch >= " " && ch <= "?") || (ch >= "`" && ch <= "\x7f"))
+          teletext = tfnt - 11;
+        ctx.font = (tbold ? "bold " : "") + fontSize + "px " + conFont[tfnt];
       } else if (cbm)
         // PETSCII : render all text using conFontNum
         ctx.font =
-          (tbold ? 'bold ' : '') + fontSize + 'px ' + conFont[conFontNum]
-      else ctx.font = (tbold ? 'bold ' : '') + fontSize + 'px ' + conFont[tfnt]
+          (tbold ? "bold " : "") + fontSize + "px " + conFont[conFontNum];
+      else ctx.font = (tbold ? "bold " : "") + fontSize + "px " + conFont[tfnt];
 
-      ctx.textAlign = 'start'
-      ctx.textBaseline = 'top'
+      ctx.textAlign = "start";
+      ctx.textBaseline = "top";
 
       // set shadowing for shadow effect
       if (attr & A_CELL_SHADOW) {
-        ctx.shadowColor = '#000000'
-        ctx.shadowOffsetX = h / rowSize
-        ctx.shadowOffsetY = h / rowSize
-        ctx.shadowBlur = 0
+        ctx.shadowColor = "#000000";
+        ctx.shadowOffsetX = h / rowSize;
+        ctx.shadowOffsetY = h / rowSize;
+        ctx.shadowBlur = 0;
       } else {
-        ctx.shadowBlur = 0
+        ctx.shadowBlur = 0;
       }
 
       // set skew for italics
-      xskew = 0
-      xadj = 0
+      xskew = 0;
+      xadj = 0;
       if (attr & A_CELL_ITALICS) {
-        xskew = -0.125
-        xadj = 1
+        xskew = -0.125;
+        xadj = 1;
       }
 
       // if drawomg the bottoms of teletext double tall, adjust
       //if (attr & A_CELL_DOUBLE)
       if (bottom) {
-        yadj = -h
-        yScale = 2.0
+        yadj = -h;
+        yScale = 2.0;
       }
 
       // convert to proper glyph # for font used by this char
       if (teletext == -1)
-        ch = String.fromCharCode(getUnicode(conFontCP[tfnt], ch.charCodeAt(0)))
+        ch = String.fromCharCode(getUnicode(conFontCP[tfnt], ch.charCodeAt(0)));
 
       // transmogrify
       ctx.setTransform(
@@ -11895,25 +11908,25 @@ vtx: {
         yScale, // y scale
         x + xScale * xadj, // x adj
         yadj
-      ) // y adj
+      ); // y adj
 
       if (teletext >= 0)
-        drawMosaicBlock(ctx, ch.charCodeAt(0), w / width, h, teletext)
-      else ctx.fillText(ch, 0, 0)
+        drawMosaicBlock(ctx, ch.charCodeAt(0), w / width, h, teletext);
+      else ctx.fillText(ch, 0, 0);
 
       // draw underline / strikethough manually
       if (attr & A_CELL_UNDERLINE) {
-        ctx.fillRect(0, h - stroke, w, stroke)
+        ctx.fillRect(0, h - stroke, w, stroke);
       }
       if (attr & A_CELL_STRIKETHROUGH) {
-        ctx.fillRect(0, (h >> 1) - stroke, w, stroke)
+        ctx.fillRect(0, (h >> 1) - stroke, w, stroke);
       }
       if (attr & A_CELL_DOUBLESTRIKE) {
-        ctx.fillRect(0, (h >> 2) - stroke, w, stroke)
-        ctx.fillRect(0, (h >> 1) + (h >> 2) - stroke, w, stroke)
+        ctx.fillRect(0, (h >> 2) - stroke, w, stroke);
+        ctx.fillRect(0, (h >> 1) + (h >> 2) - stroke, w, stroke);
       }
     }
-    ctx.restore()
+    ctx.restore();
   }
 
   // draw teletext style block graphic
@@ -11929,20 +11942,20 @@ vtx: {
       by = 0,
       sep,
       xadj,
-      yadj
+      yadj;
 
-    w /= xScale
+    w /= xScale;
 
-    bw = Math.floor(w / 2)
-    bh = Math.floor(h / 3)
-    sep = separated ? -(Math.floor(w / 9) + 1) : 0
-    xadj = w - bw * 2
-    yadj = h - bh * 3
+    bw = Math.floor(w / 2);
+    bh = Math.floor(h / 3);
+    sep = separated ? -(Math.floor(w / 9) + 1) : 0;
+    xadj = w - bw * 2;
+    yadj = h - bh * 3;
 
-    b = ch - 0x20
-    if (b > 0x1f) b -= 0x20
+    b = ch - 0x20;
+    if (b > 0x1f) b -= 0x20;
     for (y = 0; y < 3; y++) {
-      bx = 0
+      bx = 0;
       for (x = 0; x < 2; x++) {
         if (b & bit) {
           // draw this mini block
@@ -11951,60 +11964,60 @@ vtx: {
             by,
             bw + (x ? xadj : 0) + sep,
             bh + (y == 2 ? yadj : 0) + sep
-          )
+          );
         }
-        bx += bw
-        bit <<= 1
+        bx += bw;
+        bit <<= 1;
       }
-      by += bh
+      by += bh;
     }
   }
 
   // brighten / darken a color. color is a 24bit value (#RRGGBB)
   function brightenRGB(colorstr, factor) {
-    var r, g, b, rgb
+    var r, g, b, rgb;
 
     // catch transparent
-    if (colorstr == 'transparent') return colorstr
+    if (colorstr == "transparent") return colorstr;
 
-    rgb = htoi(colorstr.substring(1))
-    r = (rgb >>> 16) & 0xff
-    g = (rgb >>> 8) & 0xff
-    b = rgb & 0xff
+    rgb = htoi(colorstr.substring(1));
+    r = (rgb >>> 16) & 0xff;
+    g = (rgb >>> 8) & 0xff;
+    b = rgb & 0xff;
     if (factor < 0) {
-      factor += 1.0
-      r *= factor
-      g *= factor
-      b *= factor
+      factor += 1.0;
+      r *= factor;
+      g *= factor;
+      b *= factor;
     } else {
-      r = (255 - r) * factor + r
-      g = (255 - g) * factor + g
-      b = (255 - b) * factor + b
+      r = (255 - r) * factor + r;
+      g = (255 - g) * factor + g;
+      b = (255 - b) * factor + b;
     }
-    r = Math.floor(r) & 0xff
-    g = Math.floor(g) & 0xff
-    b = Math.floor(b) & 0xff
-    return '#' + itoh((r << 16) + (g << 8) + b, 6)
+    r = Math.floor(r) & 0xff;
+    g = Math.floor(g) & 0xff;
+    b = Math.floor(b) & 0xff;
+    return "#" + itoh((r << 16) + (g << 8) + b, 6);
   }
 
   // grow this row to col
   function expandToCol(rownum, colnum) {
-    while (conText[rownum].length < colnum) conText[rownum] += ' '
+    while (conText[rownum].length < colnum) conText[rownum] += " ";
     while (conCellAttr[rownum].length < colnum)
-      conCellAttr[rownum][conCellAttr[rownum].length] = defCellAttr
+      conCellAttr[rownum][conCellAttr[rownum].length] = defCellAttr;
   }
 
   // grow total rows to rownum. needs to add html dom elements as well.
   function expandToRow(rownum) {
     if (rownum >= conRowAttr.length) {
       while (rownum > getMaxRow()) {
-        textDiv.appendChild(createNewRow())
+        textDiv.appendChild(createNewRow());
 
-        conRowAttr[conRowAttr.length] = 0x002c0000
-        conCellAttr[conCellAttr.length] = []
-        conText[conText.length] = ''
+        conRowAttr[conRowAttr.length] = 0x002c0000;
+        conCellAttr[conCellAttr.length] = [];
+        conText[conText.length] = "";
       }
-      trimHistory()
+      trimHistory();
     }
   }
 
@@ -12017,62 +12030,62 @@ vtx: {
       h1,
       w2,
       h2,
-      p = this.parentNode
+      p = this.parentNode;
 
-    r1 = p.getBoundingClientRect() // size of bounding div
-    w1 = r1.width
-    h1 = r1.height
-    w2 = this.naturalWidth // ration of image
-    h2 = this.naturalHeight
-    str = 'scale(' + w1 / h2 + ',' + h1 / w2 + ')'
-    this.style['transform-origin'] = 'top left'
-    this.style['transform'] = str
-    this.style['visibility'] = 'visible'
+    r1 = p.getBoundingClientRect(); // size of bounding div
+    w1 = r1.width;
+    h1 = r1.height;
+    w2 = this.naturalWidth; // ration of image
+    h2 = this.naturalHeight;
+    str = "scale(" + w1 / h2 + "," + h1 / w2 + ")";
+    this.style["transform-origin"] = "top left";
+    this.style["transform"] = str;
+    this.style["visibility"] = "visible";
   }
 
   // set indicators
   function setBulbs() {
-    var el
+    var el;
 
     // set the online indicator button
-    el = document.getElementById('osbulb')
+    el = document.getElementById("osbulb");
     if (termState == TS_OFFLINE) {
-      el.src = vtxPath + 'os0.png'
-      el.title = 'Connect'
+      el.src = vtxPath + "os0.png";
+      el.title = "Connect";
     } else {
-      el.src = vtxPath + 'os1.png'
-      el.title = 'Disconnect'
+      el.src = vtxPath + "os1.png";
+      el.title = "Disconnect";
     }
 
     // set the indicators
-    document.getElementById('fsbulb').src =
-      vtxPath + (modeFullScreen ? 'fs1' : 'fs0') + '.png'
-    document.getElementById('vobulb').src =
-      vtxPath + (soundOn ? 'vo1' : 'vo0') + '.png'
-    document.getElementById('kcbulb').src =
-      vtxPath + (soundClicks ? 'kc1' : 'kc0') + '.png'
-    document.getElementById('clbulb').src =
-      vtxPath + (capState ? 'cl1' : 'cl0') + '.png'
+    document.getElementById("fsbulb").src =
+      vtxPath + (modeFullScreen ? "fs1" : "fs0") + ".png";
+    document.getElementById("vobulb").src =
+      vtxPath + (soundOn ? "vo1" : "vo0") + ".png";
+    document.getElementById("kcbulb").src =
+      vtxPath + (soundClicks ? "kc1" : "kc0") + ".png";
+    document.getElementById("clbulb").src =
+      vtxPath + (capState ? "cl1" : "cl0") + ".png";
 
     // set the ul/dl buttons
     if (termState == TS_NORMAL) {
-      el = document.getElementById('ulbtn')
-      el.src = vtxPath + 'ul1.png'
-      el.style['visibility'] = 'visible'
-      el = document.getElementById('dlbtn')
-      el.src = vtxPath + 'dl1.png'
-      el.style['visibility'] = 'visible'
+      el = document.getElementById("ulbtn");
+      el.src = vtxPath + "ul1.png";
+      el.style["visibility"] = "visible";
+      el = document.getElementById("dlbtn");
+      el.src = vtxPath + "dl1.png";
+      el.style["visibility"] = "visible";
     } else if (termState == TS_OFFLINE) {
-      el = document.getElementById('ulbtn')
-      el.src = vtxPath + 'ul0.png'
-      el.style['visibility'] = 'visible'
-      el = document.getElementById('dlbtn')
-      el.src = vtxPath + 'dl0.png'
-      el.style['visibility'] = 'visible'
+      el = document.getElementById("ulbtn");
+      el.src = vtxPath + "ul0.png";
+      el.style["visibility"] = "visible";
+      el = document.getElementById("dlbtn");
+      el.src = vtxPath + "dl0.png";
+      el.style["visibility"] = "visible";
     } else {
       // buttons not visible in file transfer mode.
-      document.getElementById('ulbtn').style['visibility'] = 'hidden'
-      document.getElementById('dlbtn').style['visibility'] = 'hidden'
+      document.getElementById("ulbtn").style["visibility"] = "hidden";
+      document.getElementById("dlbtn").style["visibility"] = "hidden";
     }
   }
 
@@ -12080,148 +12093,148 @@ vtx: {
   function setTimers(onoff) {
     if (onoff) {
       if (irqWriteBuffer == null)
-        irqWriteBuffer = setInterval(doWriteBuffer, 20)
+        irqWriteBuffer = setInterval(doWriteBuffer, 20);
       if (irqCheckResize == null)
-        irqCheckResize = setInterval(doCheckResize, 50)
-      if (irqCursor == null) irqCursor = setInterval(doCursor, 533)
-      if (irqBlink == null) irqBlink = setInterval(doBlink, 533)
+        irqCheckResize = setInterval(doCheckResize, 50);
+      if (irqCursor == null) irqCursor = setInterval(doCursor, 533);
+      if (irqBlink == null) irqBlink = setInterval(doBlink, 533);
     } else {
-      if (irqWriteBuffer != null) clearInterval(irqWriteBuffer)
-      if (irqCheckResize != null) clearInterval(irqCheckResize)
-      if (irqCursor != null) clearInterval(irqCursor)
-      if (irqBlink != null) clearInterval(irqBlink)
-      irqWriteBuffer = null
-      irqCheckResize = null
-      irqCursor = null
-      irqBlink = null
+      if (irqWriteBuffer != null) clearInterval(irqWriteBuffer);
+      if (irqCheckResize != null) clearInterval(irqCheckResize);
+      if (irqCursor != null) clearInterval(irqCursor);
+      if (irqBlink != null) clearInterval(irqBlink);
+      irqWriteBuffer = null;
+      irqCheckResize = null;
+      irqCursor = null;
+      irqBlink = null;
     }
   }
 
   // event functions for ctrl+v text to console
   function beforePaste(e) {
-    e.returnValue = false
+    e.returnValue = false;
   }
 
   // event functions for ctrl+v text to console
   function paste(e) {
-    var str, clipboardData
+    var str, clipboardData;
 
-    e = e || window.event
+    e = e || window.event;
 
     // Stop data actually being pasted into div
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation();
+    e.preventDefault();
 
-    clipboardData = e.clipboardData || window.clipboardData
+    clipboardData = e.clipboardData || window.clipboardData;
 
     // need to update to send if connected
     // for now, local echo it.
-    str = clipboardData.getData('Text')
-    str = str.replace(/(?:\r\n|\r|\n)/g, '\x0D\x0A')
-    sendData(str)
+    str = clipboardData.getData("Text");
+    str = str.replace(/(?:\r\n|\r|\n)/g, "\x0D\x0A");
+    sendData(str);
   }
 
   // update cursor from crsrAttr values
   function newCrsr() {
-    const sizes = ['0%', '10%', '25%', '100%']
-    var o, c, z, sz, ax1, ax2
+    const sizes = ["0%", "10%", "25%", "100%"];
+    var o, c, z, sz, ax1, ax2;
 
     if (crsr == null) {
       crsr = domElement(
-        'div',
+        "div",
         {},
         {
-          position: 'absolute',
-          display: 'block',
-          zIndex: '999',
+          position: "absolute",
+          display: "block",
+          zIndex: "999"
         }
-      )
+      );
 
       o = domElement(
-        'div',
-        { id: 'crsr' },
+        "div",
+        { id: "crsr" },
         {
-          position: 'absolute',
-          display: 'block',
-          bottom: '0px',
-          left: '0px',
+          position: "absolute",
+          display: "block",
+          bottom: "0px",
+          left: "0px"
         }
-      )
+      );
 
-      crsr.appendChild(o)
-      pageDiv.appendChild(crsr)
+      crsr.appendChild(o);
+      pageDiv.appendChild(crsr);
       //textDiv.appendChild(crsr);
-    } else o = crsr.firstChild
+    } else o = crsr.firstChild;
 
-    z = getCrsrAttrOrientation(crsrAttr)
-    sz = getCrsrAttrSize(crsrAttr)
+    z = getCrsrAttrOrientation(crsrAttr);
+    sz = getCrsrAttrSize(crsrAttr);
     switch (z) {
       case 0:
-        o.style['width'] = '100%'
-        o.style['height'] = sizes[sz]
-        break
+        o.style["width"] = "100%";
+        o.style["height"] = sizes[sz];
+        break;
       default:
-        o.style['height'] = '100%'
-        o.style['width'] = sizes[sz]
-        break
+        o.style["height"] = "100%";
+        o.style["width"] = sizes[sz];
+        break;
     }
-    c = getCrsrAttrColor(crsrAttr)
-    if (cbm) o.style['background-color'] = cbmColors[c & 0xf]
-    else if (atari) o.style['background-color'] = atariColors[c & 0x1]
-    else o.style['background-color'] = ansiColors[c]
+    c = getCrsrAttrColor(crsrAttr);
+    if (cbm) o.style["background-color"] = cbmColors[c & 0xf];
+    else if (atari) o.style["background-color"] = atariColors[c & 0x1];
+    else o.style["background-color"] = ansiColors[c];
   }
 
   // onmessage buffer - holds left over bytes from incomplete UTF8/16 chars
-  let inBuff = new Uint8Array(0)
+  let inBuff = new Uint8Array(0);
 
   function str2ab(str) {
-    var buf = new ArrayBuffer(str.length * 2) // 2 bytes for each char
-    var bufView = new Uint16Array(buf)
+    var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+    var bufView = new Uint16Array(buf);
     for (var i = 0, strLen = str.length; i < strLen; i++) {
-      bufView[i] = str.charCodeAt(i)
+      bufView[i] = str.charCodeAt(i);
     }
-    return buf
+    return buf;
   }
 
   // connect / disconnect. called from connect UI element.
   function termConnect() {
     if (termState == TS_OFFLINE) {
-      tnState = 0 // reset telnet options state
+      tnState = 0; // reset telnet options state
 
       if (vtxdata.hixie) {
-        ws = new WebSocket(wsConnect, ['plain'])
+        ws = new WebSocket(wsConnect, ["plain"]);
       } else {
-        ws = new WebSocket(wsConnect, ['telnet'])
-        ws.binaryType = 'arraybuffer'
+        ws = new WebSocket(wsConnect, ["telnet"]);
+        ws.binaryType = "arraybuffer";
       }
 
       ws.onmessage = function(e) {
         // binary data in.
-        var i, j, str, data, edata
+        var i, j, str, data, edata;
 
         // incoming data to Uint8Array
-        if (typeof e.data == 'string') {
-          var l = e.data.length
-          edata = new Uint8Array(l)
-          for (i = 0; i < l; i++) edata[i] = e.data.charCodeAt(i)
-        } else if (typeof e.data == 'blob') {
+        if (typeof e.data == "string") {
+          var l = e.data.length;
+          edata = new Uint8Array(l);
+          for (i = 0; i < l; i++) edata[i] = e.data.charCodeAt(i);
+        } else if (typeof e.data == "blob") {
           // umm . no
-          ws.close()
-          termState == TS_OFFLINE
-          setbulbs()
-          conBufferOut('\r\rReceived blob binary. No.\r')
-          return
+          ws.close();
+          termState == TS_OFFLINE;
+          setBulbs();
+          conBufferOut("\r\rReceived blob binary. No.\r");
+          return;
         } else {
-          edata = new Uint8Array(e.data)
+          edata = new Uint8Array(e.data);
         }
 
         // append left over data from last message (incomplete UTF8/16)
-        data = new Uint8Array(inBuff.length + edata.length)
-        data.set(inBuff)
-        data.set(edata, inBuff.length)
+        data = new Uint8Array(inBuff.length + edata.length);
+        data.set(inBuff);
+        data.set(edata, inBuff.length);
 
         // do telnet handshaking negotiations - return new data w/o IAC...'s
-        if (vtxdata.telnet == 1) data = tnNegotiate(data)
+        if (vtxdata.telnet == 1) data = tnNegotiate(data);
 
         //dump(data, 0, data.length);
 
@@ -12229,59 +12242,59 @@ vtx: {
           case TS_NORMAL:
             // convert from codepage into string data
             switch (codePage) {
-              case 'UTF8':
-                var utfdat = UTF8ArrayToStr(data)
-                str = utfdat.strData
-                inBuff = utfdat.leftOver
-                break
+              case "UTF8":
+                var utfdat = UTF8ArrayToStr(data);
+                str = utfdat.strData;
+                inBuff = utfdat.leftOver;
+                break;
 
-              case 'UTF16':
-                var utfdat = UTF16ArrayToStr(data)
-                str = utfdat.strData
-                inBuff = utfdat.leftOver
-                break
+              case "UTF16":
+                var utfdat = UTF16ArrayToStr(data);
+                str = utfdat.strData;
+                inBuff = utfdat.leftOver;
+                break;
 
               default:
                 // straight string
-                str = ''
+                str = "";
                 for (i = 0; i < data.length; i++) {
-                  str += String.fromCharCode(data[i])
+                  str += String.fromCharCode(data[i]);
                 }
-                break
+                break;
             }
-            conBufferOut(str)
-            break
+            conBufferOut(str);
+            break;
 
           case TS_YMR_START:
           case TS_YMR_GETPACKET:
             // handles binary data for ymodem
-            data = ymRStateMachine(data)
+            data = ymRStateMachine(data);
             if (data.length > 0) {
               // transfer ended midway. output the rest.
               // todo - convert data to str.
-              conBufferOut(str)
+              conBufferOut(str);
             }
-            break
+            break;
 
           case TS_YMS_START:
           case TS_YMS_PUTPACKET:
           case TS_YMS_PUTWAIT:
             // handles binary data for ymodem
-            data = ymSStateMachine(data)
+            data = ymSStateMachine(data);
             if (data.length > 0) {
               // transfer ended midway. output the rest.
               // todo - convert data to string.
-              conBufferOut(str)
+              conBufferOut(str);
             }
-            break
+            break;
         }
-      }
+      };
 
       ws.onopen = function() {
-        if (vtxdata.telnet) tnInit()
-        termState = TS_NORMAL
-        setBulbs()
-      }
+        if (vtxdata.telnet) tnInit();
+        termState = TS_NORMAL;
+        setBulbs();
+      };
       ws.onclose = function(e) {
         /*
             var reason;
@@ -12289,7 +12302,7 @@ vtx: {
                 case 1000:
                     reason = "Normal closure, meaning that the purpose for which the connection was established has been fulfilled.";
                     break;
-                    
+
                 case 1001:
                     reason = "An endpoint is \"going away\", such as a server going down or a browser having navigated away from a page.";
                     break;
@@ -12297,74 +12310,74 @@ vtx: {
                 case 1002:
                     reason = "An endpoint is terminating the connection due to a protocol error";
                     break;
-                    
+
                 case 1003:
                     reason = "An endpoint is terminating the connection because it has received a type of data it cannot accept (e.g., an endpoint that understands only text data MAY send this if it receives a binary message).";
                     break;
-                    
+
                 case 1004:
                     reason = "Reserved. The specific meaning might be defined in the future.";
                     break;
-                    
+
                 case 1005:
                     reason = "No status code was actually present.";
                     break;
-                    
+
                 case 1006:
                     reason = "The connection was closed abnormally, e.g., without sending or receiving a Close control frame";
                     break;
-                    
+
                 case 1007:
                     reason = "An endpoint is terminating the connection because it has received data within a message that was not consistent with the type of the message (e.g., non-UTF-8 [http://tools.ietf.org/html/rfc3629] data within a text message).";
                     break;
-                    
+
                 case 1008:
                     reason = "An endpoint is terminating the connection because it has received a message that \"violates its policy\". This reason is given either if there is no other sutible reason, or if there is a need to hide specific details about the policy.";
                     break;
-                    
+
                 case 1009:
                     reason = "An endpoint is terminating the connection because it has received a message that is too big for it to process.";
                     break;
-                    
+
                 case 1010:
                     reason = "An endpoint (client) is terminating the connection because it has expected the server to negotiate one or more extension, but the server didn't return them in the response message of the WebSocket handshake. <br /> Specifically, the extensions that are needed are: " + e.reason;
                     break;
-                    
+
                 case 1011:
                     reason = "A server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request.";
                     break;
-                    
+
                 case 1015:
                     reason = "The connection was closed due to a failure to perform a TLS handshake (e.g., the server certificate can't be verified).";
                     break;
-                    
+
                 default:
-                    reason = "Unknown reason";                
+                    reason = "Unknown reason";
                     break;
             }
             conBufferOut('\r\r'+reason+'\r')
 */
-        conBaud = 0
-        if (cbm) conBufferOut('\r\rDISCONNECTED.\r')
-        else if (atari) conBufferOut('\x9B\x9BDisconnected.\x9B')
-        else conBufferOut('\r\n\r\n\x1b[#9\x1b[0;91mDisconnected.\r\n')
+        conBaud = 0;
+        if (cbm) conBufferOut("\r\rDISCONNECTED.\r");
+        else if (atari) conBufferOut("\x9B\x9BDisconnected.\x9B");
+        else conBufferOut("\r\n\r\n\x1b[#9\x1b[0;91mDisconnected.\r\n");
 
-        document.body.style['cursor'] = 'default'
+        document.body.style["cursor"] = "default";
         if (audioEl) {
-          audioEl.pause()
+          audioEl.pause();
         }
-        termState = TS_OFFLINE
-        resetTerminal()
-        setBulbs()
-      }
+        termState = TS_OFFLINE;
+        resetTerminal();
+        setBulbs();
+      };
       ws.onerror = function(error) {
-        if (cbm) conBufferOut('\r\rERROR : ' + error + '\r')
-        else if (atari) conBufferOut('\x9B\x9BError : ' + error + '\x09B')
-        else conBufferOut('\r\n\r\n\x1b[#9\x1b[0;91mError : ' + error + '\r\n')
-        setBulbs()
-      }
+        if (cbm) conBufferOut("\r\rERROR : " + error + "\r");
+        else if (atari) conBufferOut("\x9B\x9BError : " + error + "\x09B");
+        else conBufferOut("\r\n\r\n\x1b[#9\x1b[0;91mError : " + error + "\r\n");
+        setBulbs();
+      };
     } else {
-      ws.close()
+      ws.close();
     }
   }
 
@@ -12372,219 +12385,219 @@ vtx: {
   function encodeAscii(str) {
     var i,
       l,
-      strout = ''
-    l = str.length
-    for (i = 0; i < l; i++) strout += ';' + str.charCodeAt(i).toString()
-    return strout.substring(1)
+      strout = "";
+    l = str.length;
+    for (i = 0; i < l; i++) strout += ";" + str.charCodeAt(i).toString();
+    return strout.substring(1);
   }
 
   // turn sound on off
   function toggleSound() {
     if (soundOn) {
-      soundSaveVol = audioEl.volume
-      audioEl.volume = 0
-      createCookie('vtxSound', '0', 30)
+      soundSaveVol = audioEl.volume;
+      audioEl.volume = 0;
+      createCookie("vtxSound", "0", 30);
     } else {
-      audioEl.volume = soundSaveVol
-      createCookie('vtxSound', '1', 30)
+      audioEl.volume = soundSaveVol;
+      createCookie("vtxSound", "1", 30);
     }
-    soundOn = !soundOn
-    setBulbs()
+    soundOn = !soundOn;
+    setBulbs();
   }
 
   // turn on / off special effects
   function toggleFX() {
     if (soundClicks) {
-      fxDiv.classList.remove('raster')
-      createCookie('vtxFX', '0', 30)
+      fxDiv.classList.remove("raster");
+      createCookie("vtxFX", "0", 30);
     } else {
-      fxDiv.classList.add('raster')
-      createCookie('vtxFX', '1', 30)
+      fxDiv.classList.add("raster");
+      createCookie("vtxFX", "1", 30);
     }
-    soundClicks = !soundClicks
-    setBulbs()
+    soundClicks = !soundClicks;
+    setBulbs();
   }
 
   function setAllCSS() {
     var style,
       css,
-      head = document.head || document.getElementsByTagName('head')[0]
+      head = document.head || document.getElementsByTagName("head")[0];
 
     // kill old one
-    style = document.getElementById('vtxstyle')
-    if (style) head.removeChild(style)
+    style = document.getElementById("vtxstyle");
+    if (style) head.removeChild(style);
 
     // build new one
-    style = document.createElement('style')
-    style.id = 'vtxstyle'
-    style.type = 'text/css'
+    style = document.createElement("style");
+    style.id = "vtxstyle";
+    style.type = "text/css";
 
     css =
-      '#vtxpage {' +
-      ' font-family: ' +
+      "#vtxpage {" +
+      " font-family: " +
       fontName +
-      ';' +
-      ' font-size: ' +
+      ";" +
+      " font-size: " +
       fontSize +
-      'px;' +
-      ' min-height: ' +
+      "px;" +
+      " min-height: " +
       (fontSize * vtxdata.crtRows).toString() +
-      'px;' +
-      ' margin: 0px auto;' +
-      ' padding: 0px;' +
-      ' border: 0px;' +
-      ' overflow: hidden;' +
-      ' text-overflow: clip;' +
-      ' z-index: 0;' +
-      ' position: relative;' +
-      '}\n' +
-      '#vtxtext {' +
-      ' width: 100%;' +
-      ' margin: 0px;' +
-      ' padding: 0px;' +
-      ' border: 0px;' +
-      ' overflow: hidden;' +
-      ' text-overflow: clip;' +
-      ' z-index: 10;' +
-      ' position: relative;' +
-      '}\n' +
-      '#vtxfx {' +
-      ' display: none;' +
-      ' position: absolute;' +
-      ' top: 0px;' +
-      ' left: 0px;' +
-      ' width: 100%;' +
-      ' height: 100%' +
-      '}\n' +
-      '.vtx {' +
-      ' position: relative;' +
-      ' left: 0px;' +
-      ' line-height: ' +
+      "px;" +
+      " margin: 0px auto;" +
+      " padding: 0px;" +
+      " border: 0px;" +
+      " overflow: hidden;" +
+      " text-overflow: clip;" +
+      " z-index: 0;" +
+      " position: relative;" +
+      "}\n" +
+      "#vtxtext {" +
+      " width: 100%;" +
+      " margin: 0px;" +
+      " padding: 0px;" +
+      " border: 0px;" +
+      " overflow: hidden;" +
+      " text-overflow: clip;" +
+      " z-index: 10;" +
+      " position: relative;" +
+      "}\n" +
+      "#vtxfx {" +
+      " display: none;" +
+      " position: absolute;" +
+      " top: 0px;" +
+      " left: 0px;" +
+      " width: 100%;" +
+      " height: 100%" +
+      "}\n" +
+      ".vtx {" +
+      " position: relative;" +
+      " left: 0px;" +
+      " line-height: " +
       fontSize +
-      'px;' +
-      ' height: ' +
+      "px;" +
+      " height: " +
       fontSize +
-      'px;' +
-      ' vertical-align: top;' +
-      ' overflow: hidden;' +
-      ' text-overflow: clip;' +
-      '}\n' +
-      '.fade {' +
-      ' opacity: .5;' +
-      ' background: #000055;' +
-      '}\n' +
-      '.noselect {' +
-      ' -webkit-touch-callout: none;' +
-      ' -webkit-user-select: none;' +
-      ' -khtml-user-select: none;' +
-      ' -moz-user-select: none;' +
-      ' -ms-user-select: none;' +
-      ' user-select: none;' +
-      '}\n' +
-      '.raster{' +
-      ' display: inline !important;' +
-      ' height: 100%;' +
-      ' position: relative;' +
-      ' overflow: hidden;' +
-      ' pointer-events: none;' +
-      '}\n' +
-      '.raster::after {' +
+      "px;" +
+      " vertical-align: top;" +
+      " overflow: hidden;" +
+      " text-overflow: clip;" +
+      "}\n" +
+      ".fade {" +
+      " opacity: .5;" +
+      " background: #000055;" +
+      "}\n" +
+      ".noselect {" +
+      " -webkit-touch-callout: none;" +
+      " -webkit-user-select: none;" +
+      " -khtml-user-select: none;" +
+      " -moz-user-select: none;" +
+      " -ms-user-select: none;" +
+      " user-select: none;" +
+      "}\n" +
+      ".raster{" +
+      " display: inline !important;" +
+      " height: 100%;" +
+      " position: relative;" +
+      " overflow: hidden;" +
+      " pointer-events: none;" +
+      "}\n" +
+      ".raster::after {" +
       ' content: " ";' +
-      ' position: absolute;' +
-      ' top: 0;' +
-      ' left: 0;' +
-      ' bottom: 0;' +
-      ' right: 0;' +
-      ' background: rgba(9, 8, 8, 0.1);' +
-      ' opacity: 0;' +
-      ' z-index: 2;' +
-      ' pointer-events: none;' +
-      ' animation: flicker 0.15s infinite;' +
-      '}\n' +
-      '.raster::before {' +
+      " position: absolute;" +
+      " top: 0;" +
+      " left: 0;" +
+      " bottom: 0;" +
+      " right: 0;" +
+      " background: rgba(9, 8, 8, 0.1);" +
+      " opacity: 0;" +
+      " z-index: 2;" +
+      " pointer-events: none;" +
+      " animation: flicker 0.15s infinite;" +
+      "}\n" +
+      ".raster::before {" +
       ' content: " ";' +
-      ' position: absolute;' +
-      ' top: 0;' +
-      ' left: 0;' +
-      ' bottom: 0;' +
-      ' right: 0;' +
-      ' background:' +
-      '  linear-gradient(rgba(9, 8, 8, 0) 50%, rgba(0, 0, 0, 0.25) 50%),' +
-      '  linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));' +
-      ' z-index: 2;' +
-      ' background-size: 100% 2px, 3px 100%;' +
-      ' pointer-events: none;' +
-      '}\n' +
-      '@keyframes flicker {' +
-      ' 0% { opacity: 0.119; }' +
-      ' 5% { opacity: 0.02841; }' +
-      ' 10% { opacity: 0.35748; }' +
-      ' 15% { opacity: 0.88852; }' +
-      ' 20% { opacity: 0.9408; }' +
-      ' 25% { opacity: 0.35088; }' +
-      ' 30% { opacity: 0.22426; }' +
-      ' 35% { opacity: 0.26418; }' +
-      ' 40% { opacity: 0.09249; }' +
-      ' 45% { opacity: 0.35312; }' +
-      ' 50% { opacity: 0.89436; }' +
-      ' 55% { opacity: 0.9574; }' +
-      ' 60% { opacity: 0.19754; }' +
-      ' 65% { opacity: 0.05086; }' +
-      ' 70% { opacity: 0.12137; }' +
-      ' 75% { opacity: 0.75791; }' +
-      ' 80% { opacity: 0.89617; }' +
-      ' 85% { opacity: 0.90183; }' +
-      ' 90% { opacity: 0.20657; }' +
-      ' 95% { opacity: 0.64125; }' +
-      ' 100% { opacity: 0.78042; }' +
-      '}\n' +
-      '.marquee {' +
-      ' animation: marquee 12s linear infinite;' +
-      '}\n' +
-      '@keyframes marquee {' +
-      ' 0% { transform: translate( ' +
+      " position: absolute;" +
+      " top: 0;" +
+      " left: 0;" +
+      " bottom: 0;" +
+      " right: 0;" +
+      " background:" +
+      "  linear-gradient(rgba(9, 8, 8, 0) 50%, rgba(0, 0, 0, 0.25) 50%)," +
+      "  linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));" +
+      " z-index: 2;" +
+      " background-size: 100% 2px, 3px 100%;" +
+      " pointer-events: none;" +
+      "}\n" +
+      "@keyframes flicker {" +
+      " 0% { opacity: 0.119; }" +
+      " 5% { opacity: 0.02841; }" +
+      " 10% { opacity: 0.35748; }" +
+      " 15% { opacity: 0.88852; }" +
+      " 20% { opacity: 0.9408; }" +
+      " 25% { opacity: 0.35088; }" +
+      " 30% { opacity: 0.22426; }" +
+      " 35% { opacity: 0.26418; }" +
+      " 40% { opacity: 0.09249; }" +
+      " 45% { opacity: 0.35312; }" +
+      " 50% { opacity: 0.89436; }" +
+      " 55% { opacity: 0.9574; }" +
+      " 60% { opacity: 0.19754; }" +
+      " 65% { opacity: 0.05086; }" +
+      " 70% { opacity: 0.12137; }" +
+      " 75% { opacity: 0.75791; }" +
+      " 80% { opacity: 0.89617; }" +
+      " 85% { opacity: 0.90183; }" +
+      " 90% { opacity: 0.20657; }" +
+      " 95% { opacity: 0.64125; }" +
+      " 100% { opacity: 0.78042; }" +
+      "}\n" +
+      ".marquee {" +
+      " animation: marquee 12s linear infinite;" +
+      "}\n" +
+      "@keyframes marquee {" +
+      " 0% { transform: translate( " +
       xScale * crtCols * colSize +
-      'px, 0); } ' +
-      ' 100% { transform: translate(-100%, 0); }' +
-      '}\n'
+      "px, 0); } " +
+      " 100% { transform: translate(-100%, 0); }" +
+      "}\n";
 
-    if (style.styleSheet) style.styleSheet.cssText = css
-    else style.appendChild(document.createTextNode(css))
-    head.appendChild(style)
+    if (style.styleSheet) style.styleSheet.cssText = css;
+    else style.appendChild(document.createTextNode(css));
+    head.appendChild(style);
   }
 
   function copyTextToClipboard(text) {
-    var textArea, range, successful
+    var textArea, range, successful;
 
     textArea = domElement(
-      'textarea',
+      "textarea",
       {
         value: text,
-        id: 'vtxcopy',
+        id: "vtxcopy"
       },
       {
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '2em',
-        height: '2em',
+        width: "2em",
+        height: "2em",
         padding: 0,
         border: 0,
         outline: 0,
-        boxShadow: 'none',
-        background: 'transparent',
-        color: 'transparent',
+        boxShadow: "none",
+        background: "transparent",
+        color: "transparent"
       }
-    )
-    document.body.appendChild(textArea)
+    );
+    document.body.appendChild(textArea);
 
-    range = document.createRange()
-    range.selectNode(textArea)
-    textArea.select()
-    window.getSelection().addRange(range)
-    successful = document.execCommand('copy')
-    document.body.removeChild(textArea)
-    return successful
+    range = document.createRange();
+    range.selectNode(textArea);
+    textArea.select();
+    window.getSelection().addRange(range);
+    successful = document.execCommand("copy");
+    document.body.removeChild(textArea);
+    return successful;
   }
 
   // setup the crt and cursor
@@ -12603,399 +12616,399 @@ vtx: {
       head,
       sound,
       fx,
-      defattrs
+      defattrs;
 
     // get cookie info
-    sound = readCookie('vtxSound') || '1'
-    soundOn = sound == '1'
-    fx = readCookie('vtxFX') || '1'
-    soundClicks = fx == '1'
+    sound = readCookie("vtxSound") || "1";
+    soundOn = sound == "1";
+    fx = readCookie("vtxFX") || "1";
+    soundClicks = fx == "1";
 
-    hotspotHoverAttr = 0x000800ff
-    hotspotClickAttr = 0x000000ff
+    hotspotHoverAttr = 0x000800ff;
+    hotspotClickAttr = 0x000000ff;
 
     // find where client is to go id='vtxclient'
-    clientDiv = document.getElementById('vtxclient')
-    if (!clientDiv) return
-    clientDiv.style['position'] = 'relative'
-    clientDiv.style['padding'] = '32px'
+    clientDiv = document.getElementById("vtxclient");
+    if (!clientDiv) return;
+    clientDiv.style["position"] = "relative";
+    clientDiv.style["padding"] = "32px";
 
     // special fx div
-    fxDiv = domElement('div', { id: 'vtxfx' })
-    if (soundClicks) fxDiv.classList.add('raster')
-    clientDiv.appendChild(fxDiv)
+    fxDiv = domElement("div", { id: "vtxfx" });
+    if (soundClicks) fxDiv.classList.add("raster");
+    clientDiv.appendChild(fxDiv);
 
     // build required inner divs
-    pageDiv = domElement('div', {
-      id: 'vtxpage',
-      className: 'noselect',
-    })
-    textDiv = domElement('div', {
-      id: 'vtxtext',
-      className: 'noselect',
-    })
-    pageDiv.appendChild(textDiv)
-    clientDiv.appendChild(pageDiv)
+    pageDiv = domElement("div", {
+      id: "vtxpage",
+      className: "noselect"
+    });
+    textDiv = domElement("div", {
+      id: "vtxtext",
+      className: "noselect"
+    });
+    pageDiv.appendChild(textDiv);
+    clientDiv.appendChild(pageDiv);
 
     // create clipboard copy element
     copyEl = domElement(
-      'textarea',
-      { id: 'vtxcopy' },
+      "textarea",
+      { id: "vtxcopy" },
       {
-        position: 'fixed',
-        visibility: 'hidden',
-        left: '0',
-        top: '0',
-        width: '1px',
-        height: '1px',
-        color: 'transparent',
-        background: 'transparent',
-        whiteSpace: 'pre',
-        border: 'none',
+        position: "fixed",
+        visibility: "hidden",
+        left: "0",
+        top: "0",
+        width: "1px",
+        height: "1px",
+        color: "transparent",
+        background: "transparent",
+        whiteSpace: "pre",
+        border: "none",
         padding: 0,
-        margin: 0,
+        margin: 0
       }
-    )
-    clientDiv.appendChild(copyEl)
+    );
+    clientDiv.appendChild(copyEl);
 
-    textPos = getElementPosition(textDiv)
+    textPos = getElementPosition(textDiv);
 
     // determine standard sized font width in pixels
-    getDefaultFontSize() // get fontName, colSize, rowSize
-    crtWidth = colSize * crtCols
+    getDefaultFontSize(); // get fontName, colSize, rowSize
+    crtWidth = colSize * crtCols;
 
     // codepage from AKAs - abort if invalid
     if (!codePageData[codePage]) {
-      if (codePageAKAs[codePage]) codePage = codePageAKAs[codePage]
+      if (codePageAKAs[codePage]) codePage = codePageAKAs[codePage];
     }
 
     // set fonts.
     if (cbm) {
-      conFontNum = 0
+      conFontNum = 0;
       switch (vtxdata.codePage) {
-        case 'VIC20':
-          conFont[0] = 'VIC200'
-          conFont[1] = 'VIC201'
-          cbmColors = vic20Colors
-          break
+        case "VIC20":
+          conFont[0] = "VIC200";
+          conFont[1] = "VIC201";
+          cbmColors = vic20Colors;
+          break;
 
-        case 'C64':
-          conFont[0] = 'C640'
-          conFont[1] = 'C641'
-          cbmColors = c64Colors
-          break
+        case "C64":
+          conFont[0] = "C640";
+          conFont[1] = "C641";
+          cbmColors = c64Colors;
+          break;
 
-        case 'C128':
-          conFont[0] = 'C1280'
-          conFont[1] = 'C1281'
-          cbmColors = c128Colors
-          break
+        case "C128":
+          conFont[0] = "C1280";
+          conFont[1] = "C1281";
+          cbmColors = c128Colors;
+          break;
       }
-      conFontCP[0] = 'RAW'
-      conFontCP[1] = 'RAW'
+      conFontCP[0] = "RAW";
+      conFontCP[1] = "RAW";
     } else if (atari) {
-      conFontNum = 0
-      conFont[0] = 'ATARI'
-      conFontCP[0] = 'RAW'
+      conFontNum = 0;
+      conFont[0] = "ATARI";
+      conFontCP[0] = "RAW";
     } else {
-      conFontNum = 0 // current font being used.
+      conFontNum = 0; // current font being used.
       for (i = 0; i < 10; i++) {
         // set default font selects.
-        conFont[i] = fontName
-        conFontCP[i] = codePage
+        conFont[i] = fontName;
+        conFontCP[i] = codePage;
       }
       for (i = 10; i < 13; i++) {
-        conFont[i] = fontName // text w/separated blocks
-        conFontCP[i] = 'TELETEXT'
+        conFont[i] = fontName; // text w/separated blocks
+        conFontCP[i] = "TELETEXT";
       }
     }
 
-    pageDiv.style['width'] = crtWidth * xScale + 'px'
-    pagePos = getElementPosition(pageDiv)
-    pageLeft = pagePos.left
-    pageTop = pagePos.top
+    pageDiv.style["width"] = crtWidth * xScale + "px";
+    pagePos = getElementPosition(pageDiv);
+    pageLeft = pagePos.left;
+    pageTop = pagePos.top;
 
     // build CSS for VTX client
-    setAllCSS()
+    setAllCSS();
 
-    defCellAttr = vtxdata.defCellAttr
-    defCrsrAttr = vtxdata.defCrsrAttr
-    defPageAttr = vtxdata.defPageAttr
-    cellAttr = defCellAttr
-    crsrAttr = defCrsrAttr
-    pageAttr = defPageAttr
+    defCellAttr = vtxdata.defCellAttr;
+    defCrsrAttr = vtxdata.defCrsrAttr;
+    defPageAttr = vtxdata.defPageAttr;
+    cellAttr = defCellAttr;
+    crsrAttr = defCrsrAttr;
+    pageAttr = defPageAttr;
 
     // create cursor
-    newCrsr()
-    crsrSkipTime = 0
+    newCrsr();
+    crsrSkipTime = 0;
 
     // load bell sound
-    soundBell = new Audio()
-    soundBell.src = vtxPath + 'bell.mp3'
-    soundBell.type = 'audio/mp3'
-    soundBell.volume = 1
-    soundBell.preload = 'auto'
-    soundBell.load()
+    soundBell = new Audio();
+    soundBell.src = vtxPath + "bell.mp3";
+    soundBell.type = "audio/mp3";
+    soundBell.volume = 1;
+    soundBell.preload = "auto";
+    soundBell.load();
 
     // load keyboard sounds.
     for (i = 0; i < 11; i++) {
-      soundKeyUp[i] = new Audio()
-      soundKeyUp[i].src = vtxPath + 'ku' + i + '.mp3'
-      soundKeyUp[i].type = 'audio/mp3'
-      soundKeyUp[i].volume = 0.5
-      soundKeyUp[i].preload = 'auto'
-      soundKeyUp[i].load()
-      soundKeyDn[i] = new Audio()
-      soundKeyDn[i].src = vtxPath + 'kd' + i + '.mp3'
-      soundKeyDn[i].type = 'audio/mp3'
-      soundKeyDn[i].volume = 0.5
-      soundKeyDn[i].preload = 'auto'
-      soundKeyDn[i].load()
+      soundKeyUp[i] = new Audio();
+      soundKeyUp[i].src = vtxPath + "ku" + i + ".mp3";
+      soundKeyUp[i].type = "audio/mp3";
+      soundKeyUp[i].volume = 0.5;
+      soundKeyUp[i].preload = "auto";
+      soundKeyUp[i].load();
+      soundKeyDn[i] = new Audio();
+      soundKeyDn[i].src = vtxPath + "kd" + i + ".mp3";
+      soundKeyDn[i].type = "audio/mp3";
+      soundKeyDn[i].volume = 0.5;
+      soundKeyDn[i].preload = "auto";
+      soundKeyDn[i].load();
     }
 
     // set page attributes
-    p = pageDiv.parentNode
+    p = pageDiv.parentNode;
     if (cbm) {
-      p.style['background-color'] = cbmColors[(pageAttr >>> 8) & 0xf]
-      pageDiv.style['background-color'] = cbmColors[pageAttr & 0xf]
+      p.style["background-color"] = cbmColors[(pageAttr >>> 8) & 0xf];
+      pageDiv.style["background-color"] = cbmColors[pageAttr & 0xf];
     } else if (atari) {
-      p.style['background-color'] = atariColors[(pageAttr >>> 8) & 0x1]
-      pageDiv.style['background-color'] = atariColors[pageAttr & 0x1]
+      p.style["background-color"] = atariColors[(pageAttr >>> 8) & 0x1];
+      pageDiv.style["background-color"] = atariColors[pageAttr & 0x1];
     } else {
-      p.style['background-color'] = ansiColors[(pageAttr >>> 8) & 0xff]
-      pageDiv.style['background-color'] = ansiColors[pageAttr & 0xff]
+      p.style["background-color"] = ansiColors[(pageAttr >>> 8) & 0xff];
+      pageDiv.style["background-color"] = ansiColors[pageAttr & 0xff];
     }
     // set event for page resize check and cursor blink
-    pageWidth = elPage.clientWidth
+    pageWidth = elPage.clientWidth;
 
     // set initial states.
-    shiftState = ctrlState = altState = capState = numState = scrState = false
-    crsrBlink = false // cursor blink state for intervaltimer
-    cellBlinkSlow = true
-    cellBlinkFast = true
-    crsrRow = crsrCol = 0
-    crsrDraw()
+    shiftState = ctrlState = altState = capState = numState = scrState = false;
+    crsrBlink = false; // cursor blink state for intervaltimer
+    cellBlinkSlow = true;
+    cellBlinkFast = true;
+    crsrRow = crsrCol = 0;
+    crsrDraw();
 
-    setTimers(true)
+    setTimers(true);
 
-    crsrRow = crsrCol = 0
-    termState = TS_OFFLINE // set for standard terminal mode, not in file xfer mode
+    crsrRow = crsrCol = 0;
+    termState = TS_OFFLINE; // set for standard terminal mode, not in file xfer mode
 
     // indicators and controls
     // ctrl for fixed ur
     ctrlDiv = domElement(
-      'div',
+      "div",
       {},
       {
-        width: (crtWidth * xScale) / 2 + 'px',
-        height: '30px',
-        padding: '3px',
-        position: 'absolute',
-        top: '0px',
-        left: '50%',
-        textAlign: 'right',
-        zIndex: '10',
+        width: (crtWidth * xScale) / 2 + "px",
+        height: "30px",
+        padding: "3px",
+        position: "absolute",
+        top: "0px",
+        left: "50%",
+        textAlign: "right",
+        zIndex: "10"
       }
-    )
+    );
 
     // connect / disconnect indicator / button.
     ctrlDiv.appendChild(
       domElement(
-        'img',
+        "img",
         {
-          src: vtxPath + 'os0.png',
-          id: 'osbulb',
-          display: 'inline-block',
+          src: vtxPath + "os0.png",
+          id: "osbulb",
+          display: "inline-block",
           onclick: termConnect,
           width: 24,
           height: 24,
-          title: 'Connect/Disconnect',
+          title: "Connect/Disconnect"
         },
-        { cursor: 'pointer' }
+        { cursor: "pointer" }
       )
-    )
+    );
 
     // fullscreen on / off
     ctrlDiv.appendChild(
       domElement(
-        'img',
+        "img",
         {
-          src: vtxPath + 'fs0.png',
-          id: 'fsbulb',
-          display: 'inline-block',
+          src: vtxPath + "fs0.png",
+          id: "fsbulb",
+          display: "inline-block",
           onclick: toggleFullScreen,
           width: 24,
           height: 24,
-          title: 'Fullscreen',
+          title: "Fullscreen"
         },
-        { cursor: 'pointer' }
+        { cursor: "pointer" }
       )
-    )
+    );
 
     // sound on / off
     ctrlDiv.appendChild(
       domElement(
-        'img',
+        "img",
         {
-          src: vtxPath + (soundOn ? 'vo1.png' : 'vo0.png'),
-          id: 'vobulb',
-          display: 'inline-block',
+          src: vtxPath + (soundOn ? "vo1.png" : "vo0.png"),
+          id: "vobulb",
+          display: "inline-block",
           onclick: toggleSound,
           width: 24,
           height: 24,
-          title: 'Sound',
+          title: "Sound"
         },
-        { cursor: 'pointer' }
+        { cursor: "pointer" }
       )
-    )
+    );
 
     // FX on / off
     ctrlDiv.appendChild(
       domElement(
-        'img',
+        "img",
         {
-          src: vtxPath + (soundClicks ? 'kc1.png' : 'kc0.png'),
-          id: 'kcbulb',
-          display: 'inline-block',
+          src: vtxPath + (soundClicks ? "kc1.png" : "kc0.png"),
+          id: "kcbulb",
+          display: "inline-block",
           onclick: toggleFX,
           width: 24,
           height: 24,
-          title: 'Effects',
+          title: "Effects"
         },
-        { cursor: 'pointer' }
+        { cursor: "pointer" }
       )
-    )
+    );
 
     // capslock indicator.
     ctrlDiv.appendChild(
-      domElement('img', {
-        src: vtxPath + 'cl0.png',
-        id: 'clbulb',
-        display: 'inline-block',
+      domElement("img", {
+        src: vtxPath + "cl0.png",
+        id: "clbulb",
+        display: "inline-block",
         width: 24,
         height: 24,
-        title: 'CapsLk',
+        title: "CapsLk"
       })
-    )
+    );
 
     // upload
     ctrlDiv.appendChild(
       domElement(
-        'img',
+        "img",
         {
-          src: vtxPath + 'ul0.png',
-          id: 'ulbtn',
-          display: 'inline-block',
+          src: vtxPath + "ul0.png",
+          id: "ulbtn",
+          display: "inline-block",
           onclick: ymSendStart,
           width: 24,
           height: 24,
-          title: 'YModem Upload',
+          title: "YModem Upload"
         },
-        { cursor: 'pointer' }
+        { cursor: "pointer" }
       )
-    )
+    );
     // download
     ctrlDiv.appendChild(
       domElement(
-        'img',
+        "img",
         {
-          src: vtxPath + 'dl0.png',
-          id: 'dlbtn',
-          display: 'inline-block',
+          src: vtxPath + "dl0.png",
+          id: "dlbtn",
+          display: "inline-block",
           onclick: ymRecvStart,
           width: 24,
           height: 24,
-          title: 'YModem Download',
+          title: "YModem Download"
         },
-        { cursor: 'pointer' }
+        { cursor: "pointer" }
       )
-    )
+    );
 
-    pageDiv.parentNode.appendChild(ctrlDiv)
+    pageDiv.parentNode.appendChild(ctrlDiv);
 
     // add audio element for sound.
     audioEl = domElement(
-      'audio',
+      "audio",
       {
-        id: 'vtxaudio',
-        preload: 'none',
-        volume: soundOn ? '0.25' : '0.0',
-        src: '/;',
+        id: "vtxaudio",
+        preload: "none",
+        volume: soundOn ? "0.25" : "0.0",
+        src: "/;"
       },
       {
-        width: '0px',
-        height: '0px',
+        width: "0px",
+        height: "0px"
       }
-    )
-    pageDiv.appendChild(audioEl)
+    );
+    pageDiv.appendChild(audioEl);
 
-    conBufferOut(initStr)
+    conBufferOut(initStr);
 
     if (vtxdata.autoConnect && vtxdata.autoConnect > 0)
       // websocket connect
-      termConnect()
+      termConnect();
     else {
       // let user know how to connect. heh-
       switch (vtxdata.term) {
-        case 'PETSCII':
-          conBufferOut('\x0Evtx tERMINAL cLIENT\r')
-          conBufferOut('vERSION ' + version + '\r')
-          conBufferOut('2017 dAN mECKLENBURG jR.\r')
-          conBufferOut('GITHUB.COM/CODEWAR65/vtx\xA4cLIENTsERVER\r')
-          conBufferOut('\rcLICK cONNECT...\r')
-          break
+        case "PETSCII":
+          conBufferOut("\x0Evtx tERMINAL cLIENT\r");
+          conBufferOut("vERSION " + version + "\r");
+          conBufferOut("2017 dAN mECKLENBURG jR.\r");
+          conBufferOut("GITHUB.COM/CODEWAR65/vtx\xA4cLIENTsERVER\r");
+          conBufferOut("\rcLICK cONNECT...\r");
+          break;
 
-        case 'ATASCII':
-          conBufferOut('VTX Terminal Client\x9B')
-          conBufferOut('Version ' + version + '\x9B')
-          conBufferOut('2017 Dan Mecklenburg Jr.\x9B')
-          conBufferOut('github.com/codewar65/VTX_ClientServer\x9B')
-          conBufferOut('\x9BClick Connect...\x9B')
-          break
+        case "ATASCII":
+          conBufferOut("VTX Terminal Client\x9B");
+          conBufferOut("Version " + version + "\x9B");
+          conBufferOut("2017 Dan Mecklenburg Jr.\x9B");
+          conBufferOut("github.com/codewar65/VTX_ClientServer\x9B");
+          conBufferOut("\x9BClick Connect...\x9B");
+          break;
 
         default:
           conBufferOut(
-            '\n\r\x1b#6\x1b[38;5;46;58mVTX\x1b[32;78m Terminal Client\n\r'
-          )
+            "\n\r\x1b#6\x1b[38;5;46;58mVTX\x1b[32;78m Terminal Client\n\r"
+          );
           conBufferOut(
-            '\x1b#6\x1b[38;5;46;59mVTX\x1b[32;79m Version ' + version + '\n\r'
-          )
-          conBufferOut('\n\r\x1b[m2017 Dan Mecklenburg Jr.\n\r')
+            "\x1b#6\x1b[38;5;46;59mVTX\x1b[32;79m Version " + version + "\n\r"
+          );
+          conBufferOut("\n\r\x1b[m2017 Dan Mecklenburg Jr.\n\r");
           conBufferOut(
-            'Visit \x1b[1;45;1;1;' +
-              encodeAscii('https://github.com/codewar65/VTX_ClientServer') +
-              '\\https://github.com/codewar65/VTX_ClientServer for more info.\n\r'
-          )
-          conBufferOut('\n\r\x1b[38;5;46mCLICK CONNECT...\x1b[m\n\r')
-          break
+            "Visit \x1b[1;45;1;1;" +
+              encodeAscii("https://github.com/codewar65/VTX_ClientServer") +
+              "\\https://github.com/codewar65/VTX_ClientServer for more info.\n\r"
+          );
+          conBufferOut("\n\r\x1b[38;5;46mCLICK CONNECT...\x1b[m\n\r");
+          break;
       }
     }
 
-    setBulbs()
+    setBulbs();
 
     // key events
-    addListener(document, 'keydown', keyDown)
-    addListener(document, 'keyup', keyUp)
-    addListener(document, 'keypress', keyPress)
+    addListener(document, "keydown", keyDown);
+    addListener(document, "keyup", keyUp);
+    addListener(document, "keypress", keyPress);
     // mouse events
-    addListener(document, 'mouseup', mouseUp)
-    addListener(document, 'mousedown', mouseDown)
-    addListener(document, 'click', click)
-    addListener(document, 'mousemove', mouseMove)
+    addListener(document, "mouseup", mouseUp);
+    addListener(document, "mousedown", mouseDown);
+    addListener(document, "click", click);
+    addListener(document, "mousemove", mouseMove);
     // copy paste events
     //addListener(document, 'beforepaste', beforePaste);
-    addListener(document, 'paste', paste)
+    addListener(document, "paste", paste);
   }
 
   function UTF8ArrayToStr(ray) {
-    var out, i, len, c, breakPos, char2, char3
+    var out, i, len, c, breakPos, char2, char3;
 
-    out = ''
-    len = ray.length
-    breakPos = len
-    i = 0
+    out = "";
+    len = ray.length;
+    breakPos = len;
+    i = 0;
     while (i < len) {
-      c = ray[i++]
+      c = ray[i++];
       switch (c >>> 4) {
         case 0:
         case 1:
@@ -13006,299 +13019,299 @@ vtx: {
         case 6:
         case 7:
           // 0xxxxxxx
-          out += String.fromCharCode(c)
-          break
+          out += String.fromCharCode(c);
+          break;
 
         case 12:
         case 13:
           // 110x xxxx   10xx xxxx
           if (i >= len - 1) {
             // need 2 bytes. only have 1
-            breakPos = i - 1
-            i = len
-            break
+            breakPos = i - 1;
+            i = len;
+            break;
           }
-          char2 = ray[i++]
-          out += String.fromCharCode(((c & 0x1f) << 6) | (char2 & 0x3f))
-          break
+          char2 = ray[i++];
+          out += String.fromCharCode(((c & 0x1f) << 6) | (char2 & 0x3f));
+          break;
 
         case 14:
           // 1110 xxxx  10xx xxxx  10xx xxxx
           if (i >= len - 2) {
             // need 3 bytes. only have 1 or 2
-            breakPos = i - 1
-            i = len
-            break
+            breakPos = i - 1;
+            i = len;
+            break;
           }
-          char2 = ray[i++]
-          char3 = ray[i++]
+          char2 = ray[i++];
+          char3 = ray[i++];
           out += String.fromCharCode(
             ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0)
-          )
-          break
+          );
+          break;
       }
     }
     //return out;
     //var lo = ray.slice(breakPos);
-    var lo = ray.subarray(breakPos)
-    return { strData: out, leftOver: lo }
+    var lo = ray.subarray(breakPos);
+    return { strData: out, leftOver: lo };
   }
 
   function UTF16ArrayToStr(ray) {
-    var out, i, len, c, breakPos, char2
+    var out, i, len, c, breakPos, char2;
 
-    out = ''
-    len = ray.length
-    breakPos = len
-    i = 0
+    out = "";
+    len = ray.length;
+    breakPos = len;
+    i = 0;
     while (i < len) {
       if (i >= len - 1) {
         // need 2 bytes, only have 1.
-        breakPos = i - 1
-        i = len
-        break
+        breakPos = i - 1;
+        i = len;
+        break;
       }
-      c = ray[i++]
-      char2 = ray[i++]
-      out += String.fromCharCode((c << 8) | char2)
+      c = ray[i++];
+      char2 = ray[i++];
+      out += String.fromCharCode((c << 8) | char2);
     }
     //return out;
-    var lo = ray.subarray(breakPos)
+    var lo = ray.subarray(breakPos);
     //    var lo = ray.slice(breakPos);
-    return { strData: out, leftOver: lo }
+    return { strData: out, leftOver: lo };
   }
 
   function fadeScreen(fade) {
-    var el, fntfm, cs
+    var el, fntfm, cs;
 
     if (!fade) {
-      clientDiv.classList.remove('fade')
-      if (ovl['dialog']) document.body.removeChild(ovl['dialog'])
-      ovl = {}
+      clientDiv.classList.remove("fade");
+      if (ovl["dialog"]) document.body.removeChild(ovl["dialog"]);
+      ovl = {};
 
       // enable keys / cursor
-      document.getElementById('ulbtn').style['visibility'] = 'visible'
-      document.getElementById('dlbtn').style['visibility'] = 'visible'
-      setTimers(true)
-      document.body.style['cursor'] = 'default'
+      document.getElementById("ulbtn").style["visibility"] = "visible";
+      document.getElementById("dlbtn").style["visibility"] = "visible";
+      setTimers(true);
+      document.body.style["cursor"] = "default";
     } else {
-      clientDiv.classList.add('fade')
-      fntfm = 'san-serif'
+      clientDiv.classList.add("fade");
+      fntfm = "san-serif";
 
       // add control overlay
-      ovl['dialog'] = domElement(
-        'div',
-        { className: 'noselect' },
+      ovl["dialog"] = domElement(
+        "div",
+        { className: "noselect" },
         {
-          width: '256px',
-          height: '128px',
-          display: 'block',
-          background: '#CCC',
-          color: '#000',
-          border: '2px outset #888',
-          position: 'fixed',
-          top: (window.innerHeight - 128) / 2 + 'px',
-          left: (pageWidth - 256) / 2 + 'px',
-          cursor: 'default',
+          width: "256px",
+          height: "128px",
+          display: "block",
+          background: "#CCC",
+          color: "#000",
+          border: "2px outset #888",
+          position: "fixed",
+          top: (window.innerHeight - 128) / 2 + "px",
+          left: (pageWidth - 256) / 2 + "px",
+          cursor: "default",
           fontFamily: fntfm,
-          fontSize: '12px',
+          fontSize: "12px"
         }
-      )
-      document.body.appendChild(ovl['dialog'])
+      );
+      document.body.appendChild(ovl["dialog"]);
 
       // add cancel button
-      ovl['dialog'].appendChild(
+      ovl["dialog"].appendChild(
         domElement(
-          'input',
+          "input",
           {
-            type: 'button',
+            type: "button",
             onclick: ymCancel,
-            value: 'Cancel',
+            value: "Cancel"
           },
           {
-            width: '96px',
-            height: '24px',
-            position: 'absolute',
-            bottom: '8px',
-            right: '8px',
+            width: "96px",
+            height: "24px",
+            position: "absolute",
+            bottom: "8px",
+            right: "8px"
           }
         )
-      )
+      );
 
       // dialog label
-      ovl['title'] = domElement(
-        'span',
-        { className: 'noselect' },
+      ovl["title"] = domElement(
+        "span",
+        { className: "noselect" },
         {
-          width: '228px',
-          height: '20px',
-          background: '#039',
-          border: '1px inset #888',
-          position: 'absolute',
-          top: '4px',
-          left: '4px',
-          padding: '0px 8px',
-          fontSize: '14px',
-          fontWieght: 'bold',
-          color: 'white',
+          width: "228px",
+          height: "20px",
+          background: "#039",
+          border: "1px inset #888",
+          position: "absolute",
+          top: "4px",
+          left: "4px",
+          padding: "0px 8px",
+          fontSize: "14px",
+          fontWieght: "bold",
+          color: "white"
         },
-        'YModem Download'
-      )
-      ovl['dialog'].appendChild(ovl['title'])
+        "YModem Download"
+      );
+      ovl["dialog"].appendChild(ovl["title"]);
 
       // filename
-      ovl['dialog'].appendChild(
+      ovl["dialog"].appendChild(
         domElement(
-          'span',
-          { className: 'noselect' },
+          "span",
+          { className: "noselect" },
           {
-            position: 'absolute',
-            top: '32px',
-            left: '12px',
+            position: "absolute",
+            top: "32px",
+            left: "12px"
           },
-          'File:'
+          "File:"
         )
-      )
-      ovl['filename'] = domElement(
-        'span',
+      );
+      ovl["filename"] = domElement(
+        "span",
         {},
         {
-          position: 'absolute',
-          top: '32px',
-          left: '80px',
-          width: '172px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          position: "absolute",
+          top: "32px",
+          left: "80px",
+          width: "172px",
+          overflow: "hidden",
+          textOverflow: "ellipsis"
         },
-        '{filename}'
-      )
-      ovl['dialog'].appendChild(ovl['filename'])
+        "{filename}"
+      );
+      ovl["dialog"].appendChild(ovl["filename"]);
 
       // filesize
-      ovl['dialog'].appendChild(
+      ovl["dialog"].appendChild(
         domElement(
-          'span',
-          { className: 'noselect' },
+          "span",
+          { className: "noselect" },
           {
-            position: 'absolute',
-            top: '52px',
-            left: '12px',
+            position: "absolute",
+            top: "52px",
+            left: "12px"
           },
-          'Size:'
+          "Size:"
         )
-      )
-      ovl['filesize'] = domElement(
-        'span',
+      );
+      ovl["filesize"] = domElement(
+        "span",
         {},
         {
-          position: 'absolute',
-          top: '52px',
-          left: '80px',
-          width: '172px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          position: "absolute",
+          top: "52px",
+          left: "80px",
+          width: "172px",
+          overflow: "hidden",
+          textOverflow: "ellipsis"
         },
-        '{filesize}'
-      )
-      ovl['dialog'].appendChild(ovl['filesize'])
+        "{filesize}"
+      );
+      ovl["dialog"].appendChild(ovl["filesize"]);
 
       // filesize
-      ovl['dialog'].appendChild(
+      ovl["dialog"].appendChild(
         domElement(
-          'span',
-          { className: 'noselect' },
+          "span",
+          { className: "noselect" },
           {
-            position: 'absolute',
-            top: '72px',
-            left: '12px',
+            position: "absolute",
+            top: "72px",
+            left: "12px"
           },
-          'Transferred:'
+          "Transferred:"
         )
-      )
-      ovl['transferred'] = domElement(
-        'span',
+      );
+      ovl["transferred"] = domElement(
+        "span",
         {},
         {
-          position: 'absolute',
-          top: '72px',
-          left: '80px',
-          width: '172px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          position: "absolute",
+          top: "72px",
+          left: "80px",
+          width: "172px",
+          overflow: "hidden",
+          textOverflow: "ellipsis"
         },
-        '{transferred}'
-      )
-      ovl['dialog'].appendChild(ovl['transferred'])
+        "{transferred}"
+      );
+      ovl["dialog"].appendChild(ovl["transferred"]);
 
       // disable keys / cursor
-      setBulbs()
-      document.getElementById('ulbtn').style['visibility'] = 'hidden'
-      document.getElementById('dlbtn').style['visibility'] = 'hidden'
-      setTimers(false)
-      document.body.style['cursor'] = 'wait'
+      setBulbs();
+      document.getElementById("ulbtn").style["visibility"] = "hidden";
+      document.getElementById("dlbtn").style["visibility"] = "hidden";
+      setTimers(false);
+      document.body.style["cursor"] = "wait";
     }
   }
 
   function updateCRC16(crcIn, byteIn) {
     var crc = crcIn,
-      b = byteIn | 0x100
+      b = byteIn | 0x100;
 
     do {
-      crc <<= 1
-      b <<= 1
-      if (b & 0x100) crc++
-      if (crc & 0x10000) crc ^= CRC_POLY
-    } while (!(b & 0x10000))
-    return crc & 0xffff
+      crc <<= 1;
+      b <<= 1;
+      if (b & 0x100) crc++;
+      if (crc & 0x10000) crc ^= CRC_POLY;
+    } while (!(b & 0x10000));
+    return crc & 0xffff;
   }
 
   function calcCRC16(data, start, size) {
     var pos,
       end,
-      crc = 0
+      crc = 0;
 
-    pos = start
-    end = start + size
-    for (; pos < end; pos++) crc = updateCRC16(crc, data[pos])
-    crc = updateCRC16(crc, 0)
-    crc = updateCRC16(crc, 0)
-    return crc & 0xffff
+    pos = start;
+    end = start + size;
+    for (; pos < end; pos++) crc = updateCRC16(crc, data[pos]);
+    crc = updateCRC16(crc, 0);
+    crc = updateCRC16(crc, 0);
+    return crc & 0xffff;
   }
 
   // concatinate two bytearrays
   function combineArrays(first, second) {
     var firstLength = first.length,
-      result = new Uint8Array(firstLength + second.length)
+      result = new Uint8Array(firstLength + second.length);
 
-    result.set(first)
-    result.set(second, firstLength)
+    result.set(first);
+    result.set(second, firstLength);
 
-    return result
+    return result;
   }
 
   // https://stackoverflow.com/questions/23451726/saving-binary-data-as-file-using-javascript-from-a-browser
   function saveAs(blob, fileName) {
     var el,
-      url = window.URL.createObjectURL(blob)
+      url = window.URL.createObjectURL(blob);
 
     el = domElement(
-      'a',
+      "a",
       {
         href: url,
-        download: fileName,
+        download: fileName
       },
-      { display: 'none' }
-    )
+      { display: "none" }
+    );
 
-    document.body.appendChild(el)
-    el.click()
-    document.body.removeChild(el)
+    document.body.appendChild(el);
+    el.click();
+    document.body.removeChild(el);
 
     // On Edge, revokeObjectURL should be called only after
     // a.click() has completed, atleast on EdgeHTML 15.15048
     setTimeout(function() {
-      window.URL.revokeObjectURL(url)
-    }, 1000)
+      window.URL.revokeObjectURL(url);
+    }, 1000);
   }
 
   // data in / out is Uint8Array
@@ -13317,236 +13330,236 @@ vtx: {
       str,
       b,
       tmp,
-      bytes = []
+      bytes = [];
 
-    if (!data) return result
+    if (!data) return result;
 
     for (i = 0; i < data.length; i++) {
-      b = data[i]
+      b = data[i];
       switch (termState) {
         case TS_YMR_START:
           // start recieving packets. if SOH, get 128. if STX then 1024
           // need SOH 00 FF foo.c NUL[123] CRC CRC
-          ymPacketPos = 0
+          ymPacketPos = 0;
           switch (b) {
             case _SOH:
-              clearInterval(ymTimer)
-              ymEOTCount = 0
-              termState = TS_YMR_GETPACKET // advance to get line num
-              ymPacketSize = 128 + 4 // 128 bytes + line, line inv + crc16
-              break
+              clearInterval(ymTimer);
+              ymEOTCount = 0;
+              termState = TS_YMR_GETPACKET; // advance to get line num
+              ymPacketSize = 128 + 4; // 128 bytes + line, line inv + crc16
+              break;
 
             case _STX:
-              clearInterval(ymTimer)
-              ymEOTCount = 0
-              termState = TS_YMR_GETPACKET // advance to get line num
-              ymPacketSize = 1024 + 4 // 128 bytes + line, line inv + crc16
-              break
+              clearInterval(ymTimer);
+              ymEOTCount = 0;
+              termState = TS_YMR_GETPACKET; // advance to get line num
+              ymPacketSize = 1024 + 4; // 128 bytes + line, line inv + crc16
+              break;
 
             case _EOT:
               // end of transmittion. save file.
-              clearInterval(ymTimer)
-              ymEOTCount++
+              clearInterval(ymTimer);
+              ymEOTCount++;
               if (ymEOTCount == 1) {
-                sendData(_ACK)
+                sendData(_ACK);
 
-                termState = TS_NORMAL
-                fadeScreen(false)
+                termState = TS_NORMAL;
+                fadeScreen(false);
 
                 if (ymFileSize > -1) {
-                  ymFileData = ymFileData.slice(0, ymFileSize)
+                  ymFileData = ymFileData.slice(0, ymFileSize);
                 } else {
                   // TODO : count CPMEOFs on end (work on this)
-                  throw 'EOT look for CMPEOF'
+                  throw "EOT look for CMPEOF";
                   //                              j = ymFileData.size - 1;
                   //                              while ((ymFileData[j] == _CPMEOF) && (j > 0))
                   //                                 j--;
                   //                              ymFileData = ymFileData.slice(0, j + 1);
                 }
-                saveAs(ymFileData, ymFileName)
-                result = data.slice(i + 1)
-                ymCancel()
-                break
+                saveAs(ymFileData, ymFileName);
+                result = data.slice(i + 1);
+                ymCancel();
+                break;
               }
-              sendData(_ACK)
-              break
+              sendData(_ACK);
+              break;
 
             case _CAN:
               // cancel from remote.
-              clearInterval(ymTimer)
-              ymEOTCount = 0
-              termState = TS_NORMAL
-              fadeScreen(false)
-              ymFileData = new Blob([], { type: 'application/octet-stream' })
-              result = data.slice(i + 1)
-              break
+              clearInterval(ymTimer);
+              ymEOTCount = 0;
+              termState = TS_NORMAL;
+              fadeScreen(false);
+              ymFileData = new Blob([], { type: "application/octet-stream" });
+              result = data.slice(i + 1);
+              break;
           }
-          break
+          break;
 
         case TS_YMR_GETPACKET:
           // read ymPacketSize bytes for packet
-          ymPacketBuff[ymPacketPos++] = b
+          ymPacketBuff[ymPacketPos++] = b;
           if (ymPacketPos == ymPacketSize) {
             // entire packet recieved. test lines and crc16
-            block = ymPacketBuff[0]
-            block2 = ymPacketBuff[1]
+            block = ymPacketBuff[0];
+            block2 = ymPacketBuff[1];
 
             // out of sequence
             if (block != ymNextBlock) {
               if (block == ymNextBlock - 1)
                 // resending last block.
-                sendData(_ACK)
-              else sendData(_NAK)
-              termState = TS_YMR_START
-              break
+                sendData(_ACK);
+              else sendData(_NAK);
+              termState = TS_YMR_START;
+              break;
             }
 
             // check block number
             if (block != (~block2 & 0xff)) {
-              sendData(_NAK)
-              termState = TS_YMR_START
-              break
+              sendData(_NAK);
+              termState = TS_YMR_START;
+              break;
             }
             // check crc16
             // uncertain the order for crc16 - swap if needed.
             crc16A =
               (ymPacketBuff[ymPacketPos - 2] << 8) |
-              ymPacketBuff[ymPacketPos - 1]
-            crc16B = calcCRC16(ymPacketBuff, 2, ymPacketSize - 4)
+              ymPacketBuff[ymPacketPos - 1];
+            crc16B = calcCRC16(ymPacketBuff, 2, ymPacketSize - 4);
 
             if (crc16A != crc16B) {
               //dump(ymPacketBuff, 2, ymPacketSize - 4);
-              sendData(_NAK)
-              termState = TS_YMR_START
-              break
+              sendData(_NAK);
+              termState = TS_YMR_START;
+              break;
             }
             if (block == 0 && ymFileData.size == 0) {
               // first packet. get filename and optional filesize
               //dump(ymPacketBuff, 0, ymPacketBuff.length);
-              ymFileName = ''
-              j = 2
+              ymFileName = "";
+              j = 2;
               while (ymPacketBuff[j])
-                ymFileName += String.fromCharCode(ymPacketBuff[j++])
-              ovl['filename'].innerHTML = ymFileName
+                ymFileName += String.fromCharCode(ymPacketBuff[j++]);
+              ovl["filename"].innerHTML = ymFileName;
 
-              j++ // skip over null.
+              j++; // skip over null.
 
               // check for filesize
               if (ymPacketBuff[j]) {
-                str = ''
+                str = "";
                 while (ymPacketBuff[j] != _SPACE && ymPacketBuff[j] != _NUL)
-                  str += String.fromCharCode(ymPacketBuff[j++])
-                ymFileSize = int(str) // known size
-                ovl['filesize'].innerHTML = formatSize(ymFileSize)
+                  str += String.fromCharCode(ymPacketBuff[j++]);
+                ymFileSize = int(str); // known size
+                ovl["filesize"].innerHTML = formatSize(ymFileSize);
               } else {
-                ymFileSize = -1 // unknown size
-                ovl['filesize'].innerHTML = 'Unknown'
+                ymFileSize = -1; // unknown size
+                ovl["filesize"].innerHTML = "Unknown";
               }
 
               // initialize blob to empty
-              ymFileData = new Blob([], { type: 'application/octet-stream' })
-              ovl['transferred'].innerHTML = '0 bytes'
+              ymFileData = new Blob([], { type: "application/octet-stream" });
+              ovl["transferred"].innerHTML = "0 bytes";
 
               // send ACK + C
-              sendData(_ACK)
-              sendData(_C)
-              termState = TS_YMR_START
+              sendData(_ACK);
+              sendData(_C);
+              termState = TS_YMR_START;
             } else {
               // append data to blob
-              tmp = new Uint8Array(ymPacketSize - 4)
+              tmp = new Uint8Array(ymPacketSize - 4);
               for (j = 0; j < ymPacketSize - 4; j++)
-                tmp[j] = ymPacketBuff[2 + j]
-              ymPacketBuff = []
-              tmpblob = new Blob([ymFileData, tmp])
-              ymFileData = tmpblob
-              ovl['transferred'].innerHTML = formatSize(ymFileData.size)
+                tmp[j] = ymPacketBuff[2 + j];
+              ymPacketBuff = [];
+              tmpblob = new Blob([ymFileData, tmp]);
+              ymFileData = tmpblob;
+              ovl["transferred"].innerHTML = formatSize(ymFileData.size);
 
               // send ACK
-              sendData(_ACK)
-              termState = TS_YMR_START
+              sendData(_ACK);
+              termState = TS_YMR_START;
             }
-            ymNextBlock = (block + 1) & 0xff
+            ymNextBlock = (block + 1) & 0xff;
           }
-          break
+          break;
       }
-      if (termState == TS_NORMAL) break
+      if (termState == TS_NORMAL) break;
     }
-    return result
+    return result;
   }
 
   // return human readable text for filesize
   function formatSize(size) {
     var mag,
-      mags = ['B', 'KB', 'MB', 'GB']
+      mags = ["B", "KB", "MB", "GB"];
 
     for (mag = 0; size >= 1000; size /= 1000, mag++) {}
-    return size.toFixed(2) + ' ' + mags[mag]
+    return size.toFixed(2) + " " + mags[mag];
   }
 
   // cancel ymodem transfer
   function ymCancel() {
-    clearInterval(ymTimer)
-    sendData(_CAN)
-    sendData(_CAN)
-    sendData(_CAN)
-    sendData(_CAN)
-    sendData(_CAN)
-    sendData(_CAN)
-    sendData(_CAN)
-    sendData(_CAN)
-    termState = TS_NORMAL
-    fadeScreen(false)
+    clearInterval(ymTimer);
+    sendData(_CAN);
+    sendData(_CAN);
+    sendData(_CAN);
+    sendData(_CAN);
+    sendData(_CAN);
+    sendData(_CAN);
+    sendData(_CAN);
+    sendData(_CAN);
+    termState = TS_NORMAL;
+    fadeScreen(false);
   }
 
   // send C's to remote to start download.
   function ymSendC() {
-    sendData(_C)
-    ymCCount++
+    sendData(_C);
+    ymCCount++;
     if (ymCCount > 8) {
       // abort after 8 tries.
-      termState = TS_NORMAL
-      clearInterval(ymTimer)
-      fadeScreen(false)
+      termState = TS_NORMAL;
+      clearInterval(ymTimer);
+      fadeScreen(false);
     }
   }
 
   // receive file from remote.
   function ymRecvStart() {
     // already have session started.
-    if (ovl.length) return
+    if (ovl.length) return;
 
     // send starting C's
-    termState = TS_YMR_START
+    termState = TS_YMR_START;
 
     // fade terminal - build file xfer ui.
-    fadeScreen(true)
-    ovl['title'].innerHTML = 'YModem Download'
-    ovl['filename'].innerHTML = 'Waiting for Remote...'
-    ovl['filesize'].innerHTML = ''
-    ovl['transferred'].innerHTML = ''
+    fadeScreen(true);
+    ovl["title"].innerHTML = "YModem Download";
+    ovl["filename"].innerHTML = "Waiting for Remote...";
+    ovl["filesize"].innerHTML = "";
+    ovl["transferred"].innerHTML = "";
 
-    ymNextBlock = 0
-    ymCCount = 0
-    ymSendC()
-    if (termState != TS_NORMAL) ymTimer = setInterval(ymSendC, 3000)
+    ymNextBlock = 0;
+    ymCCount = 0;
+    ymSendC();
+    if (termState != TS_NORMAL) ymTimer = setInterval(ymSendC, 3000);
   }
 
   // wait for ack / nak. if no response, resend last packet.
   function ymTimeOut() {
-    sendData(ymPacketBuff)
-    ymNakCount++
+    sendData(ymPacketBuff);
+    ymNakCount++;
   }
 
   function twosCompliment(v) {
-    return (255 - v) & 0xff
+    return (255 - v) & 0xff;
   }
 
   function highByte(v) {
-    return (v >>> 8) & 0xff
+    return (v >>> 8) & 0xff;
   }
 
   function lowByte(v) {
-    return v & 0xff
+    return v & 0xff;
   }
 
   // state machine for sending.
@@ -13560,11 +13573,11 @@ vtx: {
       j,
       pos,
       packetSize,
-      b
+      b;
 
     for (i = 0; i < data.length; i++) {
-      clearInterval(ymTimer)
-      b = data[i]
+      clearInterval(ymTimer);
+      b = data[i];
       switch (termState) {
         case TS_YMS_START:
           // wait for 'C'
@@ -13572,186 +13585,186 @@ vtx: {
             // build header packet
 
             // 128 byte header
-            packetSize = 128
+            packetSize = 128;
 
-            ymPacketBuff = new Uint8Array(5 + packetSize)
-            ymPacketBuff.fill(_NUL)
+            ymPacketBuff = new Uint8Array(5 + packetSize);
+            ymPacketBuff.fill(_NUL);
 
             // block packet prefix - size / block num
-            ymPacketBuff[0] = packetSize == 128 ? _SOH : _STX
-            ymPacketBuff[1] = ymNextBlock // block number 0
-            ymPacketBuff[2] = 255 - ymNextBlock // inverse block number
+            ymPacketBuff[0] = packetSize == 128 ? _SOH : _STX;
+            ymPacketBuff[1] = ymNextBlock; // block number 0
+            ymPacketBuff[2] = 255 - ymNextBlock; // inverse block number
 
             // filename charactes are ascii 33-126 via cleanFileName()
             str =
               ymFileName +
               NUL +
               ymFileSize.toString() +
-              ' ' +
+              " " +
               ymModifiedDate +
-              ' 0 0' // mode + serial #
+              " 0 0"; // mode + serial #
             for (j = 0; j < str.length; j++)
-              ymPacketBuff[3 + j] = str.charCodeAt(j)
+              ymPacketBuff[3 + j] = str.charCodeAt(j);
 
             // block packet suffix - crc16
-            crc16 = calcCRC16(ymPacketBuff, 3, packetSize)
-            ymPacketBuff[3 + packetSize] = highByte(crc16)
-            ymPacketBuff[4 + packetSize] = lowByte(crc16)
+            crc16 = calcCRC16(ymPacketBuff, 3, packetSize);
+            ymPacketBuff[3 + packetSize] = highByte(crc16);
+            ymPacketBuff[4 + packetSize] = lowByte(crc16);
 
             //console.log('Header Packet');
             //dump(ymPacketBuff, 0, ymPacketBuff.length);
-            sendData(ymPacketBuff)
+            sendData(ymPacketBuff);
 
-            termState = TS_YMS_PUTPACKET
-            ymFilePos = 0
-            ymNakCount = 0
-            ymEOTCount = 0
-            ymNextBlock = (ymNextBlock + 1) & 0xff
+            termState = TS_YMS_PUTPACKET;
+            ymFilePos = 0;
+            ymNakCount = 0;
+            ymEOTCount = 0;
+            ymNextBlock = (ymNextBlock + 1) & 0xff;
             // now need ACK + C
           } else {
             // wait for 10 seconds before abort
-            if (new Date().getTime() > ymSendStartTime + 10000) ymCancel()
+            if (new Date().getTime() > ymSendStartTime + 10000) ymCancel();
           }
-          break
+          break;
 
         case TS_YMS_PUTWAIT:
           // need a C to get past header ACK
           if (b == _C) {
-            ymNakCount = 0
+            ymNakCount = 0;
 
             // send first block
-            packetSize = 1024
+            packetSize = 1024;
 
-            ymPacketBuff = new Uint8Array(5 + packetSize)
-            ymPacketBuff.fill(_CPMEOF)
+            ymPacketBuff = new Uint8Array(5 + packetSize);
+            ymPacketBuff.fill(_CPMEOF);
 
             // block packet prefix - size / block num
-            ymPacketBuff[0] = packetSize == 128 ? _SOH : _STX
-            ymPacketBuff[1] = ymNextBlock // block number 0
-            ymPacketBuff[2] = 255 - ymNextBlock // inverse block number
+            ymPacketBuff[0] = packetSize == 128 ? _SOH : _STX;
+            ymPacketBuff[1] = ymNextBlock; // block number 0
+            ymPacketBuff[2] = 255 - ymNextBlock; // inverse block number
 
             // copy chunk of file data
-            pos = ymFilePos
+            pos = ymFilePos;
             for (j = 0; j < packetSize; j++, pos++) {
-              if (pos < ymFileSize) ymPacketBuff[3 + j] = ymFileData[pos]
-              else break
+              if (pos < ymFileSize) ymPacketBuff[3 + j] = ymFileData[pos];
+              else break;
             }
 
             // block packet suffix - crc16
-            crc16 = calcCRC16(ymPacketBuff, 3, packetSize)
-            ymPacketBuff[3 + packetSize] = highByte(crc16)
-            ymPacketBuff[4 + packetSize] = lowByte(crc16)
+            crc16 = calcCRC16(ymPacketBuff, 3, packetSize);
+            ymPacketBuff[3 + packetSize] = highByte(crc16);
+            ymPacketBuff[4 + packetSize] = lowByte(crc16);
 
             // send data
-            sendData(ymPacketBuff)
-            ymFilePos += packetSize
-            if (ymFilePos > ymFileSize) ymFilePos = ymFileSize
+            sendData(ymPacketBuff);
+            ymFilePos += packetSize;
+            if (ymFilePos > ymFileSize) ymFilePos = ymFileSize;
 
-            termState = TS_YMS_PUTPACKET
-            ymNextBlock = (ymNextBlock + 1) & 0xff
+            termState = TS_YMS_PUTPACKET;
+            ymNextBlock = (ymNextBlock + 1) & 0xff;
             // back to normal data-> + ACK/NAK<-
           }
           // ?!
-          else break
+          else break;
 
         case TS_YMS_PUTPACKET:
           if (b == _NAK) {
             // resend last packet.
-            sendData(ymPacketBuff)
-            ymNakCount++
+            sendData(ymPacketBuff);
+            ymNakCount++;
             // abort after 10 NAKs
-            if (ymNakCount > 10) ymCancel()
+            if (ymNakCount > 10) ymCancel();
           } else if (b == _ACK) {
             // last packet good.
-            ymNakCount = 0
+            ymNakCount = 0;
             if (ymFilePos == 0 && ymNextBlock == 1) {
               // wait for C.
-              ovl['transferred'].innerHTML = 'Sent header.'
-              termState = TS_YMS_PUTWAIT
+              ovl["transferred"].innerHTML = "Sent header.";
+              termState = TS_YMS_PUTWAIT;
             } else if (ymFilePos == ymFileSize) {
               // send EOT
-              ovl['transferred'].innerHTML = formatSize(ymFileSize)
+              ovl["transferred"].innerHTML = formatSize(ymFileSize);
               if (ymEOTCount) {
                 // done. transferred.
-                termState = TS_NORMAL
-                ymCancel()
+                termState = TS_NORMAL;
+                ymCancel();
               }
-              ymEOTCount++
-              ymPacketBuff = new Uint8Array(1)
-              ymPacketBuff[0] = _EOT
-              sendData(ymPacketBuff)
+              ymEOTCount++;
+              ymPacketBuff = new Uint8Array(1);
+              ymPacketBuff[0] = _EOT;
+              sendData(ymPacketBuff);
             } else {
               // send data packet
-              ovl['transferred'].innerHTML = formatSize(ymFilePos)
+              ovl["transferred"].innerHTML = formatSize(ymFilePos);
 
               // send data packet 2+
-              packetSize = 1024
+              packetSize = 1024;
 
-              ymPacketBuff = new Uint8Array(5 + packetSize)
-              ymPacketBuff.fill(_CPMEOF)
+              ymPacketBuff = new Uint8Array(5 + packetSize);
+              ymPacketBuff.fill(_CPMEOF);
 
               // block packet prefix - size / block num
-              ymPacketBuff[0] = packetSize == 128 ? _SOH : _STX
-              ymPacketBuff[1] = ymNextBlock // block number 0
-              ymPacketBuff[2] = 255 - ymNextBlock // inverse block number
+              ymPacketBuff[0] = packetSize == 128 ? _SOH : _STX;
+              ymPacketBuff[1] = ymNextBlock; // block number 0
+              ymPacketBuff[2] = 255 - ymNextBlock; // inverse block number
 
               // copy chunk of file data
-              pos = ymFilePos
+              pos = ymFilePos;
               for (j = 0; j < packetSize; j++, pos++) {
-                if (pos < ymFileSize) ymPacketBuff[3 + j] = ymFileData[pos]
-                else break
+                if (pos < ymFileSize) ymPacketBuff[3 + j] = ymFileData[pos];
+                else break;
               }
 
               // block packet suffix - crc16
-              crc16 = calcCRC16(ymPacketBuff, 3, packetSize)
-              ymPacketBuff[3 + packetSize] = highByte(crc16)
-              ymPacketBuff[4 + packetSize] = lowByte(crc16)
+              crc16 = calcCRC16(ymPacketBuff, 3, packetSize);
+              ymPacketBuff[3 + packetSize] = highByte(crc16);
+              ymPacketBuff[4 + packetSize] = lowByte(crc16);
 
-              sendData(ymPacketBuff)
-              ymFilePos += packetSize
-              if (ymFilePos > ymFileSize) ymFilePos = ymFileSize
+              sendData(ymPacketBuff);
+              ymFilePos += packetSize;
+              if (ymFilePos > ymFileSize) ymFilePos = ymFileSize;
 
-              ymNextBlock = (ymNextBlock + 1) & 0xff
+              ymNextBlock = (ymNextBlock + 1) & 0xff;
             }
           } else if (b == _CAN) {
-            ymCancel()
+            ymCancel();
           } else {
             // ?!
           }
-          break
+          break;
       }
-      if (termState == TS_NORMAL) break
+      if (termState == TS_NORMAL) break;
     }
-    return []
+    return [];
   }
 
   // file loaded. commence upload.
   function ymFileLoaded(e) {
-    var str, i, pos
+    var str, i, pos;
 
-    ymFileData = new Uint8Array(e.target.result)
-    ymFileSize = ymFileData.byteLength
-    ovl['filesize'].innerHTML = formatSize(ymFileSize)
-    ovl['transferred'].innerHTML = formatSize(0)
-    termState = TS_YMS_START // wait for 'G'.
-    ymNextBlock = 0
-    ymFilePos = 0
-    ymSendStartTime = new Date().getTime()
+    ymFileData = new Uint8Array(e.target.result);
+    ymFileSize = ymFileData.byteLength;
+    ovl["filesize"].innerHTML = formatSize(ymFileSize);
+    ovl["transferred"].innerHTML = formatSize(0);
+    termState = TS_YMS_START; // wait for 'G'.
+    ymNextBlock = 0;
+    ymFilePos = 0;
+    ymSendStartTime = new Date().getTime();
   }
 
   // file selected. load it up.
   function ymFileLoad(e) {
     var i,
       file,
-      reader = new FileReader()
-    ;(file = e.target.files[0]), (name = file.name)
-    i = name.lastIndexOf('/')
-    if (i == -1) i = name.lastIndexOf('\\')
-    ymFileName = cleanFileName(name.substring(i + 1))
-    ymModifiedDate = Math.floor(file.lastModified / 1000).toString(8)
-    ovl['filename'].innerHTML = ymFileName
-    reader.onload = ymFileLoaded
-    reader.readAsArrayBuffer(file)
+      reader = new FileReader();
+    (file = e.target.files[0]), (name = file.name);
+    i = name.lastIndexOf("/");
+    if (i == -1) i = name.lastIndexOf("\\");
+    ymFileName = cleanFileName(name.substring(i + 1));
+    ymModifiedDate = Math.floor(file.lastModified / 1000).toString(8);
+    ovl["filename"].innerHTML = ymFileName;
+    reader.onload = ymFileLoaded;
+    reader.readAsArrayBuffer(file);
   }
 
   // remove spaces and stuff.
@@ -13760,115 +13773,115 @@ vtx: {
       l,
       c,
       ch,
-      strout = '',
-      badchrs = '/\\?%*:|"<> '
+      strout = "",
+      badchrs = '/\\?%*:|"<> ';
 
     for (i = 0, l = str.length; i < l; i++) {
-      c = str.charAt(i)
-      ch = str.charCodeAt(i)
-      if (between(ch, 32, 126) && badchrs.indexOf(c) == -1) strout += c
+      c = str.charAt(i);
+      ch = str.charCodeAt(i);
+      if (between(ch, 32, 126) && badchrs.indexOf(c) == -1) strout += c;
     }
-    if (!strout.length) strout = 'untitled'
-    return strout
+    if (!strout.length) strout = "untitled";
+    return strout;
   }
 
   // send file to remove
   function ymSendStart() {
-    var el
+    var el;
 
     // already have session started.
-    if (ovl.length) return
+    if (ovl.length) return;
 
     // fade terminal - build file xfer ui.
-    fadeScreen(true)
-    ovl['title'].innerHTML = 'YModem Upload'
-    ovl['filename'].innerHTML = ''
-    ovl['filesize'].innerHTML = ''
-    ovl['transferred'].innerHTML = ''
+    fadeScreen(true);
+    ovl["title"].innerHTML = "YModem Upload";
+    ovl["filename"].innerHTML = "";
+    ovl["filesize"].innerHTML = "";
+    ovl["transferred"].innerHTML = "";
 
     // fetch file.
     el = domElement(
-      'input',
+      "input",
       {
-        type: 'file',
-        onchange: ymFileLoad,
+        type: "file",
+        onchange: ymFileLoad
       },
       {
-        position: 'relative',
-        left: '1px',
-        top: '1px',
-        width: '1px',
-        height: '1px',
+        position: "relative",
+        left: "1px",
+        top: "1px",
+        width: "1px",
+        height: "1px"
       }
-    )
+    );
 
-    ovl['dialog'].appendChild(el)
-    el.click()
-    ovl['dialog'].removeChild(el)
+    ovl["dialog"].appendChild(el);
+    el.click();
+    ovl["dialog"].removeChild(el);
   }
 
   function dump(buff, start, len) {
     var i,
       str,
       alpha,
-      count = 0
+      count = 0;
 
-    str = itoh(start, 4) + ':'
-    alpha = ''
+    str = itoh(start, 4) + ":";
+    alpha = "";
     for (i = start; i < start + len; i++) {
-      str += ' ' + itoh(buff[i], 2)
-      if (between(buff[i], 32, 126)) alpha += String.fromCharCode(buff[i])
-      else alpha += '.'
+      str += " " + itoh(buff[i], 2);
+      if (between(buff[i], 32, 126)) alpha += String.fromCharCode(buff[i]);
+      else alpha += ".";
 
-      count = (count + 1) & 0xf
+      count = (count + 1) & 0xf;
       if (!count) {
-        str += ': ' + alpha + '\r\n' + itoh(i + 1, 4) + ':'
-        alpha = ''
+        str += ": " + alpha + "\r\n" + itoh(i + 1, 4) + ":";
+        alpha = "";
       }
     }
-    for (i = count; i < 16; i++) str += '   '
-    str += ': ' + alpha
-    console.log(str)
+    for (i = count; i < 16; i++) str += "   ";
+    str += ": " + alpha;
+    console.log(str);
   }
   function nop() {}
 
   // convert character ch (0-255) to unicode
   function getUnicode(cp, ch) {
-    if (cp == 'UTF8' || cp == 'UTF16') return ch
+    if (cp == "UTF8" || cp == "UTF16") return ch;
 
     var d = 0,
-      cplut = codePageData[cp] || codePageData[codePageAKAs[cp]]
+      cplut = codePageData[cp] || codePageData[codePageAKAs[cp]];
 
     if (cplut) {
       switch (cplut.length) {
         case 256:
-          d = cplut[ch]
-          break
+          d = cplut[ch];
+          break;
 
         case 128:
-          d = ch < 128 ? codePageData['ASCII'][ch] : cplut[ch - 128]
-          break
+          d = ch < 128 ? codePageData["ASCII"][ch] : cplut[ch - 128];
+          break;
 
         case 96:
-          d = ch < 160 ? codePageData['ASCII'][ch] : cplut[ch - 160]
-          break
+          d = ch < 160 ? codePageData["ASCII"][ch] : cplut[ch - 160];
+          break;
 
         default:
           // default to 437 if not found.
-          d = codePageData['CP437'][ch]
-          break
+          d = codePageData["CP437"][ch];
+          break;
       }
     }
-    return d
+    return d;
   }
 
   // because IE and Safari are still in the stone age.
   function Uint8indexOf(ba, val) {
-    var i
+    var i;
     for (i = 0; i < ba.length; i++) {
-      if (ba[i] == val) return i
+      if (ba[i] == val) return i;
     }
-    return -1
+    return -1;
   }
 
   // send data to remote (or echo local if not connected)
@@ -13876,21 +13889,21 @@ vtx: {
   // add convert from native to node's codepage.
   // need to escape 0xFF if in telnet mode!
   function sendData(data) {
-    var i, l, str, pos, len, tmp
+    var i, l, str, pos, len, tmp;
 
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       // string to aray buffer
-      str = data
-      l = str.length
-      data = new Uint8Array(l)
-      for (i = 0; i < l; i++) data[i] = str.charCodeAt(i)
-    } else if (typeof data === 'number') {
+      str = data;
+      l = str.length;
+      data = new Uint8Array(l);
+      for (i = 0; i < l; i++) data[i] = str.charCodeAt(i);
+    } else if (typeof data === "number") {
       // byte/character to aray buffer
-      str = String.fromCharCode(data)
-      data = new Uint8Array([data])
+      str = String.fromCharCode(data);
+      data = new Uint8Array([data]);
     }
 
-    if (!(data instanceof Uint8Array)) throw 'Invalid data in sendData().'
+    if (!(data instanceof Uint8Array)) throw "Invalid data in sendData().";
 
     if (vtxdata.telnet) {
       // escape 0xFF's
@@ -13898,101 +13911,101 @@ vtx: {
       if (Uint8indexOf(data, 0xff) >= 0) {
         //        if (data.indexOf(0xFF) >= 0) {
         // spilt up / recombine
-        tmp = []
-        len = 0
+        tmp = [];
+        len = 0;
         while ((pos = Uint8indexOf(data, 0xff)) >= 0) {
-          tmp.push(data.slice(0, pos))
-          len += pos
-          tmp.push(new Uint8Array([0xff, 0xff]))
-          len += 2
-          data = data.slice(pos + 1)
+          tmp.push(data.slice(0, pos));
+          len += pos;
+          tmp.push(new Uint8Array([0xff, 0xff]));
+          len += 2;
+          data = data.slice(pos + 1);
         }
-        len += data.length
-        tmp.push(data)
+        len += data.length;
+        tmp.push(data);
 
         // join tmp into new data
-        data = new Uint8Array(len)
+        data = new Uint8Array(len);
         for (pos = 0, i = 0; i < tmp.length; i++) {
-          data.set(tmp[i], pos)
-          pos += tmp[i].length
+          data.set(tmp[i], pos);
+          pos += tmp[i].length;
         }
       }
     }
 
     // check code page conversions.
     if (ws && ws.readyState == 1 && termState != TS_OFFLINE) {
-      ws.send(data.buffer)
+      ws.send(data.buffer);
     } else {
-      conBufferOut(str)
-      crsrDraw()
+      conBufferOut(str);
+      crsrDraw();
     }
   }
 
   // poke a character
   function conPutChar(rownum, colnum, chr, attr) {
     // expand if needed
-    expandToRow(rownum)
-    expandToCol(rownum, colnum)
-    if (chr == 127) nop()
+    expandToRow(rownum);
+    expandToCol(rownum, colnum);
+    if (chr == 127) nop();
     conText[rownum] = conText[rownum].splice(
       colnum,
       1,
       String.fromCharCode(chr)
-    )
-    conCellAttr[rownum][colnum] = attr
-    renderCell(rownum, colnum)
+    );
+    conCellAttr[rownum][colnum] = attr;
+    renderCell(rownum, colnum);
   }
 
   // output character using current attribute at cursor position.
   function conPrintChar(chr) {
-    crsrSkipTime = new Date().getTime()
-    conPutChar(crsrRow, crsrCol, chr, cellAttr)
-    crsrCol++
+    crsrSkipTime = new Date().getTime();
+    conPutChar(crsrRow, crsrCol, chr, cellAttr);
+    crsrCol++;
     if (!modeAutoWrap) {
-      if (crsrCol >= crtCols) crsrCol--
+      if (crsrCol >= crtCols) crsrCol--;
     } else {
       if (crsrCol == colsOnRow(crsrRow)) {
-        crsrCol = 0
-        crsrRow++
+        crsrCol = 0;
+        crsrRow++;
       }
     }
-    lastChar = chr
+    lastChar = chr;
   }
 
   // erase hotspots on row from col1 to col2
   function clearHotSpotsRow(row, col1, col2) {
-    var hs, i
+    var hs, i;
     for (i = conHotSpots.length - 1; i >= 0; i--) {
-      hs = conHotSpots[i]
+      hs = conHotSpots[i];
       if (hs.row == row && hs.col >= col1 && hs.col <= col2)
-        conHotSpots.splice(i, 1)
+        conHotSpots.splice(i, 1);
     }
   }
 
   // erase hotspots from row1 to row2
   function clearHotSpotsRows(row1, row2) {
-    var hs, i
+    var hs, i;
     for (i = conHotSpots.length - 1; i >= 0; i--) {
-      hs = conHotSpots[i]
-      if (between(hs.row, row1, row2)) conHotSpots.splice(i, 1)
+      hs = conHotSpots[i];
+      if (between(hs.row, row1, row2)) conHotSpots.splice(i, 1);
     }
   }
 
   // move hotspots on row from col1 to col2 by coladj cols
   function moveHotSpotsRow(row, col1, col2, coladj) {
-    var hs, i
+    var hs, i;
     for (i = conHotSpots.length - 1; i >= 0; i--) {
-      hs = conHotSpots[i]
-      if (hs.row == row && between(hs.col, col1, col2)) hs.col += coladj
+      hs = conHotSpots[i];
+      if (hs.row == row && between(hs.col, col1, col2)) hs.col += coladj;
     }
   }
 
   // move hotspots from row1 to row2 by rowadj rows
   function moveHotSpotsRows(row1, row2, rowadj) {
-    var hs, i
+    var hs, i;
     for (i = conHotSpots.length - 1; i >= 0; i--) {
-      hs = conHotSpots[i]
-      if (between(hs.row, row1, row2)) hs.row += rowadj
+      hs = conHotSpots[i];
+      if (between(hs.row, row1, row2)) hs.row += rowadj;
     }
   }
 
@@ -14005,49 +14018,49 @@ vtx: {
       h, // dimensions
       cnvf,
       cnvt, // canvases to move from / to
-      ctxt // canvas context
+      ctxt; // canvas context
 
     //    rowf = getRowElement(fromrow);
     //    rowt = getRowElement(torow);
 
-    width = getRowAttrWidth(conRowAttr[fromrow]) / 100
-    w = xScale * colSize * width
-    h = fontSize
+    width = getRowAttrWidth(conRowAttr[fromrow]) / 100;
+    w = xScale * colSize * width;
+    h = fontSize;
 
     // copy canvas's
     // TODO : check row size changes and adjust canvas
-    cnvf = conCanvas[fromrow]
+    cnvf = conCanvas[fromrow];
     if (!cnvf) {
-      rowf = getRowElement(fromrow)
+      rowf = getRowElement(fromrow);
       cnvf = domElement(
-        'canvas',
+        "canvas",
         {
           width: crtCols * w,
-          height: h + 16,
+          height: h + 16
         },
-        { zIndex: '50' }
-      )
-      rowf.appendChild(cnvf)
-      conCanvas[fromrow] = cnvf
+        { zIndex: "50" }
+      );
+      rowf.appendChild(cnvf);
+      conCanvas[fromrow] = cnvf;
     }
 
-    cnvt = conCanvas[torow]
+    cnvt = conCanvas[torow];
     if (!cnvt) {
-      rowt = getRowElement(torow)
+      rowt = getRowElement(torow);
       cnvt = domElement(
-        'canvas',
+        "canvas",
         {
           width: crtCols * w,
-          height: h + 16,
+          height: h + 16
         },
-        { zIndex: '50' }
-      )
-      rowt.appendChild(cnvt)
-      conCanvas[torow] = cnvt
+        { zIndex: "50" }
+      );
+      rowt.appendChild(cnvt);
+      conCanvas[torow] = cnvt;
     }
-    ctxt = cnvt.getContext('2d')
-    ctxt.clearRect(0, 0, crtCols * w, h + 16)
-    ctxt.drawImage(cnvf, 0, 0)
+    ctxt = cnvt.getContext("2d");
+    ctxt.clearRect(0, 0, crtCols * w, h + 16);
+    ctxt.drawImage(cnvf, 0, 0);
   }
 
   // scroll screen up 1 row
@@ -14066,94 +14079,94 @@ vtx: {
       fromRow,
       toRow,
       j,
-      hs
+      hs;
 
     if (modeRegion) {
-      fromRow = regionTopRow
-      toRow = regionBottomRow
+      fromRow = regionTopRow;
+      toRow = regionBottomRow;
     } else {
-      fromRow = 0
-      toRow = conRowAttr.length - 1
+      fromRow = 0;
+      toRow = conRowAttr.length - 1;
     }
 
-    expandToRow(crtRows)
+    expandToRow(crtRows);
     for (j = fromRow; j < toRow; j++) {
-      conText[j] = conText[j + 1]
-      conCellAttr[j] = conCellAttr[j + 1]
-      conRowAttr[j] = conRowAttr[j + 1]
+      conText[j] = conText[j + 1];
+      conCellAttr[j] = conCellAttr[j + 1];
+      conRowAttr[j] = conRowAttr[j + 1];
 
-      copyRow(j + 1, j)
+      copyRow(j + 1, j);
     }
     // clear bottow row
-    conText[toRow] = ''
-    conCellAttr[toRow] = []
-    conRowAttr[toRow] = defRowAttr
-    redrawRow(toRow)
+    conText[toRow] = "";
+    conCellAttr[toRow] = [];
+    conRowAttr[toRow] = defRowAttr;
+    redrawRow(toRow);
 
     // move / clear hotspots
-    clearHotSpotsRow(fromRow, 0, 999)
-    moveHotSpotsRows(fromRow + 1, toRow, -1)
+    clearHotSpotsRow(fromRow, 0, 999);
+    moveHotSpotsRows(fromRow + 1, toRow, -1);
   }
 
   // scroll screen down 1 row
   function scrollDown() {
-    var fromRow, toRow, j, hs
+    var fromRow, toRow, j, hs;
 
     if (modeRegion) {
-      fromRow = regionTopRow
-      toRow = regionBottomRow
+      fromRow = regionTopRow;
+      toRow = regionBottomRow;
     } else {
-      fromRow = 0
-      toRow = conRowAttr.length - 1
+      fromRow = 0;
+      toRow = conRowAttr.length - 1;
     }
 
-    expandToRow(crtRows)
+    expandToRow(crtRows);
     for (j = toRow; j > fromRow; j--) {
-      conText[j] = conText[j - 1]
-      conCellAttr[j] = conCellAttr[j - 1]
-      conRowAttr[j] = conRowAttr[j - 1]
+      conText[j] = conText[j - 1];
+      conCellAttr[j] = conCellAttr[j - 1];
+      conRowAttr[j] = conRowAttr[j - 1];
 
-      copyRow(j - 1, j)
+      copyRow(j - 1, j);
     }
     // clear top row
-    conText[fromRow] = ''
-    conCellAttr[fromRow] = []
-    conRowAttr[fromRow] = defRowAttr
-    redrawRow(fromRow)
+    conText[fromRow] = "";
+    conCellAttr[fromRow] = [];
+    conRowAttr[fromRow] = defRowAttr;
+    redrawRow(fromRow);
 
     // move / clear hotspots
-    clearHotSpotsRow(toRow, 0, 999)
-    moveHotSpotsRows(fromRow, toRow - 1, +1)
+    clearHotSpotsRow(toRow, 0, 999);
+    moveHotSpotsRows(fromRow, toRow - 1, +1);
   }
 
   function resetTerminal() {
-    var i
+    var i;
 
-    modeVTXANSI = false
-    modeBlinkBright = false
-    modeCursor = true
-    modeBoldFont = false
-    modeNoBold = false
-    modeBlinkFont = false
-    modeNoBlink = false
-    conBaud = 0
-    modeDOORWAY = false
-    cellAttr = defCellAttr
-    pageAttr = defPageAttr
-    crsrAttr = defCrsrAttr
+    modeVTXANSI = false;
+    modeBlinkBright = false;
+    modeCursor = true;
+    modeBoldFont = false;
+    modeNoBold = false;
+    modeBlinkFont = false;
+    modeNoBlink = false;
+    conBaud = 0;
+    modeDOORWAY = false;
+    cellAttr = defCellAttr;
+    pageAttr = defPageAttr;
+    crsrAttr = defCrsrAttr;
 
-    pageDiv.parentNode.style['background-color'] =
-      ansiColors[(pageAttr >>> 8) & 0xff]
-    pageDiv.style['background-color'] = ansiColors[pageAttr & 0xff]
-    conFontNum = 0 // current font being used.
+    pageDiv.parentNode.style["background-color"] =
+      ansiColors[(pageAttr >>> 8) & 0xff];
+    pageDiv.style["background-color"] = ansiColors[pageAttr & 0xff];
+    conFontNum = 0; // current font being used.
     for (i = 0; i < 10; i++) {
       // set default font selects.
-      conFont[i] = fontName
-      conFontCP[i] = codePage
+      conFont[i] = fontName;
+      conFontCP[i] = codePage;
     }
     for (i = 10; i < 13; i++) {
-      conFont[i] = fontName // text w/separated blocks
-      conFontCP[i] = 'TELETEXT'
+      conFont[i] = fontName; // text w/separated blocks
+      conFontCP[i] = "TELETEXT";
     }
   }
 
@@ -14161,7 +14174,7 @@ vtx: {
     ttxSeparated, // separeted blocks?
     ttxDouble, // in double height text
     ttxBottom, // drawing bottom halfs flag
-    ttxHeld // held / release?
+    ttxHeld; // held / release?
 
   // the big function - ansi sequence state machine. ###CALL conBufferOut!###
   function conCharOut(chr) {
@@ -14189,53 +14202,53 @@ vtx: {
       csize,
       spriteTop,
       spriteLeft,
-      el
+      el;
 
     if (modeTeletext) {
       // teletext burst mode - ESC to exit to ANSI
       // if in col 0, set row for teletext
       if (chr == _ESC) {
         // exit
-        cellAttr = cellSaveAttr // restore attributes
-        modeAutoWrap = modeSaveAutoWrap
-        modeTeletext = false
+        cellAttr = cellSaveAttr; // restore attributes
+        modeAutoWrap = modeSaveAutoWrap;
+        modeTeletext = false;
       } else {
         if (crsrCol == 0) {
           // all rows are 40 cols.
           if (crtCols >= 80) {
-            conRowAttr[crsrRow] &= ~(A_ROW_DISPLAY_MASK | A_ROW_WIDTH_MASK)
-            conRowAttr[crsrRow] |= A_ROW_WIDTH_200
-            adjustRow(crsrRow)
+            conRowAttr[crsrRow] &= ~(A_ROW_DISPLAY_MASK | A_ROW_WIDTH_MASK);
+            conRowAttr[crsrRow] |= A_ROW_WIDTH_200;
+            adjustRow(crsrRow);
           }
           // reset attributes for new row
-          cellAttr = 0xa0000000 | (ttxToAnsiColor[0] << 8) | ttxToAnsiColor[7]
-          ttxGraphics = false
-          ttxSeparated = false
-          ttxBottom = false
-          if (ttxDouble) ttxBottom = true
-          ttxDouble = false
-          ttxHeld = false
+          cellAttr = 0xa0000000 | (ttxToAnsiColor[0] << 8) | ttxToAnsiColor[7];
+          ttxGraphics = false;
+          ttxSeparated = false;
+          ttxBottom = false;
+          if (ttxDouble) ttxBottom = true;
+          ttxDouble = false;
+          ttxHeld = false;
         }
         if (ttxBottom) {
           // ignore all text this row. only drop bottoms of previous row
           // get text from above row.
           if (chr == 0x0a) {
-            crsrCol = 0
-            crsrRow++
-            expandToRow(crsrRow)
+            crsrCol = 0;
+            crsrRow++;
+            expandToRow(crsrRow);
           } else {
-            chr = conText[crsrRow - 1].charCodeAt(crsrCol)
-            cellAttr = conCellAttr[crsrRow - 1][crsrCol]
-            var disp = getCellAttrDisplay(cellAttr)
+            chr = conText[crsrRow - 1].charCodeAt(crsrCol);
+            cellAttr = conCellAttr[crsrRow - 1][crsrCol];
+            var disp = getCellAttrDisplay(cellAttr);
             if (disp == A_CELL_DISPLAY_TOP)
               // this is a bottom.
-              cellAttr = setCellAttrDisplay(cellAttr, A_CELL_DISPLAY_BOTTOM)
+              cellAttr = setCellAttrDisplay(cellAttr, A_CELL_DISPLAY_BOTTOM);
             else {
               // else no show.
-              cellAttr = setCellAttrDisplay(cellAttr, A_CELL_DISPLAY_NORMAL)
-              chr = 0x20
+              cellAttr = setCellAttrDisplay(cellAttr, A_CELL_DISPLAY_NORMAL);
+              chr = 0x20;
             }
-            conPrintChar(chr)
+            conPrintChar(chr);
           }
         } else {
           switch (chr) {
@@ -14246,41 +14259,41 @@ vtx: {
             case 0x05: // magenta alpha
             case 0x06: // cyan alpha
             case 0x07: // white alpha **
-              ttxGraphics = false
-              cellAttr = setCellAttrFG(cellAttr, ttxToAnsiColor[chr])
-              conPrintChar(0x20)
-              break
+              ttxGraphics = false;
+              cellAttr = setCellAttrFG(cellAttr, ttxToAnsiColor[chr]);
+              conPrintChar(0x20);
+              break;
 
             case 0x08: // blink
             case 0x09: // blink off **
-              cellAttr = setCellAttrBlinkFast(cellAttr, chr == 0x08)
-              conPrintChar(0x20)
-              break
+              cellAttr = setCellAttrBlinkFast(cellAttr, chr == 0x08);
+              conPrintChar(0x20);
+              break;
 
             case 0x0a: // box end (NL?)
-              crsrCol = 0
-              crsrRow++
-              expandToRow(crsrRow)
-              break
+              crsrCol = 0;
+              crsrRow++;
+              expandToRow(crsrRow);
+              break;
 
             case 0x0b: // box start (ignore)
-              break
+              break;
 
             case 0x0c: // normal height **
-              cellAttr = setCellAttrDisplay(cellAttr, A_CELL_DISPLAY_NORMAL)
-              conPrintChar(0x20)
-              break
+              cellAttr = setCellAttrDisplay(cellAttr, A_CELL_DISPLAY_NORMAL);
+              conPrintChar(0x20);
+              break;
 
             case 0x0d: // double height
-              cellAttr = setCellAttrDisplay(cellAttr, A_CELL_DISPLAY_TOP)
-              ttxDouble = true
-              conPrintChar(0x20)
-              break
+              cellAttr = setCellAttrDisplay(cellAttr, A_CELL_DISPLAY_TOP);
+              ttxDouble = true;
+              conPrintChar(0x20);
+              break;
 
             case 0x0e: // S0 (ignore)
             case 0x0f: // S1 (ignore)
             case 0x10: // DLE (ignore)
-              break
+              break;
 
             case 0x11: // red gfx
             case 0x12: // green gfx
@@ -14289,135 +14302,135 @@ vtx: {
             case 0x15: // magenta gfx
             case 0x16: // cyan gfx
             case 0x17: // white gfx
-              ttxGraphics = true
-              cellAttr = setCellAttrFG(cellAttr, ttxToAnsiColor[chr - 0x10])
-              conPrintChar(0x20)
-              break
+              ttxGraphics = true;
+              cellAttr = setCellAttrFG(cellAttr, ttxToAnsiColor[chr - 0x10]);
+              conPrintChar(0x20);
+              break;
 
             case 0x18: // conceal (ignore)
-              break
+              break;
 
             case 0x19: // solid block gfx **
             case 0x1a: // separated block gfx
-              ttxSeparated = chr == 0x1a
-              conPrintChar(0x20)
-              break
+              ttxSeparated = chr == 0x1a;
+              conPrintChar(0x20);
+              break;
 
             case 0x1c: // black background
-              cellAttr = setCellAttrBG(cellAttr, ttxToAnsiColors[0])
-              conPrintChar(0x20)
-              break
+              cellAttr = setCellAttrBG(cellAttr, ttxToAnsiColor[0]);
+              conPrintChar(0x20);
+              break;
 
             case 0x1d: // new background
-              cellAttr = setCellAttrBG(cellAttr, getCellAttrFG(cellAttr))
-              conPrintChar(0x20)
-              break
+              cellAttr = setCellAttrBG(cellAttr, getCellAttrFG(cellAttr));
+              conPrintChar(0x20);
+              break;
 
             case 0x1e: // hold gfx
             case 0x1f: // release gfx **
-              txtHeld = chr == 0x1e
-              conPrintChar(0x20)
-              break
+              ttxHeld = chr == 0x1e;
+              conPrintChar(0x20);
+              break;
 
             default:
               // print it.
-              chr &= 0x7f // only use 7 bits
+              chr &= 0x7f; // only use 7 bits
               // set font base on ttxGraphics / ttxSeparated
-              var fnt = ttxGraphics ? (ttxSeparated ? 12 : 11) : 10
-              cellAttr = setCellAttrFont(cellAttr, fnt)
-              conPrintChar(chr)
-              break
+              var fnt = ttxGraphics ? (ttxSeparated ? 12 : 11) : 10;
+              cellAttr = setCellAttrFont(cellAttr, fnt);
+              conPrintChar(chr);
+              break;
           }
         }
-        crsrrender = true
+        crsrrender = true;
       }
     } else if (cbm) {
       // PETSCII ------------------------------------------------------------
       switch (chr) {
         case 3: // run/stop
           // ignore
-          break
+          break;
 
         case 5: // white
-          cellAttr = setCellAttrFG(cellAttr, 1)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 1);
+          break;
 
         case 7: // bell
-          soundBell.pause()
-          soundBell.play()
-          break
+          soundBell.pause();
+          soundBell.play();
+          break;
 
         case 8: // shift disable
-          modeCBMShift = false
-          break
+          modeCBMShift = false;
+          break;
 
         case 9: // shift enable
-          modeCBMShift = true
-          break
+          modeCBMShift = true;
+          break;
 
         case 13: // cr
         case 141: // lf
-          crsrCol = 0
-          crsrRow++
-          crsrrender = true
-          cellAttr = setCellAttrReverse(cellAttr, false)
-          break
+          crsrCol = 0;
+          crsrRow++;
+          crsrrender = true;
+          cellAttr = setCellAttrReverse(cellAttr, false);
+          break;
 
         case 14: // text mode
-          conFontNum = 1
-          renderAll()
-          break
+          conFontNum = 1;
+          renderAll();
+          break;
 
         case 17: // down
-          crsrRow++
-          crsrrender = true
-          break
+          crsrRow++;
+          crsrrender = true;
+          break;
 
         case 18: // rev on
-          cellAttr = setCellAttrReverse(cellAttr, true)
-          break
+          cellAttr = setCellAttrReverse(cellAttr, true);
+          break;
 
         case 19: // home
-          crsrRow = 0
-          crsrCol = 0
-          crsrrender = true
-          break
+          crsrRow = 0;
+          crsrCol = 0;
+          crsrrender = true;
+          break;
 
         case 20: // del
-          if (crsrCol > 0) crsrCol--
-          delChar(crsrRow, crsrCol)
-          redrawRow(crsrRow)
-          crsrrender = true
-          break
+          if (crsrCol > 0) crsrCol--;
+          delChar(crsrRow, crsrCol);
+          redrawRow(crsrRow);
+          crsrrender = true;
+          break;
 
         case 28: // red
-          cellAttr = setCellAttrFG(cellAttr, 2)
-          crsrAttr = setCrsrAttrColor(2)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 2);
+          crsrAttr = setCrsrAttrColor(2);
+          break;
 
         case 29: // right
-          crsrCol++
+          crsrCol++;
           if (crsrCol > crtCols) {
-            crsrCol = 0
-            crsrRow++
+            crsrCol = 0;
+            crsrRow++;
           }
-          crsrrender = true
-          break
+          crsrrender = true;
+          break;
 
         case 30: // green
-          cellAttr = setCellAttrFG(cellAttr, 5)
-          crsrAttr = setCrsrAttrColor(5)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 5);
+          crsrAttr = setCrsrAttrColor(5);
+          break;
 
         case 31: // blue
-          cellAttr = setCellAttrFG(cellAttr, 6)
-          crsrAttr = setCrsrAttrColor(6)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 6);
+          crsrAttr = setCrsrAttrColor(6);
+          break;
 
         case 129: // orange
-          cellAttr = setCellAttrFG(cellAttr, 8)
-          crsrAttr = setCrsrAttrColor(8)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 8);
+          crsrAttr = setCrsrAttrColor(8);
+          break;
 
         case 133:
         case 134:
@@ -14429,341 +14442,341 @@ vtx: {
         case 140:
           // function keys.
           // ignore
-          break
+          break;
 
         case 142: // graphics mode
-          conFontNum = 0
-          renderAll()
-          break
+          conFontNum = 0;
+          renderAll();
+          break;
 
         case 144: // black
-          cellAttr = setCellAttrFG(cellAttr, 0)
-          crsrAttr = setCrsrAttrColor(0)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 0);
+          crsrAttr = setCrsrAttrColor(0);
+          break;
 
         case 145: // up
-          if (crsrRow > 0) crsrRow--
-          crsrrender = true
-          break
+          if (crsrRow > 0) crsrRow--;
+          crsrrender = true;
+          break;
 
         case 146: // rev off
-          cellAttr = setCellAttrReverse(cellAttr, false)
-          break
+          cellAttr = setCellAttrReverse(cellAttr, false);
+          break;
 
         case 147: // clr
           // clear entire screen.
           // remove html rows
-          els = document.getElementsByClassName('vtx')
+          els = document.getElementsByClassName("vtx");
           for (l = els.length, r = l - 1; r >= 0; r--)
-            els[r].parentNode.removeChild(els[r])
-          conRowAttr = []
-          conCellAttr = []
-          conText = []
-          document.body.style['cursor'] = 'default'
-          crsrRow = crsrCol = 0
-          crsrrender = true
-          break
+            els[r].parentNode.removeChild(els[r]);
+          conRowAttr = [];
+          conCellAttr = [];
+          conText = [];
+          document.body.style["cursor"] = "default";
+          crsrRow = crsrCol = 0;
+          crsrrender = true;
+          break;
 
         case 148: // insert
-          insChar(crsrRow, crsrCol, 0x20)
-          redrawRow(crsrRow)
-          break
+          insChar(crsrRow, crsrCol, 0x20);
+          redrawRow(crsrRow);
+          break;
 
         case 149: // brown
-          cellAttr = setCellAttrFG(cellAttr, 9)
-          crsrAttr = setCrsrAttrColor(9)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 9);
+          crsrAttr = setCrsrAttrColor(9);
+          break;
 
         case 150: // lt red
-          cellAttr = setCellAttrFG(cellAttr, 10)
-          crsrAttr = setCrsrAttrColor(10)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 10);
+          crsrAttr = setCrsrAttrColor(10);
+          break;
 
         case 151: // dk gray
-          cellAttr = setCellAttrFG(cellAttr, 11)
-          crsrAttr = setCrsrAttrColor(11)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 11);
+          crsrAttr = setCrsrAttrColor(11);
+          break;
 
         case 152: // gray
-          cellAttr = setCellAttrFG(cellAttr, 12)
-          crsrAttr = setCrsrAttrColor(12)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 12);
+          crsrAttr = setCrsrAttrColor(12);
+          break;
 
         case 153: // lt green
-          cellAttr = setCellAttrFG(cellAttr, 13)
-          crsrAttr = setCrsrAttrColor(13)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 13);
+          crsrAttr = setCrsrAttrColor(13);
+          break;
 
         case 154: // lt blue
-          cellAttr = setCellAttrFG(cellAttr, 14)
-          crsrAttr = setCrsrAttrColor(14)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 14);
+          crsrAttr = setCrsrAttrColor(14);
+          break;
 
         case 155: // lt gray
-          cellAttr = setCellAttrFG(cellAttr, 15)
-          crsrAttr = setCrsrAttrColor(15)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 15);
+          crsrAttr = setCrsrAttrColor(15);
+          break;
 
         case 156: // purple
-          cellAttr = setCellAttrFG(cellAttr, 4)
-          crsrAttr = setCrsrAttrColor(4)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 4);
+          crsrAttr = setCrsrAttrColor(4);
+          break;
 
         case 157: // left
-          if (crsrCol > 0) crsrCol--
-          crsrrender = true
-          break
+          if (crsrCol > 0) crsrCol--;
+          crsrrender = true;
+          break;
 
         case 158: // yellow
-          cellAttr = setCellAttrFG(cellAttr, 7)
-          crsrAttr = setCrsrAttrColor(7)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 7);
+          crsrAttr = setCrsrAttrColor(7);
+          break;
 
         case 159: // cyan
-          cellAttr = setCellAttrFG(cellAttr, 3)
-          crsrAttr = setCrsrAttrColor(3)
-          break
+          cellAttr = setCellAttrFG(cellAttr, 3);
+          crsrAttr = setCrsrAttrColor(3);
+          break;
 
         default:
           // try to print it.
           if ((chr & 0x7f) >= 0x20) {
-            conPrintChar(chr)
-            crsrrender = true
+            conPrintChar(chr);
+            crsrrender = true;
           }
-          break
+          break;
       }
     } else if (atari) {
       // ATASCII ------------------------------------------------------------
       switch (chr) {
         case 0x1c: // cursor up.
-          if (crsrRow > 0) crsrRow--
-          crsrrender = true
-          break
+          if (crsrRow > 0) crsrRow--;
+          crsrrender = true;
+          break;
 
         case 0x1d: // cursor down.
-          crsrRow++
-          crsrrender = true
-          break
+          crsrRow++;
+          crsrrender = true;
+          break;
 
         case 0x1e: // cursor left.
-          if (crsrCol > 0) crsrCol--
-          crsrrender = true
-          break
+          if (crsrCol > 0) crsrCol--;
+          crsrrender = true;
+          break;
 
         case 0x1f: // cursor right.
-          crsrCol++
+          crsrCol++;
           if (crsrCol > crtCols) {
-            crsrCol = 0
-            crsrRow++
+            crsrCol = 0;
+            crsrRow++;
           }
-          crsrrender = true
-          break
+          crsrrender = true;
+          break;
 
         case 0x7d: // clear screen.
           // clear entire screen.
           // remove html rows
-          els = document.getElementsByClassName('vtx')
+          els = document.getElementsByClassName("vtx");
           for (l = els.length, r = l - 1; r >= 0; r--)
-            els[r].parentNode.removeChild(els[r])
-          conRowAttr = []
-          conCellAttr = []
-          conText = []
-          document.body.style['cursor'] = 'default'
-          crsrRow = crsrCol = 0
-          crsrrender = true
-          break
+            els[r].parentNode.removeChild(els[r]);
+          conRowAttr = [];
+          conCellAttr = [];
+          conText = [];
+          document.body.style["cursor"] = "default";
+          crsrRow = crsrCol = 0;
+          crsrrender = true;
+          break;
 
         case 0x7e: // backspace - TODO : find out if destructive
-          if (crsrCol > 0) crsrCol--
-          crsrrender = true
-          break
+          if (crsrCol > 0) crsrCol--;
+          crsrrender = true;
+          break;
 
         case 0x7f: // tab
           // find next tabstop
           for (i = crsrCol + 1; i < crtCols; i++) {
             if (conTabStop[i]) {
-              crsrCol = i
-              crsrrender = true
-              break
+              crsrCol = i;
+              crsrrender = true;
+              break;
             }
           }
-          break
+          break;
 
         case 0x9b: // return
-          crsrCol = 0
-          crsrRow++
-          crsrrender = true
-          cellAttr = setCellAttrReverse(cellAttr, false)
-          break
+          crsrCol = 0;
+          crsrRow++;
+          crsrrender = true;
+          cellAttr = setCellAttrReverse(cellAttr, false);
+          break;
 
         case 0x9c: // delete row
-          delRow(crsrRow)
-          break
+          delRow(crsrRow);
+          break;
 
         case 0x9d: // insert row
-          insRow(crsrRow)
-          break
+          insRow(crsrRow);
+          break;
 
         case 0x9e: // clear tabstop
         case 0x9f: // set tabstop
-          conTabStop[crsrCol] = chr == 0x9f
-          break
+          conTabStop[crsrCol] = chr == 0x9f;
+          break;
 
         case 0xfd: // buzzer
-          soundBell.pause()
-          soundBell.play()
-          break
+          soundBell.pause();
+          soundBell.play();
+          break;
 
         case 0xfe: // delete char
-          expandToRow(crsrRow)
-          expandToCol(crsrRow, crsrCol)
-          delChar(crsrRow, crsrCol)
-          redrawRow(crsrRow)
-          crsrrender = true
-          break
+          expandToRow(crsrRow);
+          expandToCol(crsrRow, crsrCol);
+          delChar(crsrRow, crsrCol);
+          redrawRow(crsrRow);
+          crsrrender = true;
+          break;
 
         case 0xff: // insert char
-          break
+          break;
 
         default:
           // set reverse on off for each character in atari mode
-          cellAttr = setCellAttrReverse(cellAttr, chr & 0x80)
-          conPrintChar(chr & 0x7f)
-          crsrrender = true
-          break
+          cellAttr = setCellAttrReverse(cellAttr, chr & 0x80);
+          conPrintChar(chr & 0x7f);
+          crsrrender = true;
+          break;
       }
     } else {
       // ANSI ---------------------------------------------------------------
 
       if (modeNextGlyph) {
         // print glyph AS IS
-        conPrintChar(chr)
-        crsrrender = true
-        modeNextGlyph = false
+        conPrintChar(chr);
+        crsrrender = true;
+        modeNextGlyph = false;
       } else {
         // do all normal ctrls first
         switch (chr) {
           case _NUL: // null
-            if (modeDOORWAY) modeNextGlyph = true
-            break
+            if (modeDOORWAY) modeNextGlyph = true;
+            break;
 
           case _BEL: // bell
-            soundBell.pause()
-            soundBell.play()
-            break
+            soundBell.pause();
+            soundBell.play();
+            break;
 
           case _BS: // backspace
             if (crsrCol > 0) {
-              expandToRow(crsrRow)
-              expandToCol(crsrRow, crsrCol)
-              crsrCol--
+              expandToRow(crsrRow);
+              expandToCol(crsrRow, crsrCol);
+              crsrCol--;
               //delChar(crsrRow, crsrCol);  // backspace is not destructive
-              crsrrender = true
+              crsrrender = true;
             }
-            break
+            break;
 
           case _HT: // horz tab
-            crsrCol = ((crsrCol >>> 3) + 1) << 3
-            if (crsrCol > colsOnRow(crsrRow)) crsrCol = colsOnRow(crsrRow)
-            crsrrender = true
-            break
+            crsrCol = ((crsrCol >>> 3) + 1) << 3;
+            if (crsrCol > colsOnRow(crsrRow)) crsrCol = colsOnRow(crsrRow);
+            crsrrender = true;
+            break;
 
           case _LF: // linefeed
             //                    if (!modeVTXANSI)  // LF dont CR!  lol
             //                        crsrCol = 0;    // for BBS/ANSI.SYS mode
-            crsrRow++
-            crsrrender = true
-            break
+            crsrRow++;
+            crsrrender = true;
+            break;
 
           case _CR: // carriage return
-            crsrCol = 0
-            crsrrender = true
-            break
+            crsrCol = 0;
+            crsrrender = true;
+            break;
 
           case _DEL: // delete (not on font 10 or 11)
             if (between(conFontNum, 10, 12)) {
-              conPrintChar(chr)
-              crsrrender = true
+              conPrintChar(chr);
+              crsrrender = true;
             } else {
-              expandToRow(crsrRow)
-              expandToCol(crsrRow, crsrCol)
-              delChar(crsrRow, crsrCol)
-              redrawRow(crsrRow)
-              crsrrender = true
+              expandToRow(crsrRow);
+              expandToCol(crsrRow, crsrCol);
+              delChar(crsrRow, crsrCol);
+              redrawRow(crsrRow);
+              crsrrender = true;
             }
-            break
+            break;
 
           default:
             switch (ansiState) {
               case 0:
                 // not in an sequence.
-                if (chr == _ESC) ansiState = 1
+                if (chr == _ESC) ansiState = 1;
                 else {
                   // convert to codepage
-                  conPrintChar(chr)
-                  crsrrender = true
+                  conPrintChar(chr);
+                  crsrrender = true;
                 }
-                break
+                break;
 
               case 1:
                 // start of ansi sequence
                 if (chr == 0x5b) {
                   // ESC [ - CSI
-                  parms = ''
-                  interm = ''
-                  ansiState = 2
+                  parms = "";
+                  interm = "";
+                  ansiState = 2;
                 } else if (chr == 0x23)
                   // ESC # - row attr
-                  ansiState = 3
+                  ansiState = 3;
                 else if (chr == 0x37) {
                   // ESC 7 - Save crsr pos and attrs
-                  crsrSaveRow = crsrRow
-                  crsrSaveCol = crsrCol
-                  cellSaveAttr = cellAttr
-                  ansiState = 0
+                  crsrSaveRow = crsrRow;
+                  crsrSaveCol = crsrCol;
+                  cellSaveAttr = cellAttr;
+                  ansiState = 0;
                 } else if (chr == 0x38) {
                   // ESC 8 - restore crsr pos and attrs
-                  crsrRow = crsrSaveRow
-                  crsrCol = crsrSaveCol
-                  cellAttr = cellSaveAttr
-                  ansiState = 0
+                  crsrRow = crsrSaveRow;
+                  crsrCol = crsrSaveCol;
+                  cellAttr = cellSaveAttr;
+                  ansiState = 0;
                 } else if (chr == 0x44) {
                   // ESC D - Scroll up 1
-                  scrollUp()
-                  ansiState = 0
+                  scrollUp();
+                  ansiState = 0;
                 } else if (chr == 0x45) {
                   // ESC E - Move to next line
-                  crsrRow++
-                  crsrrender = true
-                  ansiState = 0
+                  crsrRow++;
+                  crsrrender = true;
+                  ansiState = 0;
                 } else if (chr == 0x4d) {
                   // ESC M - Scroll down 1
-                  scrollDown()
-                  ansiState = 0
+                  scrollDown();
+                  ansiState = 0;
                 } else if (chr == 0x63) {
                   // ESC c - reset terminal
-                  resetTerminal()
+                  resetTerminal();
                 }
                 // unrecognized - abort sequence
-                else ansiState = 0
-                break
+                else ansiState = 0;
+                break;
 
               case 2:
                 // start of CSI (ESC [)
                 // collect parameters until either intermediate or final
-                if (between(chr, 0x30, 0x3f)) parms += String.fromCharCode(chr)
+                if (between(chr, 0x30, 0x3f)) parms += String.fromCharCode(chr);
                 else if (between(chr, 0x20, 0x2f)) {
                   // intermediate byte
-                  interm = String.fromCharCode(chr)
-                  ansiState = 5
+                  interm = String.fromCharCode(chr);
+                  ansiState = 5;
                 } else if (between(chr, 0x40, 0x7e)) {
                   // final byte
-                  ansiState = 0
-                  doCSI = true
+                  ansiState = 0;
+                  doCSI = true;
                 }
                 // unrecognized - abort sequence
-                else ansiState = 0
-                break
+                else ansiState = 0;
+                break;
 
               case 3:
                 // start of row attr (ESC #)
@@ -14771,92 +14784,93 @@ vtx: {
                 switch (chr) {
                   case 0x30:
                     // ESC # 0 - reset row
-                    conRowAttr[crsrRow] = defRowAttr
-                    break
+                    conRowAttr[crsrRow] = defRowAttr;
+                    break;
 
                   case 0x31:
                     // ESC # 1 - single wide, double high, top
                     conRowAttr[crsrRow] &= ~(
                       A_ROW_DISPLAY_MASK | A_ROW_WIDTH_MASK
-                    )
-                    conRowAttr[crsrRow] |= A_ROW_DISPLAY_TOP | A_ROW_WIDTH_100
-                    break
+                    );
+                    conRowAttr[crsrRow] |= A_ROW_DISPLAY_TOP | A_ROW_WIDTH_100;
+                    break;
 
                   case 0x32:
                     // ESC # 2 - single wide, double high, bottom
                     conRowAttr[crsrRow] &= ~(
                       A_ROW_DISPLAY_MASK | A_ROW_WIDTH_MASK
-                    )
+                    );
                     conRowAttr[crsrRow] |=
-                      A_ROW_DISPLAY_BOTTOM | A_ROW_WIDTH_100
-                    break
+                      A_ROW_DISPLAY_BOTTOM | A_ROW_WIDTH_100;
+                    break;
 
                   case 0x33:
                     // ESC # 3 - double wide/high, top
                     conRowAttr[crsrRow] &= ~(
                       A_ROW_DISPLAY_MASK | A_ROW_WIDTH_MASK
-                    )
-                    conRowAttr[crsrRow] |= A_ROW_DISPLAY_TOP | A_ROW_WIDTH_200
-                    break
+                    );
+                    conRowAttr[crsrRow] |= A_ROW_DISPLAY_TOP | A_ROW_WIDTH_200;
+                    break;
 
                   case 0x34:
                     // ESC # 4 - double wide/high, bottom
                     conRowAttr[crsrRow] &= ~(
                       A_ROW_DISPLAY_MASK | A_ROW_WIDTH_MASK
-                    )
+                    );
                     conRowAttr[crsrRow] |=
-                      A_ROW_DISPLAY_BOTTOM | A_ROW_WIDTH_200
-                    break
+                      A_ROW_DISPLAY_BOTTOM | A_ROW_WIDTH_200;
+                    break;
 
                   case 0x35:
                     // ESC # 5 - single wide/high
                     conRowAttr[crsrRow] &= ~(
                       A_ROW_DISPLAY_MASK | A_ROW_WIDTH_MASK
-                    )
-                    conRowAttr[crsrRow] |= A_ROW_WIDTH_100
-                    break
+                    );
+                    conRowAttr[crsrRow] |= A_ROW_WIDTH_100;
+                    break;
 
                   case 0x36:
                     // ESC # 6 - single high / double wide
                     conRowAttr[crsrRow] &= ~(
                       A_ROW_DISPLAY_MASK | A_ROW_WIDTH_MASK
-                    )
-                    conRowAttr[crsrRow] |= A_ROW_WIDTH_200
-                    break
+                    );
+                    conRowAttr[crsrRow] |= A_ROW_WIDTH_200;
+                    break;
 
                   case 0x37:
                     // marquee off
                     // ESC # 7
-                    conRowAttr[crsrRow] &= ~A_ROW_MARQUEE
+                    conRowAttr[crsrRow] &= ~A_ROW_MARQUEE;
                     getRowElement(crsrRow).firstChild.classList.remove(
-                      'marquee'
-                    )
-                    break
+                      "marquee"
+                    );
+                    break;
 
                   case 0x38:
                     // marquee on
                     // ESC # 8
-                    conRowAttr[crsrRow] |= A_ROW_MARQUEE
-                    getRowElement(crsrRow).firstChild.classList.add('marquee')
-                    break
+                    conRowAttr[crsrRow] |= A_ROW_MARQUEE;
+                    getRowElement(crsrRow).firstChild.classList.add("marquee");
+                    break;
                 }
-                adjustRow(crsrRow)
-                ansiState = 0
-                break
+                adjustRow(crsrRow);
+                ansiState = 0;
+                break;
 
               case 5:
                 // collecting intermediate bytes
-                if (between(chr, 0x20, 0x2f)) interm += String.fromCharCode(chr)
+                if (between(chr, 0x20, 0x2f))
+                  interm += String.fromCharCode(chr);
                 else if (between(chr, 0x40, 0x7e)) {
                   // command?
-                  ansiState = 0
-                  doCSI = true
+                  ansiState = 0;
+                  doCSI = true;
                 }
                 // unrecognized - abort sequence
-                else ansiState = 0
-                break
+                else ansiState = 0;
+                break;
             }
-            break
+            break;
         }
       }
 
@@ -14865,454 +14879,454 @@ vtx: {
         // params = optional parameters
         // interm = optional intermediate (not using any for this term emulation - ignore)
 
-        parm = parms.split(';')
-        if (parm[0] == '') parm = []
+        parm = parms.split(";");
+        if (parm[0] == "") parm = [];
 
         // for our purposes, all parameters are integers. if not, leave as string.
-        l = parm.length
+        l = parm.length;
         for (i = 0; i < l; i++) {
-          v = int(parm[i])
-          if (v.toString() == parm[i]) parm[i] = v
+          v = int(parm[i]);
+          if (v.toString() == parm[i]) parm[i] = v;
         }
 
         switch (chr) {
           case 0x40: // @ - ICH - insert characters
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            for (i = 0; i < parm[0]; i++) insChar(crsrRow, crsrCol, 32)
-            redrawRow(crsrRow)
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            for (i = 0; i < parm[0]; i++) insChar(crsrRow, crsrCol, 32);
+            redrawRow(crsrRow);
+            break;
 
           case 0x41: // A - Cursor Up
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            crsrRow -= parm[0]
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            crsrRow -= parm[0];
             if (modeRegion) {
-              if (crsrRow < regionTopRow) crsrRow = regionTopRow
+              if (crsrRow < regionTopRow) crsrRow = regionTopRow;
             } else {
-              if (crsrRow < 0) crsrRow = 0
+              if (crsrRow < 0) crsrRow = 0;
             }
-            crsrrender = true
-            break
+            crsrrender = true;
+            break;
 
           case 0x42: // B - Cursor Down
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            crsrRow += parm[0]
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            crsrRow += parm[0];
             if (modeRegion) {
-              if (crsrRow > regionBottomRow) crsrRow = regionBottomRow
+              if (crsrRow > regionBottomRow) crsrRow = regionBottomRow;
             }
-            crsrrender = true
-            break
+            crsrrender = true;
+            break;
 
           case 0x43: // C - Cursor Forward
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            crsrCol += parm[0]
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            crsrCol += parm[0];
             if (crsrCol >= colsOnRow(crsrRow) - 1)
-              crsrCol = colsOnRow(crsrRow) - 1
-            crsrrender = true
-            break
+              crsrCol = colsOnRow(crsrRow) - 1;
+            crsrrender = true;
+            break;
 
           case 0x44: // D - Cursor Backward / Font Selection
-            if (interm == ' ') {
+            if (interm == " ") {
               // set font
-              parm = fixParams(parm, [0, 0])
+              parm = fixParams(parm, [0, 0]);
               switch (parm[1]) {
                 case 0: // Codepage 437 English
                 case 26: // Codepage 437 English, (thin)
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'CP437'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "CP437";
+                  break;
 
                 case 5: // Codepage 866 (c) Russian
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'CP866'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "CP866";
+                  break;
 
                 case 17: // Codepage 850 Multilingual Latin I, (thin)
                 case 18: // Codepage 850 Multilingual Latin I
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'CP850'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "CP850";
+                  break;
 
                 case 25: // Codepage 866 Russian
                 case 27: // Codepage 866 (b) Russian
                 case 29: // Ukrainian font cp866u
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'CP866'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "CP866";
+                  break;
 
                 case 19: // Codepage 885 Norwegian, (thin)
                 case 28: // Codepage 885 Norwegian
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'CP885'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "CP885";
+                  break;
 
                 case 31: // Codepage 1131 Belarusian, (swiss)
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'CP1131'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "CP1131";
+                  break;
 
                 case 1: // Codepage 1251 Cyrillic, (swiss)
                 case 20: // Codepage 1251 Cyrillic
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'WIN1251'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "WIN1251";
+                  break;
 
                 case 2: // Russian koi8-r
                 case 12: // Russian koi8-r (b)
                 case 22: // Russian koi8-r (c)
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'KOI8_R'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "KOI8_R";
+                  break;
 
                 case 9: // Ukrainian font koi8-u
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'KOI8_U'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "KOI8_U";
+                  break;
 
                 case 24: // ISO-8859-1 West European
                 case 30: // ISO-8859-1 West European, (thin)
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ISO8859_1'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ISO8859_1";
+                  break;
 
                 case 3: // ISO-8859-2 Central European
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ISO8859_2'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ISO8859_2";
+                  break;
 
                 case 4: // ISO-8859-4 Baltic wide (VGA 9bit mapped)
                 case 11: // ISO-8859-4 Baltic (VGA 9bit mapped)
                 case 13: // ISO-8859-4 Baltic wide
                 case 23: // ISO-8859-4 Baltic
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ISO8859_4'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ISO8859_4";
+                  break;
 
                 case 14: // ISO-8859-5 Cyrillic
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ISO8859_5'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ISO8859_5";
+                  break;
 
                 case 21: // ISO-8859-7 Greek
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ISO8859_7'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ISO8859_7";
+                  break;
 
                 case 6: // ISO-8859-9 Turkish
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ISO8859_9'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ISO8859_9";
+                  break;
 
                 case 10: // ISO-8859-15 West European, (thin)
                 case 16: // ISO-8859-15 West European
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ISO8859_15'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ISO8859_15";
+                  break;
 
                 case 15: // ARMSCII-8 Character set
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ARMSCII_8'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ARMSCII_8";
+                  break;
 
                 case 7: // haik8 codepage (use only with armscii8 screenmap)
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'HAIK8'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "HAIK8";
+                  break;
 
                 case 8: // ISO-8859-8 Hebrew
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'ISO8859_8'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "ISO8859_8";
+                  break;
 
                 // CONVERTED FONTS - USE E000-E0FF for map
                 case 32: // Commodore 64 (UPPER)
-                  conFont[parm[0]] = 'C640'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "C640";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 33: // Commodore 64 (Lower)
-                  conFont[parm[0]] = 'C641'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "C641";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 34: // Commodore 128 (UPPER)
-                  conFont[parm[0]] = 'C1280'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "C1280";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 35: // Commodore 128 (Lower)
-                  conFont[parm[0]] = 'C1281'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "C1281";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 36: // Atari
-                  conFont[parm[0]] = 'ATARI'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "ATARI";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 37: // P0T NOoDLE (Amiga)
-                  conFont[parm[0]] = 'P0TNOODLE'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "P0TNOODLE";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 38: // mO'sOul (Amiga)
-                  conFont[parm[0]] = 'MOSOUL'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "MOSOUL";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 39: // MicroKnight Plus (Amiga)
-                  conFont[parm[0]] = 'MICROKNIGHTPLUS'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "MICROKNIGHTPLUS";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 40: // Topaz Plus (Amiga)
-                  conFont[parm[0]] = 'TOPAZPLUS'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "TOPAZPLUS";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 41: // MicroKnight (Amiga)
-                  conFont[parm[0]] = 'MICROKNIGHT'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "MICROKNIGHT";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 42: // Topaz (Amiga)
-                  conFont[parm[0]] = 'TOPAZ'
-                  conFontCP[parm[0]] = 'RAW'
-                  break
+                  conFont[parm[0]] = "TOPAZ";
+                  conFontCP[parm[0]] = "RAW";
+                  break;
 
                 case 100: // TI994 (TI-99/4)
-                  conFont[parm[0]] = 'TI994'
-                  conFontCP[parm[0]] = 'RAWHI'
-                  break
+                  conFont[parm[0]] = "TI994";
+                  conFontCP[parm[0]] = "RAWHI";
+                  break;
 
                 case 101: // Teletext
-                  conFont[parm[0]] = fontName
-                  conFontCP[parm[0]] = 'TELETEXT'
-                  break
+                  conFont[parm[0]] = fontName;
+                  conFontCP[parm[0]] = "TELETEXT";
+                  break;
               }
               // load it if it's needed.
-              loadSingleFont(conFont[parm[0]])
+              loadSingleFont(conFont[parm[0]]);
             } else {
               // move backwards
-              parm = fixParams(parm, [1])
-              parm[0] = minMax(parm[0], 1, 999)
-              crsrCol -= parm[0]
-              if (crsrCol < 0) crsrCol = 0
-              crsrrender = true
+              parm = fixParams(parm, [1]);
+              parm[0] = minMax(parm[0], 1, 999);
+              crsrCol -= parm[0];
+              if (crsrCol < 0) crsrCol = 0;
+              crsrrender = true;
             }
-            break
+            break;
 
           case 0x45: // E - Next Line
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            crsrCol = 0
-            crsrRow += parm[0]
-            crsrrender = true
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            crsrCol = 0;
+            crsrRow += parm[0];
+            crsrrender = true;
+            break;
 
           case 0x46: // F - Previous Line
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            crsrCol = 0
-            crsrRow -= parm[0]
-            if (crsrRow < 0) crsrRow = 0
-            crsrrender = true
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            crsrCol = 0;
+            crsrRow -= parm[0];
+            if (crsrRow < 0) crsrRow = 0;
+            crsrrender = true;
+            break;
 
           case 0x47: // G - To Column
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            crsrCol = parm[0] - 1
-            crsrrender = true
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            crsrCol = parm[0] - 1;
+            crsrrender = true;
+            break;
 
           // H - see f
 
           case 0x49: // I - CFT - forward tab
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
             for (i = 0; i < parm[0]; i++) {
-              crsrCol = ((crsrCol >>> 3) + 1) << 3
+              crsrCol = ((crsrCol >>> 3) + 1) << 3;
               if (crsrCol > colsOnRow(crsrRow)) {
-                crsrCol = colsOnRow(crsrRow)
-                break
+                crsrCol = colsOnRow(crsrRow);
+                break;
               }
             }
-            crsrrender = true
-            break
+            crsrrender = true;
+            break;
 
           case 0x4a: // J - Erase in Screen (0=EOS,1=SOS,2=ALL)
-            parm = fixParams(parm, [0])
-            parm[0] = minMax(parm[0], 0, 2, 0)
-            expandToRow(crsrRow)
-            expandToCol(crsrRow, crsrCol)
+            parm = fixParams(parm, [0]);
+            parm[0] = minMax(parm[0], 0, 2, 0);
+            expandToRow(crsrRow);
+            expandToCol(crsrRow, crsrCol);
             switch (parm[0]) {
               case 0:
                 // clear EOL first
-                clearHotSpotsRow(crsrRow, crsrCol, 999)
-                conCellAttr[crsrRow].length = crsrCol
-                conText[crsrRow] = conText[crsrRow].substring(0, crsrCol)
+                clearHotSpotsRow(crsrRow, crsrCol, 999);
+                conCellAttr[crsrRow].length = crsrCol;
+                conText[crsrRow] = conText[crsrRow].substring(0, crsrCol);
                 // clear EOS
-                clearHotSpotsRows(crsrRow + 1, conRowAttr.length)
+                clearHotSpotsRows(crsrRow + 1, conRowAttr.length);
                 for (r = getMaxRow(); r > crsrRow; r--) {
-                  row = getRowElement(r)
-                  row.parentNode.removeChild(row)
-                  conRowAttr.length = crsrRow + 1
-                  conCellAttr.length = crsrRow + 1
-                  conText.length = crsrRow + 1
-                  conCanvas.length = crsrRow + 1
+                  row = getRowElement(r);
+                  row.parentNode.removeChild(row);
+                  conRowAttr.length = crsrRow + 1;
+                  conCellAttr.length = crsrRow + 1;
+                  conText.length = crsrRow + 1;
+                  conCanvas.length = crsrRow + 1;
                 }
-                break
+                break;
 
               case 1:
                 // clear SOL first
-                clearHotSpotsRow(crsrRow, 0, crsrCol - 1)
+                clearHotSpotsRow(crsrRow, 0, crsrCol - 1);
                 for (c = 0; c <= crsrCol; c++)
-                  conPutChar(crsrRow, c, 32, defCellAttr)
-                redrawRow(crsrRow)
+                  conPutChar(crsrRow, c, 32, defCellAttr);
+                redrawRow(crsrRow);
 
                 // clear SOS
-                clearHotSpotsRows(0, crsrRow - 1)
+                clearHotSpotsRows(0, crsrRow - 1);
                 for (r = 0; r < crsrRow; r++) {
-                  conRowAttr[r] = defRowAttr
-                  conCellAttr[r] = []
-                  conText[r] = ''
-                  adjustRow(crsrRow)
-                  redrawRow(crsrRow)
+                  conRowAttr[r] = defRowAttr;
+                  conCellAttr[r] = [];
+                  conText[r] = "";
+                  adjustRow(crsrRow);
+                  redrawRow(crsrRow);
                 }
-                break
+                break;
 
               case 2:
                 // clear entire screen.
                 // remove html rows
-                els = document.getElementsByClassName('vtx')
+                els = document.getElementsByClassName("vtx");
                 for (l = els.length, r = l - 1; r >= 0; r--)
-                  els[r].parentNode.removeChild(els[r])
+                  els[r].parentNode.removeChild(els[r]);
                 // remove sprites
-                els = document.getElementsByClassName('sprite')
+                els = document.getElementsByClassName("sprite");
                 for (l = els.length, r = l - 1; r >= 0; r--)
-                  els[r].parentNode.removeChild(els[r])
+                  els[r].parentNode.removeChild(els[r]);
                 // reset console
-                conRowAttr = []
-                conCellAttr = []
-                conText = []
-                conHotSpots = []
-                conCanvas = []
-                lastHotSpot = null
-                document.body.style['cursor'] = 'default'
-                crsrRow = crsrCol = 0
-                crsrrender = true
-                expandToRow(crsrRow)
-                expandToCol(crsrRow, crsrCol)
-                if (modeVTXANSI) cellAttr = defCellAttr
-                isSelect = false
-                break
+                conRowAttr = [];
+                conCellAttr = [];
+                conText = [];
+                conHotSpots = [];
+                conCanvas = [];
+                lastHotSpot = null;
+                document.body.style["cursor"] = "default";
+                crsrRow = crsrCol = 0;
+                crsrrender = true;
+                expandToRow(crsrRow);
+                expandToCol(crsrRow, crsrCol);
+                if (modeVTXANSI) cellAttr = defCellAttr;
+                isSelect = false;
+                break;
             }
-            break
+            break;
 
           case 0x4b: // K - Erase in Line
-            parm = fixParams(parm, [0])
-            parm[0] = minMax(parm[0], 0, 2, 0)
-            expandToRow(crsrRow)
-            expandToCol(crsrRow, crsrCol)
+            parm = fixParams(parm, [0]);
+            parm[0] = minMax(parm[0], 0, 2, 0);
+            expandToRow(crsrRow);
+            expandToCol(crsrRow, crsrCol);
             switch (parm[0]) {
               case 0:
                 // clear EOL
-                clearHotSpotsRow(crsrRow, crsrCol, 999)
-                conCellAttr[crsrRow].length = crsrCol
-                conText[crsrRow] = conText[crsrRow].substring(0, crsrCol)
-                redrawRow(crsrRow)
-                break
+                clearHotSpotsRow(crsrRow, crsrCol, 999);
+                conCellAttr[crsrRow].length = crsrCol;
+                conText[crsrRow] = conText[crsrRow].substring(0, crsrCol);
+                redrawRow(crsrRow);
+                break;
 
               case 1:
                 // clear SOL
-                clearHotSpotsRow(crsrRow, 0, crsrCol)
+                clearHotSpotsRow(crsrRow, 0, crsrCol);
                 for (c = 0; c <= crsrCol; c++)
-                  conPutChar(crsrRow, c, 32, defCellAttr)
-                redrawRow(crsrRow)
-                break
+                  conPutChar(crsrRow, c, 32, defCellAttr);
+                redrawRow(crsrRow);
+                break;
 
               case 2:
                 // clear row.
-                clearHotSpotsRow(crsrRow, 0, 999)
-                conText[crsrRow] = ''
-                conCellAttr[crsrRow] = []
-                redrawRow(crsrRow)
-                break
+                clearHotSpotsRow(crsrRow, 0, 999);
+                conText[crsrRow] = "";
+                conCellAttr[crsrRow] = [];
+                redrawRow(crsrRow);
+                break;
             }
-            break
+            break;
 
           case 0x4c: // L - EL - insert lines
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            for (i = 0; i < parm[0]; i++) insRow(crsrRow)
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            for (i = 0; i < parm[0]; i++) insRow(crsrRow);
+            break;
 
           case 0x4d: // M - DL - delete lines
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            for (i = 0; i < parm[0]; i++) delRow(crsrRow)
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            for (i = 0; i < parm[0]; i++) delRow(crsrRow);
+            break;
 
           case 0x50: // P - DCH - delete character
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            for (i = 0; i < parm[0]; i++) delChar(crsrRow, crsrCol)
-            redrawRow(crsrRow)
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            for (i = 0; i < parm[0]; i++) delChar(crsrRow, crsrCol);
+            redrawRow(crsrRow);
+            break;
 
           case 0x53: // S - Scroll Up (SU). Scroll up.
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            for (i = 0; i < parm[0]; i++) scrollUp()
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            for (i = 0; i < parm[0]; i++) scrollUp();
+            break;
 
           case 0x54: // T - Scroll Down (SD). Scroll down.
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
-            for (i = 0; i < parm[0]; i++) scrollDown()
-            break
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            for (i = 0; i < parm[0]; i++) scrollDown();
+            break;
 
           case 0x58: // X - ECH - erase n characters
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
             for (i = 0; i < parm[0]; i++) {
-              conPutChar(crsrRow, crsrCol + i, 0x20, defCellAttr)
+              conPutChar(crsrRow, crsrCol + i, 0x20, defCellAttr);
             }
-            break
+            break;
 
           case 0x5a: // Z - CBT - back tab
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
             for (i = 0; i < parm[0]; i++) {
-              crsrCol = (((crsrCol >>> 3) + 1) << 3) - 16
+              crsrCol = (((crsrCol >>> 3) + 1) << 3) - 16;
               if (crsrCol <= 0) {
-                crsrCol = 0
-                break
+                crsrCol = 0;
+                break;
               }
             }
-            crsrrender = true
-            break
+            crsrrender = true;
+            break;
 
           /* special VTX sequences start */
           case 0x5b: // [ - Row Size
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 0, 3, 1)
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 0, 3, 1);
             conRowAttr[crsrRow] = setRowAttrWidth(
               conRowAttr[crsrRow],
               (parm[0] + 1) * 50
-            )
-            adjustRow(crsrRow)
-            crsrrender = true
-            break
+            );
+            adjustRow(crsrRow);
+            crsrrender = true;
+            break;
 
           case 0x5c: // \ - hotspots
             if (l < 2) {
               // reset all hotspots
-              conHotSpots = []
+              conHotSpots = [];
             } else {
               switch (parm[0]) {
                 case 0: // string binds
@@ -15326,49 +15340,55 @@ vtx: {
                       width: parm[1],
                       height: parm[2],
                       hilite: parm[3],
-                      val: '',
-                    }
+                      val: ""
+                    };
                     for (i = 4; i < l; i++)
-                      hs.val += String.fromCharCode(parm[i])
-                    conHotSpots.push(hs)
+                      hs.val += String.fromCharCode(parm[i]);
+                    conHotSpots.push(hs);
                   }
-                  break
+                  break;
               }
             }
-            break
+            break;
 
           case 0x5d: // ] - Row Modes / background
-            parm = fixParams(parm, [0, 0, 0])
-            parm[0] = minMax(parm[0], 0, 255, 0)
-            parm[1] = minMax(parm[1], 0, 255, 0)
-            parm[2] = minMax(parm[2], 0, 3, 0)
-            conRowAttr[crsrRow] = setRowAttrColor1(conRowAttr[crsrRow], parm[0])
-            conRowAttr[crsrRow] = setRowAttrColor2(conRowAttr[crsrRow], parm[1])
+            parm = fixParams(parm, [0, 0, 0]);
+            parm[0] = minMax(parm[0], 0, 255, 0);
+            parm[1] = minMax(parm[1], 0, 255, 0);
+            parm[2] = minMax(parm[2], 0, 3, 0);
+            conRowAttr[crsrRow] = setRowAttrColor1(
+              conRowAttr[crsrRow],
+              parm[0]
+            );
+            conRowAttr[crsrRow] = setRowAttrColor2(
+              conRowAttr[crsrRow],
+              parm[1]
+            );
             conRowAttr[crsrRow] = setRowAttrPattern(
               conRowAttr[crsrRow],
               parm[2] << 16
-            )
+            );
 
             // set row attrs here
-            row = getRowElement(crsrRow)
-            c1 = ansiColors[parm[0]]
-            c2 = ansiColors[parm[1]]
+            row = getRowElement(crsrRow);
+            c1 = ansiColors[parm[0]];
+            c2 = ansiColors[parm[1]];
             switch (parm[2] << 16) {
               case A_ROW_PATTERN_SOLID:
-                row.style['background'] = c1
-                break
+                row.style["background"] = c1;
+                break;
 
               case A_ROW_PATTERN_HORZ:
-                row.style['background'] =
-                  'linear-gradient(to bottom,' + c1 + ',' + c2 + ')'
-                break
+                row.style["background"] =
+                  "linear-gradient(to bottom," + c1 + "," + c2 + ")";
+                break;
 
               case A_ROW_PATTERN_VERT:
-                row.style['background'] =
-                  'linear-gradient(to right,' + c1 + ',' + c2 + ')'
-                break
+                row.style["background"] =
+                  "linear-gradient(to right," + c1 + "," + c2 + ")";
+                break;
             }
-            break
+            break;
 
           case 0x5e: // ^ - Cursor / Page Modes
             if (!parm.length) {
@@ -15380,79 +15400,79 @@ vtx: {
                     crsrAttr = setCrsrAttrColor(
                       crsrAttr,
                       getCrsrAttrColor(defCrsrAttr)
-                    )
-                  else crsrAttr = setCrsrAttrColor(crsrAttr, parm[1] & 0xff)
-                  newCrsr()
-                  break
+                    );
+                  else crsrAttr = setCrsrAttrColor(crsrAttr, parm[1] & 0xff);
+                  newCrsr();
+                  break;
 
                 case 1: // cursor size
                   if (l == 1)
                     crsrAttr = setCrsrAttrSize(
                       crsrAttr,
                       getCrsrAttrSize(defCrsrAttr)
-                    )
-                  else crsrAttr = setCrsrAttrSize(crsrAttr, parm[1] & 0x03)
-                  newCrsr()
-                  break
+                    );
+                  else crsrAttr = setCrsrAttrSize(crsrAttr, parm[1] & 0x03);
+                  newCrsr();
+                  break;
 
                 case 2: // cursor orientation
                   if (l == 1)
                     crsrAttr = setCrsrAttrOrientation(
                       crsrAttr,
                       parm[1] ? A_CRSR_ORIENTATION : 0
-                    )
+                    );
                   else
                     crsrAttr = setCrsrAttrOrientation(
                       crsrAttr,
                       getCrsrAttrOrientation(defCrsrAttr)
-                    )
-                  newCrsr()
-                  break
+                    );
+                  newCrsr();
+                  break;
 
                 case 3: // page border color
                   if (l == 1)
                     pageAttr = setPageAttrBorder(
                       pageAttr,
                       getPageAttrBorder(defPageAttr)
-                    )
-                  else pageAttr = setPageAttrBorder(pageAttr, parm[1] & 0xff)
-                  if (cbm) i = cbmColors[(pageAttr >>> 8) & 0xf]
-                  else if (atari) i = atariColors[(pageAttr >>> 8) & 0x1]
-                  else i = ansiColors[(pageAttr >>> 8) & 0xff]
-                  pageDiv.parentNode.style['background-color'] = i
-                  break
+                    );
+                  else pageAttr = setPageAttrBorder(pageAttr, parm[1] & 0xff);
+                  if (cbm) i = cbmColors[(pageAttr >>> 8) & 0xf];
+                  else if (atari) i = atariColors[(pageAttr >>> 8) & 0x1];
+                  else i = ansiColors[(pageAttr >>> 8) & 0xff];
+                  pageDiv.parentNode.style["background-color"] = i;
+                  break;
 
                 case 4: // page background color
                   if (l == 1)
                     pageAttr = setPageAttrBackground(
                       pageAttr,
-                      getOageAttrBackground(defPageAttr)
-                    )
+                      getPageAttrBackground(defPageAttr)
+                    );
                   else
-                    pageAttr = setPageAttrBackground(pageAttr, parm[1] & 0xff)
-                  if (cbm) i = cbmColors[pageAttr & 0xf]
-                  else if (atari) i = atariColors[pageAttr & 0x1]
-                  else i = ansiColors[pageAttr & 0xff]
-                  pageDiv.style['background-color'] = i
-                  break
+                    pageAttr = setPageAttrBackground(pageAttr, parm[1] & 0xff);
+                  if (cbm) i = cbmColors[pageAttr & 0xf];
+                  else if (atari) i = atariColors[pageAttr & 0x1];
+                  else i = ansiColors[pageAttr & 0xff];
+                  pageDiv.style["background-color"] = i;
+                  break;
 
                 case 5: // CSI '5^' : Set hotspot mouseover colors.
-                  hotspotHoverAttr = cellAttr
-                  break
+                  hotspotHoverAttr = cellAttr;
+                  break;
 
                 case 6: // CSI '6^' : Set hotspot click colors.
-                  hotspotClickAttr = cellAttr
-                  break
+                  hotspotClickAttr = cellAttr;
+                  break;
               }
             }
-            crsrrender = true
-            break
+            crsrrender = true;
+            break;
 
           case 0x5f: // _ - VTX Media Codes. Sprites & Audio
             if (parms.length == 0) {
               // syncronet got here how?
               //console.log('CSI '+ parms + interm + String.fromCharCode(chr));
-              break
+              break;
             } else if (parm[0] == 0) {
               // sprite commands
               switch (parm[1]) {
@@ -15463,134 +15483,134 @@ vtx: {
                   // parm4.. = hex3 data (rejoin with ;)
                   if (l == 2) {
                     // clear all sprite objects.
-                    spriteDefs = []
+                    spriteDefs = [];
                   } else if (l == 3) {
                     // clear single sprite object.
-                    spriteDefs[parm[2]] = null
+                    spriteDefs[parm[2]] = null;
                   } else if (l > 4) {
                     // define a sprite object
-                    str = ''
+                    str = "";
                     switch (parm[3]) {
                       case 0:
                         // url : unicode encoded characters
                         for (i = 4; i < l; i++)
-                          str += String.fromCharCode(int(parm[i]))
-                        spriteDefs[parm[2]] = stripNL(str)
-                        break
+                          str += String.fromCharCode(int(parm[i]));
+                        spriteDefs[parm[2]] = stripNL(str);
+                        break;
 
                       case 1:
                         // UTF8 url : hex3 encoded
-                        for (i = 4; i < l; i++) str += ';' + parm[i]
-                        str = str.substring(1)
+                        for (i = 4; i < l; i++) str += ";" + parm[i];
+                        str = str.substring(1);
                         spriteDefs[parm[2]] = stripNL(
                           UTF8ArrayToStr(decodeHex3(str)).strData
-                        )
-                        break
+                        );
+                        break;
 
                       case 2:
                         // raw UTF8 svg : hex3 encoded
-                        for (i = 4; i < l; i++) str += ';' + parm[i]
-                        str = str.substring(1)
+                        for (i = 4; i < l; i++) str += ";" + parm[i];
+                        str = str.substring(1);
                         spriteDefs[parm[2]] =
-                          'data:image/svg+xml;charset=utf-8,' +
+                          "data:image/svg+xml;charset=utf-8," +
                           encodeURIComponent(
                             stripNL(UTF8ArrayToStr(decodeHex3(str)).strData)
-                          )
-                        break
+                          );
+                        break;
 
                       case 3:
                         // raw UTF8 svg deflated : hex3 encoded
-                        for (i = 4; i < l; i++) str += ';' + parm[i]
-                        str = str.substring(1)
+                        for (i = 4; i < l; i++) str += ";" + parm[i];
+                        str = str.substring(1);
                         spriteDefs[parm[2]] =
-                          'data:image/svg+xml;charset=utf-8,' +
+                          "data:image/svg+xml;charset=utf-8," +
                           encodeURIComponent(
                             stripNL(
                               UTF8ArrayToStr(inflateRaw(decodeHex3(str)))
                                 .strData
                             )
-                          )
-                        break
+                          );
+                        break;
 
                       case 4:
                         // raw UTF8 svg Base64: hex3 encoded
-                        for (i = 4; i < l; i++) str += ';' + parm[i]
-                        str = str.substring(1)
+                        for (i = 4; i < l; i++) str += ";" + parm[i];
+                        str = str.substring(1);
                         spriteDefs[parm[2]] =
-                          'data:image/svg+xml;base64,' +
-                          stripNL(UTF8ArrayToStr(decodeHex3(str)).strData)
-                        break
+                          "data:image/svg+xml;base64," +
+                          stripNL(UTF8ArrayToStr(decodeHex3(str)).strData);
+                        break;
                     }
                   }
-                  break
+                  break;
 
                 case 1:
                   // display / remove sprite from display.
                   if (l == 2) {
                     // remove all sprints from display
-                    els = document.getElementsByClassName('sprite')
+                    els = document.getElementsByClassName("sprite");
                     for (i = els.length - 1; i >= 0; i--)
-                      els[i].parentNode.removeChild(els[i])
+                      els[i].parentNode.removeChild(els[i]);
                   } else if (l == 3) {
                     // remove sprite s from display
-                    div = document.getElementById('sprite' + parm[2])
-                    if (div != null) div.parentNode.removeChild(div)
+                    div = document.getElementById("sprite" + parm[2]);
+                    if (div != null) div.parentNode.removeChild(div);
                   } else if (l == 7) {
                     // display a new sprite
                     // remove old one if it exists first
-                    div = document.getElementById('sprite' + parm[2])
-                    if (div != null) div.parentNode.removeChild(div)
+                    div = document.getElementById("sprite" + parm[2]);
+                    if (div != null) div.parentNode.removeChild(div);
 
-                    rpos = getElementPosition(getRowElement(crsrRow))
-                    csize = getRowFontSize(crsrRow)
-                    spriteTop = rpos.top - pageTop
-                    spriteLeft = crsrCol * csize.width
+                    rpos = getElementPosition(getRowElement(crsrRow));
+                    csize = getRowFontSize(crsrRow);
+                    spriteTop = rpos.top - pageTop;
+                    spriteLeft = crsrCol * csize.width;
 
                     // make a new one.
                     div = domElement(
-                      'div',
+                      "div",
                       {
-                        className: 'sprite',
+                        className: "sprite",
                         row: crsrRow,
                         col: crsrCol,
-                        id: 'sprite' + parm[2],
+                        id: "sprite" + parm[2]
                       },
                       {
-                        position: 'absolute',
-                        left: spriteLeft + 'px',
-                        top: spriteTop + 'px',
-                        backgroundColor: 'green',
-                        width: colSize * parm[4] + 'px',
-                        height: rowSize * parm[5] + 'px',
-                        overflow: 'hidden',
+                        position: "absolute",
+                        left: spriteLeft + "px",
+                        top: spriteTop + "px",
+                        backgroundColor: "green",
+                        width: colSize * parm[4] + "px",
+                        height: rowSize * parm[5] + "px",
+                        overflow: "hidden"
                       }
-                    )
+                    );
 
                     img = domElement(
-                      'img',
+                      "img",
                       {
                         onload: fitSVGToDiv,
-                        src: spriteDefs[parm[3]],
+                        src: spriteDefs[parm[3]]
                       },
                       {
-                        visibility: 'hidden',
-                        position: 'relative',
-                        left: '0px',
-                        top: '0px',
+                        visibility: "hidden",
+                        position: "relative",
+                        left: "0px",
+                        top: "0px"
                       }
-                    )
+                    );
 
-                    div.appendChild(img)
-                    if (parm[6] == 0) pageDiv.insertBefore(div, textDiv)
-                    else textDiv.appendChild(div)
+                    div.appendChild(img);
+                    if (parm[6] == 0) pageDiv.insertBefore(div, textDiv);
+                    else textDiv.appendChild(div);
                   }
-                  break
+                  break;
 
                 case 2:
                   // move sprite to new r c.
-                  el = document.getElementById('sprite' + parm[2])
-                  if (el && l == 6) moveSprite(el, parm[3], parm[4], parm[5])
-                  break
+                  el = document.getElementById("sprite" + parm[2]);
+                  if (el && l == 6) moveSprite(el, parm[3], parm[4], parm[5]);
+                  break;
 
                 case 3:
                   // move sprite to new z.
@@ -15600,7 +15620,7 @@ vtx: {
                                         s : Sprite number to assign to this sprite. {0}
                                         z : Z-plane. 0 = below text plane, 1 : above text plane. {0}
                                 */
-                  break
+                  break;
               }
             } else if (parm[0] == 1) {
               // audio commands
@@ -15612,241 +15632,241 @@ vtx: {
                   // parm4.. = hex3 data (rejoin with ;)
                   if (l == 2) {
                     // clear all audio objects.
-                    audioDefs = []
+                    audioDefs = [];
                   } else if (l == 3) {
                     // clear audio object num
-                    audioDefs[parm[2]] = null
+                    audioDefs[parm[2]] = null;
                   } else if (l > 4) {
                     // define audio object
-                    str = ''
+                    str = "";
                     switch (parm[3]) {
                       case 0:
                         // url : unicode encoded characters
                         for (i = 4; i < l; i++)
-                          str += String.fromCharCode(int(parm[i]))
-                        audioDefs[parm[2]] = str
-                        break
+                          str += String.fromCharCode(int(parm[i]));
+                        audioDefs[parm[2]] = str;
+                        break;
 
                       case 1:
                         // UTF8 url : hex3 encoded
-                        for (i = 4; i < l; i++) str += ';' + parm[i]
-                        str = str.substring(1)
+                        for (i = 4; i < l; i++) str += ";" + parm[i];
+                        str = str.substring(1);
                         audioDefs[parm[2]] = UTF8ArrayToStr(
                           decodeHex3(str)
-                        ).strData
-                        break
+                        ).strData;
+                        break;
 
                       case 2:
                         // raw mp3 : hex3 encoded
                         // TODO
                         audioDefs[parm[2]] =
-                          'data:audio/mp3;base64,' + btoa(decodeHex3(str))
-                        break
+                          "data:audio/mp3;base64," + btoa(decodeHex3(str));
+                        break;
 
                       case 3:
                         // raw mp3 deflated : hex3 encoded
                         // TODO
                         audioDefs[parm[2]] =
-                          'data:audio/mp3;base64,' +
-                          btoa(inflateRaw(decodeHex3(str)))
-                        break
+                          "data:audio/mp3;base64," +
+                          btoa(inflateRaw(decodeHex3(str)));
+                        break;
 
                       case 4:
                         // raw MP3 Base64: hex3 encoded
                         // TODO
                         audioDefs[parm[2]] =
-                          'data:audio/mp3;base64,' +
-                          +stripNL(UTF8ArrayToStr(decodeHex3(str)).strData)
-                        break
+                          "data:audio/mp3;base64," +
+                          +stripNL(UTF8ArrayToStr(decodeHex3(str)).strData);
+                        break;
                     }
                   }
-                  break
+                  break;
 
                 case 1:
                   // select audio object to player.
                   if (l > 2) {
-                    audioEl.src = audioDefs[parm[2]]
+                    audioEl.src = audioDefs[parm[2]];
                   }
-                  break
+                  break;
 
                 case 2:
                   // play / pause / stop-rewind
                   switch (parm[2]) {
                     case 0:
                       // stop/rewind
-                      audioEl.pause()
-                      audioEl.load()
-                      break
+                      audioEl.pause();
+                      audioEl.load();
+                      break;
 
                     case 1:
                       // play
-                      audioEl.play()
-                      break
+                      audioEl.play();
+                      break;
 
                     case 2:
                       // pause
-                      audioEl.pause()
-                      break
+                      audioEl.pause();
+                      break;
                   }
-                  break
+                  break;
 
                 case 3:
                   // set volume (0-100)
-                  audioEl.volume = parm[2] != null ? parm[2] / 100 : 0.25
-                  break
+                  audioEl.volume = parm[2] != null ? parm[2] / 100 : 0.25;
+                  break;
               }
             }
-            break
+            break;
           /* special VTX sequences end */
 
           case 0x62: // b - repeat last char
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
             for (i = 0; i < parm[0]; i++) {
-              conPrintChar(lastChar)
+              conPrintChar(lastChar);
             }
-            crsrrender = true
-            break
+            crsrrender = true;
+            break;
 
           case 0x63: // c - device attributes
-            parm = fixParams(parm, [0])
+            parm = fixParams(parm, [0]);
             if (parm[0] == 0) {
               // request device
-              sendData(CSI + '?50;86;84;88c') // reply for VTX
+              sendData(CSI + "?50;86;84;88c"); // reply for VTX
             }
-            break
+            break;
 
           case 0x66: // f - Cursor Position
           case 0x48: // H - Cursor Position
             // set missing to defaults of 1
-            parm = fixParams(parm, [1, 1])
-            parm[0] = minMax(parm[0], 1, 999)
-            parm[1] = minMax(parm[1], 1, 999)
-            while (l < 2) parm[l++] = 1
-            if (modeRegionOrigin) crsrRow = regionTopRow + parm[0] - 1
-            else crsrRow = parm[0] - 1
-            crsrCol = parm[1] - 1
-            expandToRow(crsrRow)
-            crsrrender = true
-            break
+            parm = fixParams(parm, [1, 1]);
+            parm[0] = minMax(parm[0], 1, 999);
+            parm[1] = minMax(parm[1], 1, 999);
+            while (l < 2) parm[l++] = 1;
+            if (modeRegionOrigin) crsrRow = regionTopRow + parm[0] - 1;
+            else crsrRow = parm[0] - 1;
+            crsrCol = parm[1] - 1;
+            expandToRow(crsrRow);
+            crsrrender = true;
+            break;
 
           case 0x68: // h - set mode
           case 0x6c: // l - reset mode
-            if (parm.length == 0) break
-            parm[0] = parm[0].toString()
+            if (parm.length == 0) break;
+            parm[0] = parm[0].toString();
             switch (parm[0]) {
-              case '?6':
+              case "?6":
                 // origin in region?
-                modeRegionOrigin = chr == 0x68
-                modeRegion = true
-                break
+                modeRegionOrigin = chr == 0x68;
+                modeRegion = true;
+                break;
 
-              case '?7':
+              case "?7":
                 // autowrap mode
-                modeAutoWrap = chr == 0x68
-                break
+                modeAutoWrap = chr == 0x68;
+                break;
 
-              case '?25':
+              case "?25":
                 // hide / show cursor
-                modeCursor = chr == 0x68
-                break
+                modeCursor = chr == 0x68;
+                break;
 
-              case '?31':
+              case "?31":
                 // bright as font 1
-                modeBoldFont = chr == 0x68
-                break
+                modeBoldFont = chr == 0x68;
+                break;
 
-              case '?32':
+              case "?32":
                 // bright enable/disable
-                modeNoBold = chr == 0x68
-                break
+                modeNoBold = chr == 0x68;
+                break;
 
-              case '?33':
+              case "?33":
                 // blink to high intensity background
-                modeBlinkBright = chr == 0x68
-                break
+                modeBlinkBright = chr == 0x68;
+                break;
 
-              case '?34':
+              case "?34":
                 //  blink as font 2
-                modeBlinkFont = chr == 0x68
-                break
+                modeBlinkFont = chr == 0x68;
+                break;
 
-              case '?35':
+              case "?35":
                 // '?35' : blink disabled
-                modeNoBlink = chr == 0x68
-                break
+                modeNoBlink = chr == 0x68;
+                break;
 
-              case '?50':
+              case "?50":
                 // VTX / ANSIBBS mode flip
-                modeVTXANSI = chr == 0x68
-                break
+                modeVTXANSI = chr == 0x68;
+                break;
 
-              case '?51':
+              case "?51":
                 // Teletext burst mode. (ESC to exit mode)
-                crsrCol = 0
-                cellSaveAttr = cellAttr // save attributes
-                modeSaveAutoWrap = modeAutoWrap
-                modeAutoWrap = false
-                ttxBottom = false
-                modeTeletext = true
-                break
+                crsrCol = 0;
+                cellSaveAttr = cellAttr; // save attributes
+                modeSaveAutoWrap = modeAutoWrap;
+                modeAutoWrap = false;
+                ttxBottom = false;
+                modeTeletext = true;
+                break;
 
-              case '=255':
+              case "=255":
                 // =255 : DOORWAY mode
-                modeDOORWAY = chr == 0x68
-                break
+                modeDOORWAY = chr == 0x68;
+                break;
             }
-            break
+            break;
 
           case 0x6d: // m - Character Attr
             // don't use fixparms. variable parameters.
-            if (l == 0) parm[l++] = 0
-            parm[0] = minMax(parm[0], 0, 255)
+            if (l == 0) parm[l++] = 0;
+            parm[0] = minMax(parm[0], 0, 255);
             for (i = 0; i < l; i++) {
               switch (parm[i]) {
                 case 0: // reset
-                  cellAttr = defCellAttr
-                  break
+                  cellAttr = defCellAttr;
+                  break;
 
                 case 1: // bold on / off
                 case 21:
-                  cellAttr = setCellAttrBold(cellAttr, parm[i] < 20)
-                  break
+                  cellAttr = setCellAttrBold(cellAttr, parm[i] < 20);
+                  break;
 
                 case 2: // faint on / off
                 case 22:
-                  cellAttr = setCellAttrFaint(cellAttr, parm[i] < 20)
-                  break
+                  cellAttr = setCellAttrFaint(cellAttr, parm[i] < 20);
+                  break;
 
                 case 3: // italics on/off
                 case 23:
-                  cellAttr = setCellAttrItalics(cellAttr, parm[i] < 20)
-                  break
+                  cellAttr = setCellAttrItalics(cellAttr, parm[i] < 20);
+                  break;
 
                 case 4: // underline
                 case 24:
-                  cellAttr = setCellAttrUnderline(cellAttr, parm[i] < 20)
-                  break
+                  cellAttr = setCellAttrUnderline(cellAttr, parm[i] < 20);
+                  break;
 
                 case 5: // blink slow
-                  cellAttr &= ~(A_CELL_BLINKSLOW | A_CELL_BLINKFAST)
-                  cellAttr |= A_CELL_BLINKSLOW
-                  break
+                  cellAttr &= ~(A_CELL_BLINKSLOW | A_CELL_BLINKFAST);
+                  cellAttr |= A_CELL_BLINKSLOW;
+                  break;
 
                 case 6: // blink fast
-                  cellAttr &= ~(A_CELL_BLINKSLOW | A_CELL_BLINKFAST)
-                  cellAttr |= A_CELL_BLINKFAST
-                  break
+                  cellAttr &= ~(A_CELL_BLINKSLOW | A_CELL_BLINKFAST);
+                  cellAttr |= A_CELL_BLINKFAST;
+                  break;
 
                 case 25: // all blink off
                 case 26: // all blink off (reserved but unblink)
-                  cellAttr &= ~(A_CELL_BLINKSLOW | A_CELL_BLINKFAST)
-                  break
+                  cellAttr &= ~(A_CELL_BLINKSLOW | A_CELL_BLINKFAST);
+                  break;
 
                 case 7: // reverse video
                 case 27:
-                  cellAttr = setCellAttrReverse(cellAttr, parm[i] < 20)
-                  break
+                  cellAttr = setCellAttrReverse(cellAttr, parm[i] < 20);
+                  break;
 
                 case 8: // conceal
                 case 28:
@@ -15855,13 +15875,13 @@ vtx: {
                     parm[i] < 20
                       ? A_CELL_DISPLAY_CONCEAL
                       : A_CELL_DISPLAY_NORMAL
-                  )
-                  break
+                  );
+                  break;
 
                 case 9: // strikethrough
                 case 29:
-                  cellAttr = setCellAttrStrikethrough(cellAttr, parm[i] < 20)
-                  break
+                  cellAttr = setCellAttrStrikethrough(cellAttr, parm[i] < 20);
+                  break;
 
                 // select font
                 case 10:
@@ -15874,27 +15894,27 @@ vtx: {
                 case 17:
                 case 18:
                 case 19:
-                  conFontNum = parm[i] - 10
-                  cellAttr = setCellAttrFont(cellAttr, parm[i] - 10)
-                  break
+                  conFontNum = parm[i] - 10;
+                  cellAttr = setCellAttrFont(cellAttr, parm[i] - 10);
+                  break;
 
                 case 56: // doublestrike
                 case 76:
-                  cellAttr = setCellAttrDoublestrike(cellAttr, parm[i] < 70)
-                  break
+                  cellAttr = setCellAttrDoublestrike(cellAttr, parm[i] < 70);
+                  break;
 
                 case 57: // shadow
                 case 77:
-                  cellAttr = setCellAttrShadow(cellAttr, parm[i] < 70)
-                  break
+                  cellAttr = setCellAttrShadow(cellAttr, parm[i] < 70);
+                  break;
 
                 case 58: // top half
                 case 78:
                   cellAttr = setCellAttrDisplay(
                     cellAttr,
                     parm[i] < 70 ? A_CELL_DISPLAY_TOP : A_CELL_DISPLAY_NORMAL
-                  )
-                  break
+                  );
+                  break;
 
                 case 59: // bottom half
                 case 79:
@@ -15902,8 +15922,8 @@ vtx: {
                   cellAttr = setCellAttrDisplay(
                     cellAttr,
                     parm[i] < 70 ? A_CELL_DISPLAY_BOTTOM : A_CELL_DISPLAY_NORMAL
-                  )
-                  break
+                  );
+                  break;
 
                 // special built in fonts
                 case 80: // teletext codepage text only
@@ -15912,9 +15932,9 @@ vtx: {
                 case 83: // reserved
                 case 84: // reserved
                 case 85: // reserved
-                  conFontNum = parm[i] - 70
-                  cellAttr = setCellAttrFont(cellAttr, parm[i] - 70)
-                  break
+                  conFontNum = parm[i] - 70;
+                  cellAttr = setCellAttrFont(cellAttr, parm[i] - 70);
+                  break;
 
                 // text foreground colors
                 case 30:
@@ -15926,23 +15946,26 @@ vtx: {
                 case 36:
                 case 37:
                   // foreground color (0-7)
-                  cellAttr = setCellAttrFG(cellAttr, parm[i] - 30)
-                  break
+                  cellAttr = setCellAttrFG(cellAttr, parm[i] - 30);
+                  break;
 
                 case 38:
                   // check for 5 ; color
                   if (++i < l)
                     if (parm[i] == 5)
                       if (++i < l) {
-                        parm[i] = minMax(parm[i], 0, 255, 7)
-                        cellAttr = setCellAttrFG(cellAttr, parm[i])
+                        parm[i] = minMax(parm[i], 0, 255, 7);
+                        cellAttr = setCellAttrFG(cellAttr, parm[i]);
                       }
-                  break
+                  break;
 
                 case 39:
                   // default
-                  cellAttr = setCellAttrFG(cellAttr, getCellAttrFG(defCellAttr))
-                  break
+                  cellAttr = setCellAttrFG(
+                    cellAttr,
+                    getCellAttrFG(defCellAttr)
+                  );
+                  break;
 
                 case 90:
                 case 91:
@@ -15953,8 +15976,8 @@ vtx: {
                 case 96:
                 case 97:
                   // foreground color (8-15)
-                  cellAttr = setCellAttrFG(cellAttr, parm[i] - 90 + 8)
-                  break
+                  cellAttr = setCellAttrFG(cellAttr, parm[i] - 90 + 8);
+                  break;
 
                 // text background colors
                 case 40:
@@ -15966,23 +15989,26 @@ vtx: {
                 case 46:
                 case 47:
                   // background color (0-7)
-                  cellAttr = setCellAttrBG(cellAttr, parm[i] - 40)
-                  break
+                  cellAttr = setCellAttrBG(cellAttr, parm[i] - 40);
+                  break;
 
                 case 48:
                   // check for 5 ; color
                   if (++i < l)
                     if (parm[i] == 5)
                       if (++i < l) {
-                        parm[i] = minMax(parm[i], 0, 255, 7)
-                        cellAttr = setCellAttrBG(cellAttr, parm[i])
+                        parm[i] = minMax(parm[i], 0, 255, 7);
+                        cellAttr = setCellAttrBG(cellAttr, parm[i]);
                       }
-                  break
+                  break;
 
                 case 49:
                   // default
-                  cellAttr = setCellAttrBG(cellAttr, getCellAttrBG(defCellAttr))
-                  break
+                  cellAttr = setCellAttrBG(
+                    cellAttr,
+                    getCellAttrBG(defCellAttr)
+                  );
+                  break;
 
                 case 100:
                 case 101:
@@ -15993,145 +16019,145 @@ vtx: {
                 case 106:
                 case 107:
                   // background color (8-15)
-                  cellAttr = setCellAttrBG(cellAttr, parm[i] - 100 + 8)
-                  break
+                  cellAttr = setCellAttrBG(cellAttr, parm[i] - 100 + 8);
+                  break;
               }
             }
-            break
+            break;
 
           case 0x6e: // n DSR - device status report
-            parm = fixParams(parm, [1])
-            parm[0] = minMax(parm[0], 1, 999)
+            parm = fixParams(parm, [1]);
+            parm[0] = minMax(parm[0], 1, 999);
             switch (parm[0]) {
               case 5:
-                sendData(CSI + '0n')
-                break
+                sendData(CSI + "0n");
+                break;
 
               case 6:
-                sendData(CSI + (crsrRow + 1) + ';' + (crsrCol + 1) + 'R')
-                break
+                sendData(CSI + (crsrRow + 1) + ";" + (crsrCol + 1) + "R");
+                break;
 
               case 255:
-                sendData(CSI + crtRows + ';' + crtCols + 'R')
-                break
+                sendData(CSI + crtRows + ";" + crtCols + "R");
+                break;
             }
-            break
+            break;
 
           case 0x72: // r
-            if (interm == '*') {
+            if (interm == "*") {
               // *r - emulate baud
               // assuming if p1 < 2 then use p2, else reset to full speed.
               // ps1 : nil,0,1 = host transmit, 2=host recieve, 3=printer
               //      4=modem hi, 5=modem lo
               // ps2 : nil,0=full speed, 1=300, 2=600,3=1200,4=2400,5=4800,
               //      6=9600,7=19200,8=38400,9=57600,10=76800,11=115200
-              parm = fixParams(parm, [0, 0])
+              parm = fixParams(parm, [0, 0]);
               if (parm[0] < 2) {
-                setTimers(0)
-                conBaud = bauds[parm[1]] * 100
+                setTimers(0);
+                conBaud = bauds[parm[1]] * 100;
                 setTimeout(function() {
-                  setTimers(1)
-                }, 25)
+                  setTimers(1);
+                }, 25);
               }
-            } else if (interm == '') {
+            } else if (interm == "") {
               // CSI t ; b 'r' : Set scroll window (DECSTBM).
               if (parm.length == 0) {
-                modeRegion = false
-                regionTopRow = 0
-                regionBottomRow = crtRows - 1
+                modeRegion = false;
+                regionTopRow = 0;
+                regionBottomRow = crtRows - 1;
               } else {
-                modeRegion = true
-                parm = fixParams(parm, [1, 1])
-                parm[0] = minMax(parm[0], 1, crtRows)
-                parm[1] = minMax(parm[1], parm[0], crtRows)
-                regionTopRow = parm[0] - 1
-                regionBottomRow = parm[1] - 1
+                modeRegion = true;
+                parm = fixParams(parm, [1, 1]);
+                parm[0] = minMax(parm[0], 1, crtRows);
+                parm[1] = minMax(parm[1], parm[0], crtRows);
+                regionTopRow = parm[0] - 1;
+                regionBottomRow = parm[1] - 1;
               }
             }
-            break
+            break;
 
           case 0x73: // s - Save Position
-            crsrSaveRow = crsrRow
-            crsrSaveCol = crsrCol
-            break
+            crsrSaveRow = crsrRow;
+            crsrSaveCol = crsrCol;
+            break;
 
           case 0x75: // u - Restore Position
-            crsrRow = crsrSaveRow
-            crsrCol = crsrSaveCol
-            crsrrender = true
-            break
+            crsrRow = crsrSaveRow;
+            crsrCol = crsrSaveCol;
+            crsrrender = true;
+            break;
 
           default:
             // unsupported - ignore
             //console.log('unsupported ansi : CSI ' + String.fromCharCode(chr));
-            break
+            break;
         }
       }
     }
-    if (crsrrender) crsrDraw()
+    if (crsrrender) crsrDraw();
   }
 
   // animate move sprite to nr, nc over t time.
   function moveSprite(el, nr, nc, t) {
     var rpos = getElementPosition(getRowElement(nr)),
       csize = getRowFontSize(nr),
-      cx = int(el.style['left']),
-      cy = int(el.style['top']),
+      cx = int(el.style["left"]),
+      cy = int(el.style["top"]),
       steps,
       tmr,
       sel,
       nx,
-      ny
+      ny;
 
-    if (t < 0) t = 0
-    steps = Math.round(t / 15)
-    nx = nc * csize.width
-    ny = rpos.top - pageTop
+    if (t < 0) t = 0;
+    steps = Math.round(t / 15);
+    nx = nc * csize.width;
+    ny = rpos.top - pageTop;
 
     // generate new keyframe
     sel = domElement(
-      'style',
+      "style",
       {},
       {},
-      '@keyframes ' +
+      "@keyframes " +
         el.id +
-        ' { ' +
-        'from { left: ' +
+        " { " +
+        "from { left: " +
         cx +
-        'px; top: ' +
+        "px; top: " +
         cy +
-        'px; } ' +
-        'to { left : ' +
+        "px; } " +
+        "to { left : " +
         nx +
-        'px; top: ' +
+        "px; top: " +
         ny +
-        'px;}} '
-    )
-    el.appendChild(sel)
-    el.style['animation-duration'] = t + 'ms'
-    el.style['animation-name'] = el.id
-    el.style['animation-iteration-count'] = '1'
-    el.style['animation-fill-mode'] = 'forwards'
+        "px;}} "
+    );
+    el.appendChild(sel);
+    el.style["animation-duration"] = t + "ms";
+    el.style["animation-name"] = el.id;
+    el.style["animation-iteration-count"] = "1";
+    el.style["animation-fill-mode"] = "forwards";
     setTimeout(function() {
-      el.style['left'] = nx + 'px'
-      el.style['top'] = ny + 'px'
-      el.style['animation-name'] = null
-      el.style['animation-duration'] = null
-      el.style['animation-iteration-count'] = null
-      el.style['animation-fill-mode'] = null
-      el.removeChild(sel)
-    }, t + 5)
+      el.style["left"] = nx + "px";
+      el.style["top"] = ny + "px";
+      el.style["animation-name"] = null;
+      el.style["animation-duration"] = null;
+      el.style["animation-iteration-count"] = null;
+      el.style["animation-fill-mode"] = null;
+      el.removeChild(sel);
+    }, t + 5);
   }
 
   function getAnsiLength(str) {
-    var str2 = str.replace(/\e\[.*[@-_]/g, '')
-    return str.length
+    var str2 = str.replace(/\e\[.*[@-_]/g, "");
+    return str.length;
   }
 
   // remove all NL from string. (https://www.chromestatus.com/features/5735596811091968)
   function stripNL(strin) {
-    var strout = strin.replace(/\n/g, ' ').replace(/\s+/g, ' ')
-    return strout
+    var strout = strin.replace(/\n/g, " ").replace(/\s+/g, " ");
+    return strout;
   }
 
   // decode hex3 string, return as Uint8Array
@@ -16140,63 +16166,63 @@ vtx: {
     var ret, // decoded result
       i,
       l, // idx / length
-      p // ptr into strin
+      p; // ptr into strin
 
-    strin = strin.replace(/\s/g, '')
-    ret = new Uint8Array(strin.length >>> 1)
+    strin = strin.replace(/\s/g, "");
+    ret = new Uint8Array(strin.length >>> 1);
     for (p = 0, i = 0, l = ret.length; i < l; i++) {
       ret[i] =
-        ((strin.charCodeAt(p) & 0x0f) << 4) | (strin.charCodeAt(p + 1) & 0x0f)
-      p += 2
+        ((strin.charCodeAt(p) & 0x0f) << 4) | (strin.charCodeAt(p + 1) & 0x0f);
+      p += 2;
     }
-    return ret
+    return ret;
   }
 
   // call once every 20 ms
   function doWriteBuffer() {
-    var strOut, bytes
+    var strOut, bytes;
 
     if (conBuffer.length > 0) {
       // how many bytes to send since last call.
       if (conBaud == 0) {
-        strOut = conBuffer
-        conBuffer = ''
+        strOut = conBuffer;
+        conBuffer = "";
       } else {
-        bytes = conBaud / 500
+        bytes = conBaud / 500;
         if (conBuffer.length < bytes) {
-          strOut = conBuffer
-          conBuffer = ''
+          strOut = conBuffer;
+          conBuffer = "";
         } else {
-          strOut = conBuffer.substring(0, bytes)
-          conBuffer = conBuffer.substring(bytes)
+          strOut = conBuffer.substring(0, bytes);
+          conBuffer = conBuffer.substring(bytes);
         }
       }
-      conStrOut(strOut)
+      conStrOut(strOut);
     }
   }
 
   // do all writing here.
   function conBufferOut(data) {
-    conBuffer += data
+    conBuffer += data;
     if (conBaud == 0) {
-      conStrOut(conBuffer)
-      conBuffer = ''
+      conStrOut(conBuffer);
+      conBuffer = "";
     }
   }
 
   // write string using current attributes at cursor position. ###CALL conBufferOut!###
   function conStrOut(str) {
-    var oldSpeed, l, i
+    var oldSpeed, l, i;
 
-    str = str || ''
-    l = str.length
+    str = str || "";
+    l = str.length;
     for (i = 0; i < l; i++) {
-      oldSpeed = conBaud
-      conCharOut(str.charCodeAt(i))
+      oldSpeed = conBaud;
+      conCharOut(str.charCodeAt(i));
       if (conBaud != oldSpeed) {
         // move rest back to buffer!
-        conBuffer = str.substring(i + 1) + conBuffer
-        break
+        conBuffer = str.substring(i + 1) + conBuffer;
+        break;
       }
     }
   }
@@ -16205,28 +16231,28 @@ vtx: {
   // must be state machine.
   // data is Uint8Array. return UInt8Array
   function tnNegotiate(data) {
-    var v0, v1, v2, v3, i, l, b, outdata, outp
+    var v0, v1, v2, v3, i, l, b, outdata, outp;
 
-    outdata = new Uint8Array(data.length)
-    outp = 0 // pointer into output
-    l = data.length
+    outdata = new Uint8Array(data.length);
+    outp = 0; // pointer into output
+    l = data.length;
     for (i = 0; i < l; i++) {
-      b = data[i]
+      b = data[i];
       switch (tnState) {
         case 0:
           // not in any state. looking for IAC's
-          if (b == TN_IAC) tnState++
-          else outdata[outp++] = b
-          break
+          if (b == TN_IAC) tnState++;
+          else outdata[outp++] = b;
+          break;
 
         case 1:
           // recieved a TN_IAC
           switch (b) {
             case TN_IAC:
               // escaped 0xFF.
-              outdata[outp++] = b
-              tnState = 0
-              break
+              outdata[outp++] = b;
+              tnState = 0;
+              break;
 
             case TN_SE: // subneg end
             case TN_NOP: // no operation
@@ -16239,36 +16265,36 @@ vtx: {
             case TN_EL: // erase line
             case TN_GA: // go ahead
               // ignore for now.
-              tnState = 0
-              break
+              tnState = 0;
+              break;
 
             case TN_SB:
               // subneg begin
-              tnState = 3
-              break
+              tnState = 3;
+              break;
 
             case TN_WILL:
             case TN_WONT:
             case TN_DO:
             case TN_DONT:
-              tnCmd = b
-              tnState = 2
-              break
+              tnCmd = b;
+              tnState = 2;
+              break;
 
             default:
               // ??
-              outdata[outp++] = b
-              tnState = 0
-              break
+              outdata[outp++] = b;
+              tnState = 0;
+              break;
           }
-          break
+          break;
 
         case 2:
           // have IAC + cmd so far
           switch (tnCmd) {
             case TN_WILL:
               // server would like to do something. send DO or DONT
-              if (tnQUs[b] == TNQ_WANTYES) tnQUs[b] = TNQ_YES
+              if (tnQUs[b] == TNQ_WANTYES) tnQUs[b] = TNQ_YES;
               else {
                 switch (b) {
                   case TN_BIN: // binary
@@ -16278,42 +16304,42 @@ vtx: {
                   case TN_TTYPE: // terminal type
                   case TN_TSPEED: // terminal speed
                   case TN_NEWE:
-                    tnSendCmd(TN_DO, b)
-                    tnQHim[b] = TNQ_YES
-                    break
+                    tnSendCmd(TN_DO, b);
+                    tnQHim[b] = TNQ_YES;
+                    break;
 
                   default:
-                    tnSendCmd(TN_DONT, b)
-                    tnQHim[b] = TNQ_NO
-                    break
+                    tnSendCmd(TN_DONT, b);
+                    tnQHim[b] = TNQ_NO;
+                    break;
                 }
               }
-              break
+              break;
 
             case TN_WONT:
               if (tnQUs[b] == TNQ_WANTYES || tnQUs[b] == TNQ_WANTNO)
                 // response to my request to do or dont
-                tnQUs[b] = TNQ_NO
+                tnQUs[b] = TNQ_NO;
               else {
                 // server wants to not do
-                tnSendCmd(TN_DONT, b)
-                tnQHim[b] = TNQ_NO
+                tnSendCmd(TN_DONT, b);
+                tnQHim[b] = TNQ_NO;
               }
-              break
+              break;
 
             case TN_DO:
               if (tnQUs[b] == TNQ_WANTYES) {
                 // response to my request to will
-                tnQUs[b] = TNQ_YES
+                tnQUs[b] = TNQ_YES;
 
                 // send some SB stuff now
                 if (b == TN_NAWS) {
-                  v0 = crtCols & 0xff
-                  v1 = (crtCols >>> 8) & 0xff
-                  v2 = crtRows & 0xff
-                  v3 = (crtRows >>> 8) & 0xff
-                  tnSendCmd(TN_SB, TN_NAWS, v1, v0, v3, v2)
-                  tnSendCmd(TN_SE)
+                  v0 = crtCols & 0xff;
+                  v1 = (crtCols >>> 8) & 0xff;
+                  v2 = crtRows & 0xff;
+                  v3 = (crtRows >>> 8) & 0xff;
+                  tnSendCmd(TN_SB, TN_NAWS, v1, v0, v3, v2);
+                  tnSendCmd(TN_SE);
                 }
               } else {
                 // server wants us to do
@@ -16325,38 +16351,38 @@ vtx: {
                   case TN_TTYPE:
                   case TN_TSPEED:
                   case TN_NEWE:
-                    tnSendCmd(TN_WILL, b)
-                    tnQUs[b] = TNQ_YES
-                    break
+                    tnSendCmd(TN_WILL, b);
+                    tnQUs[b] = TNQ_YES;
+                    break;
 
                   default:
-                    tnSendCmd(TN_WONT, b)
-                    tnQUs[b] = TNQ_NO
-                    break
+                    tnSendCmd(TN_WONT, b);
+                    tnQUs[b] = TNQ_NO;
+                    break;
                 }
               }
-              break
+              break;
 
             case TN_DONT:
               // server wants me to not do something. send WONT
               if (tnQUs[b] == TNQ_WANTYES)
                 // response to my request to will
-                tnQUs[b] = TNQ_NO
+                tnQUs[b] = TNQ_NO;
               else {
                 // server wants us to not do. respond WONT
-                tnSendCmd(TN_WONT, b)
-                tnQUs[b] = TNQ_NO
+                tnSendCmd(TN_WONT, b);
+                tnQUs[b] = TNQ_NO;
               }
-              break
+              break;
           }
-          tnState = 0
-          break
+          tnState = 0;
+          break;
 
         case 3:
           // have IAC SB
-          tnCmd = b
-          tnState = 4
-          break
+          tnCmd = b;
+          tnState = 4;
+          break;
 
         case 4:
           // this should be SEND (1)
@@ -16364,34 +16390,34 @@ vtx: {
             switch (tnCmd) {
               case TN_TTYPE:
                 // will neg term type;
-                tnSendCmd(TN_SB, tnCmd, TN_IS, vtxdata.term)
-                tnSendCmd(TN_SE)
-                break
+                tnSendCmd(TN_SB, tnCmd, TN_IS, vtxdata.term);
+                tnSendCmd(TN_SE);
+                break;
 
               case TN_TSPEED:
                 // will neg terminal speed
-                tnSendCmd(TN_SB, tnCmd, TN_IS, '921600,921600')
-                tnSendCmd(TN_SE)
-                break
+                tnSendCmd(TN_SB, tnCmd, TN_IS, "921600,921600");
+                tnSendCmd(TN_SE);
+                break;
 
               case TN_NEWE:
                 // new environment
-                tnSendCmd(TN_SB, tnCmd, TN_IS, 0)
-                tnSendCmd(TN_SE)
-                break
+                tnSendCmd(TN_SB, tnCmd, TN_IS, 0);
+                tnSendCmd(TN_SE);
+                break;
 
               default:
                 // ? why are we being asked this? server on drugs?
-                tnSendCmd(TN_DONT, tnCmd)
-                outdata[outp++] = b
-                break
+                tnSendCmd(TN_DONT, tnCmd);
+                outdata[outp++] = b;
+                break;
             }
-          tnState = 0
-          break
+          tnState = 0;
+          break;
       }
     }
     // truncate outdata at outp.
-    return outdata.slice(0, outp)
+    return outdata.slice(0, outp);
   }
 
   // send telnet commands.. send bytes or strings as parameters
@@ -16401,59 +16427,59 @@ vtx: {
       l1,
       l2,
       outbuff,
-      bytebuff = []
+      bytebuff = [];
 
-    bytebuff.push(TN_IAC)
-    l1 = arguments.length
+    bytebuff.push(TN_IAC);
+    l1 = arguments.length;
     for (i = 0; i < l1; i++)
-      if (typeof arguments[i] === 'string') {
+      if (typeof arguments[i] === "string") {
         // put string into bytebuff
-        l2 = arguments[i].length
-        for (j = 0; j < l2; j++) bytebuff.push(arguments[i].charCodeAt(j))
-      } else if (typeof arguments[i] === 'number')
+        l2 = arguments[i].length;
+        for (j = 0; j < l2; j++) bytebuff.push(arguments[i].charCodeAt(j));
+      } else if (typeof arguments[i] === "number")
         // put this byte into bytebuff
-        bytebuff.push(arguments[i])
+        bytebuff.push(arguments[i]);
 
     // send bytebuff
-    l1 = bytebuff.length
-    outbuff = new Uint8Array(l1)
-    for (i = 0; i < l1; i++) outbuff[i] = bytebuff[i]
-    ws.send(outbuff)
+    l1 = bytebuff.length;
+    outbuff = new Uint8Array(l1);
+    for (i = 0; i < l1; i++) outbuff[i] = bytebuff[i];
+    ws.send(outbuff);
   }
 
   // send initial barrage of settings.
   function tnInit() {
-    var i
+    var i;
 
-    tnQHim.fill(TNQ_NO)
-    tnQUs.fill(TNQ_NO)
+    tnQHim.fill(TNQ_NO);
+    tnQUs.fill(TNQ_NO);
 
     // set initial telnet options
-    tnQUs[TN_BIN] = TNQ_WANTYES
-    tnQHim[TN_BIN] = TNQ_WANTYES
-    tnQUs[TN_SGA] = TNQ_WANTYES
-    tnQHim[TN_SGA] = TNQ_WANTYES
-    tnQHim[TN_ECHO] = TNQ_WANTYES
-    tnQUs[TN_NAWS] = TNQ_WANTYES
-    tnQUs[TN_TTYPE] = TNQ_WANTYES
-    tnQUs[TN_TSPEED] = TNQ_WANTYES
+    tnQUs[TN_BIN] = TNQ_WANTYES;
+    tnQHim[TN_BIN] = TNQ_WANTYES;
+    tnQUs[TN_SGA] = TNQ_WANTYES;
+    tnQHim[TN_SGA] = TNQ_WANTYES;
+    tnQHim[TN_ECHO] = TNQ_WANTYES;
+    tnQUs[TN_NAWS] = TNQ_WANTYES;
+    tnQUs[TN_TTYPE] = TNQ_WANTYES;
+    tnQUs[TN_TSPEED] = TNQ_WANTYES;
 
     for (i = 0; i < 256; i++) {
-      if (tnQUs[i] == TNQ_WANTYES) tnSendCmd(TN_WILL, i)
-      else if (tnQUs[i] == TNQ_WANTNO) tnSendCmd(TN_WONT, i)
+      if (tnQUs[i] == TNQ_WANTYES) tnSendCmd(TN_WILL, i);
+      else if (tnQUs[i] == TNQ_WANTNO) tnSendCmd(TN_WONT, i);
 
-      if (tnQHim[i] == TNQ_WANTYES) tnSendCmd(TN_DO, i)
-      else if (tnQHim[i] == TNQ_WANTNO) tnSendCmd(TN_DONT, i)
+      if (tnQHim[i] == TNQ_WANTYES) tnSendCmd(TN_DO, i);
+      else if (tnQHim[i] == TNQ_WANTNO) tnSendCmd(TN_DONT, i);
     }
   }
 
-  addListener(window, 'load', bootVTX)
+  addListener(window, "load", bootVTX);
 
   var fsClientParent,
     fsClientStyle,
     fsClientPlaceHolder,
     fsFontSize,
-    modeFullScreen = false
+    modeFullScreen = false;
 
   // find required font size given a destop width / height
   // crtRows and crtCols must fill best area.
@@ -16464,115 +16490,115 @@ vtx: {
       cw,
       st,
       fs,
-      el = document.body
+      el = document.body;
 
     if (modeFullScreen) {
       // turn if off. restore to original state.
       // restore style
-      clientDiv.style.cssText = fsClientStyle
-      fxDiv.style['position'] = 'absolute'
+      clientDiv.style.cssText = fsClientStyle;
+      fxDiv.style["position"] = "absolute";
 
-      if (document.cancelFullscreen) document.cancelFullscreen()
-      if (document.exitFullscreen) document.exitFullscreen()
-      else if (document.mozCancelFullScreen) document.mozCancelFullScreen()
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen()
-      else if (document.msExitFullscreen) document.msExitFullscreen()
+      if (document.cancelFullscreen) document.cancelFullscreen();
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
 
       // move it back
-      fsClientParent.insertBefore(clientDiv, fsClientPlaceHolder)
-      fsClientParent.removeChild(fsClientPlaceHolder)
+      fsClientParent.insertBefore(clientDiv, fsClientPlaceHolder);
+      fsClientParent.removeChild(fsClientPlaceHolder);
 
-      modeFullScreen = false
+      modeFullScreen = false;
 
-      vtxdata.fontSize = fsFontSize
-      fontSize = fsFontSize
+      vtxdata.fontSize = fsFontSize;
+      fontSize = fsFontSize;
     } else {
       // turn it on.
-      if (el.requestFullscreen) el.requestFullscreen()
-      else if (el.mozRequestFullScreen) el.mozRequestFullScreen()
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen()
-      else if (el.msRequestFullscreen) el.msRequestFullscreen()
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
 
       // mark our place.
-      fsClientParent = clientDiv.parentNode
-      fsClientPlaceHolder = domElement('div', {}, { width: '0', height: '0' })
-      fsClientParent.insertBefore(fsClientPlaceHolder, clientDiv)
+      fsClientParent = clientDiv.parentNode;
+      fsClientPlaceHolder = domElement("div", {}, { width: "0", height: "0" });
+      fsClientParent.insertBefore(fsClientPlaceHolder, clientDiv);
 
       // save styles
-      fsClientStyle = clientDiv.style.cssText
-      fsFontSize = vtxdata.fontSize
+      fsClientStyle = clientDiv.style.cssText;
+      fsFontSize = vtxdata.fontSize;
 
       // set full screen styles
-      clientDiv.style['position'] = 'absolute'
-      clientDiv.style['top'] = '0'
-      clientDiv.style['left'] = '0'
-      clientDiv.style['right'] = '0'
-      clientDiv.style['bottom'] = '0'
-      clientDiv.style['overflow-y'] = 'auto'
-      fxDiv.style['position'] = 'fixed'
-      fxDiv.style['z-index'] = '9'
+      clientDiv.style["position"] = "absolute";
+      clientDiv.style["top"] = "0";
+      clientDiv.style["left"] = "0";
+      clientDiv.style["right"] = "0";
+      clientDiv.style["bottom"] = "0";
+      clientDiv.style["overflow-y"] = "auto";
+      fxDiv.style["position"] = "fixed";
+      fxDiv.style["z-index"] = "9";
 
       // move client
-      document.body.appendChild(clientDiv)
+      document.body.appendChild(clientDiv);
 
-      modeFullScreen = true
+      modeFullScreen = true;
 
       // compute new font size to fit screen
-      ch = screen.height - 64
-      cw = screen.width - 64
-      fs = Math.floor(ch / crtRows / 8) * 8
+      ch = screen.height - 64;
+      cw = screen.width - 64;
+      fs = Math.floor(ch / crtRows / 8) * 8;
 
       // shrink to width if needed
-      while ((fs / (fontSize / colSize)) * crtCols * xScale > cw) fs -= 2
+      while ((fs / (fontSize / colSize)) * crtCols * xScale > cw) fs -= 2;
 
       // some figuring ..
-      vtxdata.fontSize = fs
-      fontSize = fs
+      vtxdata.fontSize = fs;
+      fontSize = fs;
     }
-    setBulbs()
+    setBulbs();
 
     // determine standard sized font width in pixels
-    getDefaultFontSize() // get fontName, colSize, rowSize
-    crtWidth = colSize * crtCols
+    getDefaultFontSize(); // get fontName, colSize, rowSize
+    crtWidth = colSize * crtCols;
 
     // redraw everything!
-    pageDiv.style['width'] = crtWidth * xScale + 'px'
-    ;(ctrlDiv.style['width'] = (crtWidth * xScale) / 2 + 'px'),
-      (pagePos = getElementPosition(pageDiv))
-    pageLeft = pagePos.left
-    pageTop = pagePos.top
+    pageDiv.style["width"] = crtWidth * xScale + "px";
+    (ctrlDiv.style["width"] = (crtWidth * xScale) / 2 + "px"),
+      (pagePos = getElementPosition(pageDiv));
+    pageLeft = pagePos.left;
+    pageTop = pagePos.top;
 
     // alter the css.
-    setAllCSS()
-    l = conRowAttr.length
+    setAllCSS();
+    l = conRowAttr.length;
     for (i = 0; i < l; i++) {
-      adjustRow(i)
+      adjustRow(i);
     }
-    crsrDraw()
+    crsrDraw();
   }
 
   function createCookie(name, val, days) {
     var date,
-      expires = ''
-    const MSTODAYS = 24 * 60 * 60 * 1000
+      expires = "";
+    const MSTODAYS = 24 * 60 * 60 * 1000;
     if (days) {
-      date = new Date()
-      date.setTime(date.getTime() + days * MSTODAYS)
-      expires = '; expires=' + date.toUTCString()
+      date = new Date();
+      date.setTime(date.getTime() + days * MSTODAYS);
+      expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + '=' + val + expires + '; path=/'
+    document.cookie = name + "=" + val + expires + "; path=/";
   }
 
   function readCookie(name) {
     var i,
       c,
-      nameEQ = name + '=',
-      ca = document.cookie.split(';')
+      nameEQ = name + "=",
+      ca = document.cookie.split(";");
     for (i = 0; i < ca.length; i++) {
-      c = ca[i]
-      while (c.charAt(0) == ' ') c = c.substring(1, c.length)
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length)
+      c = ca[i];
+      while (c.charAt(0) == " ") c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
     }
-    return null
+    return null;
   }
 }
