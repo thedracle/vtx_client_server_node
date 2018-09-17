@@ -5,7 +5,7 @@
   "main": "proxy/wsproxy.js",
   "scripts": {
     "install": "./scripts/mkkeycert.sh",
-    "start": "concurrently --kill-others \"./node_modules/http-server/bin/http-server -S -C ./cert/server.cert -K ./cert/server.key ./vtxclient/\" \"node ./proxy/wsproxy.js\"",
+    "start": "concurrently --kill-others \"./scripts/serve_vtx.sh\" \"node ./proxy/wsproxy.js\"",
     "prettier": "./node_modules/prettier/bin-prettier.js --print-width 80 --no-semi --single-quote --trailing-comma es5 --write **/*.js"
   },
   "author": "Jason Thomas",
