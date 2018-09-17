@@ -42,7 +42,7 @@ You can also run everything with docker:
 
 ```
 # docker build . -t bbsclient
-# docker run -it bbsclient
+# docker run -p 8030:8030 -p 7003:7003 -it bbsclient
 ```
 
 ## Built With

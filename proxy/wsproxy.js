@@ -14,7 +14,7 @@ const Fs = require("fs");
 const LISTEN_PORT = process.env.LISTEN_PORT || 7003;
 const DEST_PORT = process.env.FORWARD_PORT || 44510;
 const DEST_ADDRESS = process.env.FORWARD_ADDRESS || "xibalba.l33t.codes";
-const SUPPORT_SSL = process.env.SUPPORT_SSL === "true" || true;
+const SUPPORT_SSL = !process.env.SUPPORT_SSL || !(process.env.SUPPORT_SSL === "false");
 const PING_INTERVAL = 5000;
 
 let httpsServer = null;
