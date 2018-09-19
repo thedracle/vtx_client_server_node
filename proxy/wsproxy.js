@@ -81,6 +81,9 @@ vtxServer.on("connection", function connection(clientConnection) {
       clientConnection.on("disconnect", () => {
         forwardClient.end();
       });
+      forwardClient.on("end", () => {
+        clientConnection.close();
+      });
       checkOnline(clientConnection, forwardClient);
     }
   );
