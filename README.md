@@ -45,6 +45,19 @@ You can also run everything with docker:
 # docker run -p 8030:8030 -p 7003:7003 -it bbsclient
 ```
 
+## Deployment
+
+You can deploy the application as a docker container, and use NGINX to terminate SSL.
+
+The SUPPORT_SSL parameter can be used to serve as TCP for both the server and websocket, and WEBSOCKET_OVERRIDE_ADDRESS can be used to set whatever the externally facing name will be for your websocket endpoint.
+
+```
+docker run bbsclient -e "SUPPORT_SSL=false" -e "WEBSOCKET_OVERRIDE_ADDRESS=wss\/\/<MY_URL>/ws"
+```
+
+## Example
+An example deployment can be found at https://bbs.jasonthom.as/
+
 ## Built With
 
 * [VTX_ClientServer](https://github.com/codewar65/VTX_ClientServer) - All of the client side terminal magic.
