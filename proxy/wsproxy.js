@@ -38,30 +38,6 @@ if (SUPPORT_SSL) {
   vtxServer = new WebSocket.Server({ port: LISTEN_PORT });
 }
 
-// Deal with broken connections.
-function checkOnline(ws, tcps) {
-  ws.on("connection", function connection(ws) {
-    ws.isAlive = true;
-    ws.on("pong", () => {
-      ws.isAlive = true;
-    });
-  });
-
-  const interval = setInterval(function ping() {
-    ws &&
-      ws.clients &&
-      ws.clients.forEach(function each(ws) {
-        if (ws.isAlive === false) {
-          clearInterval(interval);
-          tcps.end();
-          return ws.terminate();
-        }
-        ws.isAlive = false;
-        ws.ping(() => {});
-      });
-  }, PING_INTERVAL);
-}
-
 vtxServer.on("connection", function connection(clientConnection) {
   const forwardClient = new net.Socket();
   forwardClient.connect(
@@ -72,19 +48,21 @@ vtxServer.on("connection", function connection(clientConnection) {
         try {
           clientConnection.send(data);
         } catch (e) {
-          forwardClient.end();
+          forwardClient && forwardClient.end();
+          forwardClient = null;
         }
       });
       clientConnection.on("message", message => {
-        forwardClient.write(message);
+        forwardClient && forwardClient.write(message);
       });
       clientConnection.on("disconnect", () => {
-        forwardClient.end();
+        forwardClient && forwardClient.end();
+        forwardClient = null;
       });
       forwardClient.on("end", () => {
-        clientConnection.close();
+        clientConnection && clientConnection.close();
+        clientConnection = null;
       });
-      checkOnline(clientConnection, forwardClient);
     }
   );
 });
