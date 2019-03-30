@@ -12,8 +12,8 @@ const net = require("net");
 const Fs = require("fs");
 
 const LISTEN_PORT = parseInt(process.env.LISTEN_PORT) || 7003;
-const DEST_PORT = parseInt(process.env.FORWARD_PORT) || 44510;
-const DEST_ADDRESS = process.env.FORWARD_ADDRESS || "xibalba.l33t.codes";
+const DEST_PORT = parseInt(process.env.FORWARD_PORT) || 23;
+const DEST_ADDRESS = process.env.FORWARD_ADDRESS || "blackflag.acid.org";
 const SUPPORT_SSL =
   !process.env.SUPPORT_SSL || !(process.env.SUPPORT_SSL === "false");
 const PING_INTERVAL = 15000;
